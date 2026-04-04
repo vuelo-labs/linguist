@@ -480,6 +480,49 @@
   line-height: 1.5;
 }
 
+/* ---- Collapsible stage sections ---- */
+.stage-details {
+  width: 100%;
+}
+
+.stage-summary {
+  list-style: none;
+  cursor: pointer;
+  padding-bottom: var(--space-md);
+  position: relative;
+}
+
+.stage-summary::-webkit-details-marker { display: none; }
+
+.stage-summary::after {
+  content: '↓';
+  position: absolute;
+  right: 0;
+  top: 0.25rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--w-faint);
+  transition: transform 0.2s ease;
+}
+
+.stage-details[open] > .stage-summary::after {
+  transform: rotate(180deg);
+}
+
+.stage-summary:hover .stage-summary::after {
+  color: var(--w-muted);
+}
+
+.module-count {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--w-faint);
+  letter-spacing: 0.05em;
+  margin-left: 0.75rem;
+  vertical-align: middle;
+}
+
 /* ---- Callout note ---- */
 .callout-note {
   background: var(--w-bg-card);
