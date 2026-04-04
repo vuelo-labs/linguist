@@ -9,4 +9,4 @@
 /pdf           /pdf/index.html  200
 /handbook      /handbook/index.html  200
 /course        /course/index.html    200
-/course/*      /course/index.html    200
+/course/exercises  /course/exercises/index.html  200

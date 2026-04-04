@@ -1,0 +1,511 @@
+/* ============================================================
+   LINGUIST — Course Module Styles
+   Shared stylesheet for all module pages, course index,
+   and reference pages.
+   ============================================================ */
+
+/* ---- Module page header (sticky) ---- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--w-bg);
+  border-bottom: 1px solid var(--w-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+}
+
+.site-logo {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--w-muted);
+  text-decoration: none;
+}
+
+.site-header-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.site-header-link {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--w-muted);
+  text-decoration: none;
+}
+
+.site-header-link:hover { color: var(--w-text); }
+
+.site-header-cta {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--w-accent);
+  text-decoration: none;
+  border: 1px solid var(--w-border);
+  padding: 0.4rem 1rem;
+  border-radius: 3px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.site-header-cta:hover {
+  border-color: var(--w-accent);
+  background: var(--w-accent-light);
+}
+
+@media (max-width: 480px) {
+  .site-header { padding: 0.85rem 1rem; }
+  .site-header-link { display: none; }
+}
+
+/* ---- Module nav bar (stage + progress strip) ---- */
+.module-nav-bar {
+  background: var(--w-bg-card);
+  border-bottom: 1px solid var(--w-border);
+  padding: 0.6rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--w-faint);
+}
+
+.module-nav-bar a {
+  color: var(--w-muted);
+  text-decoration: none;
+}
+
+.module-nav-bar a:hover { color: var(--w-accent); }
+
+.module-nav-bar .sep {
+  color: var(--w-faint);
+}
+
+/* ---- Page layout ---- */
+.module-page main {
+  padding-bottom: var(--space-2xl);
+}
+
+/* ---- Module hero / intro ---- */
+.module-hero {
+  padding: var(--space-2xl) 0 var(--space-xl);
+  border-bottom: 1px solid var(--w-border);
+}
+
+/* ---- Eyebrow label ---- */
+.module-eyebrow {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--w-muted);
+  margin-bottom: var(--space-sm);
+  font-variant: small-caps;
+}
+
+/* ---- Module title ---- */
+.module-title {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: normal;
+  line-height: 1.2;
+  margin-bottom: var(--space-sm);
+  color: var(--w-text);
+}
+
+/* ---- Learning objective ---- */
+.module-objective {
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--w-muted);
+  max-width: 56ch;
+  line-height: 1.65;
+}
+
+/* ---- Module body prose ---- */
+.module-body {
+  padding-top: var(--space-xl);
+}
+
+.module-body h2 {
+  font-family: var(--serif);
+  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+  font-weight: normal;
+  color: var(--w-text);
+  margin-top: var(--space-2xl);
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+}
+
+.module-body h2:first-child {
+  margin-top: 0;
+}
+
+.module-body h3 {
+  font-family: var(--serif);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  font-weight: normal;
+  color: var(--w-text);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  line-height: 1.4;
+}
+
+.module-body p {
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--w-text);
+  margin-bottom: var(--space-md);
+  max-width: 65ch;
+}
+
+.module-body p strong { font-weight: 600; }
+.module-body p em { font-style: italic; }
+
+.module-body ul,
+.module-body ol {
+  margin: var(--space-md) 0;
+  padding-left: 1.5rem;
+  max-width: 62ch;
+}
+
+.module-body li {
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--w-text);
+  margin-bottom: 0.35rem;
+}
+
+.module-body li strong { font-weight: 600; }
+
+.module-body hr {
+  border: none;
+  border-top: 1px solid var(--w-border);
+  margin: var(--space-xl) 0;
+}
+
+/* ---- Inline code ---- */
+.module-body code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--c-bg);
+  color: var(--c-text);
+  border: 1px solid var(--c-border);
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+}
+
+/* ---- Fenced code blocks ---- */
+.module-body pre {
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  margin: var(--space-md) 0;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.module-body pre code {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--c-text);
+  line-height: 1.7;
+}
+
+/* ---- Blockquotes — "what you type to the AI" ---- */
+.module-body blockquote {
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-left: 3px solid var(--c-accent);
+  border-radius: 0 4px 4px 0;
+  padding: 1rem 1.25rem;
+  margin: var(--space-md) 0;
+  max-width: 680px;
+}
+
+.module-body blockquote p {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--c-text);
+  line-height: 1.75;
+  margin: 0;
+  max-width: none;
+}
+
+.module-body blockquote p + p {
+  margin-top: 0.75rem;
+}
+
+/* ---- Copy–Personalise–Use starter block ---- */
+.copy-personalise-use {
+  background: var(--w-bg-card);
+  border: 1px solid var(--w-border);
+  border-left: 3px solid var(--w-accent);
+  border-radius: 0 4px 4px 0;
+  padding: 1.25rem 1.5rem;
+  margin: var(--space-lg) 0;
+  max-width: 680px;
+}
+
+.copy-personalise-use-label {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--w-accent);
+  margin-bottom: 0.75rem;
+}
+
+.copy-personalise-use blockquote {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.copy-personalise-use blockquote p {
+  font-family: var(--mono);
+  font-size: 0.83rem;
+  color: var(--c-text);
+}
+
+/* ---- Tables (verb reference etc.) ---- */
+.module-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-lg) 0;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+}
+
+.module-body th {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--w-muted);
+  background: var(--w-bg-card);
+  border: 1px solid var(--w-border);
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-weight: 500;
+}
+
+.module-body td {
+  border: 1px solid var(--w-border);
+  padding: 0.7rem 1rem;
+  vertical-align: top;
+  line-height: 1.55;
+  color: var(--w-text);
+}
+
+.module-body tr:nth-child(even) td {
+  background: var(--w-bg-card);
+}
+
+/* ---- Module prev/next navigation ---- */
+.module-pagination {
+  border-top: 1px solid var(--w-border);
+  padding: var(--space-xl) 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-top: var(--space-2xl);
+}
+
+.module-pagination-prev,
+.module-pagination-next {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-decoration: none;
+}
+
+.module-pagination-next {
+  text-align: right;
+}
+
+.module-pagination-label {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--w-faint);
+}
+
+.module-pagination-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--w-accent);
+  line-height: 1.3;
+}
+
+.module-pagination-prev:hover .module-pagination-title,
+.module-pagination-next:hover .module-pagination-title {
+  color: var(--w-accent-soft);
+}
+
+.module-pagination-spacer {
+  flex: 1;
+}
+
+/* ---- Footer ---- */
+.site-footer {
+  padding: var(--space-xl) 0;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--w-faint);
+  border-top: 1px solid var(--w-border);
+}
+
+/* ---- Course index — stage sections ---- */
+.course-hero {
+  padding: var(--space-2xl) 0 var(--space-xl);
+  border-bottom: 1px solid var(--w-border);
+}
+
+.course-hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: normal;
+  margin-bottom: var(--space-sm);
+  line-height: 1.2;
+}
+
+.course-hero p {
+  color: var(--w-muted);
+  font-size: 1.05rem;
+  max-width: 52ch;
+}
+
+.course-stage {
+  padding: var(--space-2xl) 0;
+  border-bottom: 1px solid var(--w-border);
+}
+
+.course-stage:last-of-type { border-bottom: none; }
+
+.stage-label {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--w-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.course-stage h2 {
+  font-family: var(--serif);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: normal;
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+}
+
+.stage-intro {
+  color: var(--w-muted);
+  font-size: 0.95rem;
+  max-width: 56ch;
+  margin-bottom: var(--space-xl);
+  font-family: var(--sans);
+}
+
+/* ---- Module list / cards ---- */
+.module-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--w-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.module-card {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--w-border);
+  text-decoration: none;
+  background: var(--w-bg);
+  transition: background 0.1s;
+}
+
+.module-card:last-child { border-bottom: none; }
+
+.module-card:hover {
+  background: var(--w-accent-light);
+}
+
+.module-card-code {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--w-faint);
+  min-width: 2.8rem;
+  flex-shrink: 0;
+}
+
+.module-card-body {
+  flex: 1;
+}
+
+.module-card-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--w-text);
+  line-height: 1.3;
+  margin-bottom: 0.15rem;
+}
+
+.module-card-objective {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--w-muted);
+  line-height: 1.5;
+}
+
+/* ---- Callout note ---- */
+.callout-note {
+  background: var(--w-bg-card);
+  border: 1px solid var(--w-border);
+  border-radius: 4px;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: var(--space-xl);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--w-muted);
+  line-height: 1.6;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  .module-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .module-pagination-next { text-align: left; }
+  .module-pagination-spacer { display: none; }
+
+  .module-card {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

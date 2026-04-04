@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool Fluency · Linguist</title>
+  <meta name="description" content="Name the right tool for a given task, understand why tool choice affects quality and cost, and guide Claude Code away from expensive tools when cheaper ones will do.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body class="module-page">
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <div class="module-nav-bar">
+    <a href="/course">Course</a>
+    <span class="sep">›</span>
+    <span>Advanced Practitioner</span>
+    <span class="sep">›</span>
+    <span>A-07</span>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section class="module-hero">
+        <p class="module-eyebrow">Advanced Practitioner · Module 07</p>
+        <h1 class="module-title">Tool Fluency</h1>
+        <p class="module-objective">After this, you can name the right tool for a given task in your message, understand why tool choice affects both quality and cost, and guide Claude Code away from expensive tools when cheaper ones will do the job.</p>
+      </section>
+
+      <div class="module-body">
+
+        <hr>
+
+        <h2>What you already know</h2>
+
+        <p>In A-06, you learned to separate planning from execution — asking Claude Code to describe its approach before it acts. That module was about when Claude Code starts work. This one is about how it works once it does.</p>
+
+        <p>When Claude Code takes on a task, it chooses from a set of tools: reading files, searching for patterns, running commands, or launching a separate session. Left to its own judgement, it will make a reasonable choice. But reasonable is not always the right choice for your task, and it is not always the cheapest one.</p>
+
+        <p>Naming the tool in your message is how you close that gap.</p>
+
+        <hr>
+
+        <h2>The tool hierarchy</h2>
+
+        <p><strong>Read</strong> — opens a specific file and reads its full contents. Use this when you know exactly which file you need. It reads one file, costs a predictable amount, and gives you exactly what you asked for.</p>
+
+        <p><strong>Glob</strong> — finds files matching a pattern across your project. Think of it as a file name search: "find every file called config.json" or "find all files ending in .md". Use this when you need to locate files, not read them.</p>
+
+        <p><strong>Grep</strong> — searches inside files for specific text or patterns. Use this when you need to find where something appears across multiple files. "Find every file that mentions the word 'deadline'" is a Grep task.</p>
+
+        <p><strong>Bash</strong> — runs a terminal command. This is powerful and flexible, but it is also more expensive than the dedicated tools above, and some commands are irreversible. Only reach for Bash when Read, Glob, and Grep genuinely cannot do what you need.</p>
+
+        <p><strong>Agent</strong> — starts an entirely separate Claude Code session to handle a subtask, then reports the result back to your main session. This is the most expensive tool by a significant margin. It is covered in full in A-08.</p>
+
+        <p>The cost hierarchy, from cheapest to most expensive:</p>
+
+        <p><code>Read / Glob / Grep → Bash → Agent</code></p>
+
+        <p>The dedicated tools (Read, Glob, Grep) are in the same cost bracket: targeted, reviewable, predictable. Bash costs more because it runs shell execution. Agent costs the most because it opens a second full session with its own context window.</p>
+
+        <hr>
+
+        <h2>The key technique: name the tool</h2>
+
+        <p>Claude Code's default tool selection is based on what it thinks the task requires. It is not trying to be expensive — it is trying to be thorough. But thorough often means reaching for a larger tool than the task needs.</p>
+
+        <p>When you name the tool in your message, you give Claude Code a more precise instruction than the task description alone provides. "Use Grep to find every file containing the word 'deadline'" is more precise than "find files with the word deadline." The first tells Claude Code both what to find and how to find it. The second leaves the how open.</p>
+
+        <p>Claude Code will still make the final decision. But explicit tool naming reduces unnecessary escalation to more expensive tools and makes the action you are about to approve more predictable.</p>
+
+        <h3>Without / With: Searching a project</h3>
+
+        <p>Without: "Find where we reference the project deadline across all documents."</p>
+
+        <p>Claude Code might launch an Agent to survey the project broadly, reading multiple files and generating its own summary. Large, unpredictable, expensive.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Use Grep to search all files in this folder for the word "deadline". Show me the file name and the matching line for each result. Don't read the full files — just the matching lines.</p>
+        </blockquote>
+
+        <p>One Grep call. Bounded output. You see exactly what tool ran before you approve it.</p>
+
+        <h3>Without / With: Researching the current landscape</h3>
+
+        <p>Without: "Tell me about the main competitors in this space."</p>
+
+        <p>Claude Code may reach for WebSearch with multiple queries or launch an Agent for each competitor, generating a large volume of intermediate results in your main session.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Use WebSearch twice — once for [Competitor A] and once for [Competitor B] — with these specific queries:</p>
+          <p>1. "[Competitor A] pricing 2025"<br>
+          2. "[Competitor B] pricing 2025"</p>
+          <p>For each: report what you find in one paragraph. Note whether the source is the company's own website or a third party. Don't read beyond the search results.</p>
+        </blockquote>
+
+        <p>Two bounded searches. Predictable scope. Source reliability visible.</p>
+
+        <hr>
+
+        <h2>Cost warning</h2>
+
+        <p>Each tool call costs tokens. Before running these exercises, check your session budget from A-01. Tool calls on large files or directories can add up quickly. The exercises below are designed to be targeted — follow the scope instructions and you will keep costs low.</p>
+
+        <hr>
+
+        <h2>Exercise: Guided tool selection</h2>
+
+        <h3>Part 1 — Name the tool before you send</h3>
+
+        <p>For each of the three tasks below, decide which tool is appropriate and name it in your message before sending. The goal is to think about the tool first, not after.</p>
+
+        <p><strong>Task A:</strong> Find all files in this project that contain the word "deadline."</p>
+
+        <p>The right tool here is Grep. It searches inside files for matching text, which is exactly what this task requires. Your message might be: "Use Grep to find every file in this project that contains the word 'deadline'. Show me the file name and matching line for each result."</p>
+
+        <p><strong>Task B:</strong> Read the contents of README.md.</p>
+
+        <p>The right tool is Read. You know the exact file you want. Name it directly. Your message might be: "Use Read to open README.md and tell me what it contains."</p>
+
+        <p><strong>Task C:</strong> Show me the last 10 lines of a log file.</p>
+
+        <p>This one needs Bash. Read opens the full file. There is no dedicated "read the tail of a file" tool. The right message: "Use Bash to run: <code>tail -n 10 [logfile name]</code>. Show me the output."</p>
+
+        <p>After sending each message, observe whether Claude Code used the tool you named. The tool call will appear in the output before Claude Code asks for your approval. You can confirm before allowing it to proceed.</p>
+
+        <h3>Part 2 — Compare tool choice and cost</h3>
+
+        <p>Send the same request twice:</p>
+
+        <p><strong>Version 1 (free choice):</strong></p>
+
+        <blockquote>
+          <p>Look through the files in this project and find all mentions of [a word or phrase from your own project]. Tell me where it appears.</p>
+        </blockquote>
+
+        <p><strong>Version 2 (named tool):</strong></p>
+
+        <blockquote>
+          <p>Use Grep to find every mention of [the same word or phrase] across files in this project. Show me the file name and matching line. Don't read any full files.</p>
+        </blockquote>
+
+        <p>After both, compare the token counts shown at the end of each response. The second version will typically be equal or cheaper, and the scope of the result will be more predictable.</p>
+
+        <hr>
+
+        <h2>Copy, Personalise, Use</h2>
+
+        <p>Use this starter whenever you want to guide Claude Code to a specific tool.</p>
+
+        <blockquote>
+          <p>Use [tool name: Read / Glob / Grep / Bash] to [specific action]. [What to look for / what to find / what to run]. Report what you find before doing anything else.</p>
+        </blockquote>
+
+        <p>How to edit this:</p>
+
+        <ul>
+          <li>[tool name] — choose the right tool using the hierarchy. If you know the file, use Read. If you need to find files by name, use Glob. If you need to find text inside files, use Grep. If you need a terminal command, use Bash. If none of these apply, see A-08 for Agent.</li>
+          <li>[specific action] — be as precise as possible. "Open README.md" is better than "look at the readme." "Search for the word 'deadline'" is better than "find mentions of deadlines."</li>
+          <li>[what to look for / what to find / what to run] — the content of the task. This is where you tell Claude Code what it is actually looking for.</li>
+          <li>"Report what you find before doing anything else" — keeps Claude Code from reading one file and immediately going to read three more. It forces a pause where you can see what was found and decide what to do next.</li>
+        </ul>
+
+        <hr>
+
+        <h2>What good looks like</h2>
+
+        <p>Claude Code uses the tool you named. The tool call appears in the output before you approve it — you can see that it is using Grep, not Agent, before anything happens. The result is scoped to what you asked for: matching lines from Grep, not a full file read; the specific file from Read, not a sweep of the folder.</p>
+
+        <p>You are not guessing what Claude Code did. You can see it.</p>
+
+        <hr>
+
+        <h2>Recovery path</h2>
+
+        <p>If Claude Code ignores your tool name and uses a more expensive tool instead, do not approve the action. Reject it and ask:</p>
+
+        <blockquote>
+          <p>Why did you use [X] instead of [Y]?</p>
+        </blockquote>
+
+        <p>The answer will tell you one of two things: either your instruction was ambiguous and the task description pulled Claude Code toward a different interpretation, or the task genuinely required the more expensive tool — Grep cannot do what you asked for, or Read would have missed something. Both answers are useful. The first tells you how to rewrite the message. The second tells you the task is bigger than you thought.</p>
+
+        <hr>
+
+        <h2>Next</h2>
+
+        <p>A-08 covers the Agent tool — the final and most expensive tool in the hierarchy. Delegation is not just about naming a tool. It is about deciding whether a task belongs in your main session at all, and writing a brief that gives a separate session everything it needs to do the job.</p>
+
+        <nav class="module-pagination">
+          <a href="/course/a/06" class="module-pagination-prev">
+            <span class="module-pagination-label">Previous</span>
+            <span class="module-pagination-title">← A-06: Output Engineering</span>
+          </a>
+          <span class="module-pagination-spacer"></span>
+          <a href="/course/a/08" class="module-pagination-next">
+            <span class="module-pagination-label">Next</span>
+            <span class="module-pagination-title">A-08: Agent Delegation and Briefing →</span>
+          </a>
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

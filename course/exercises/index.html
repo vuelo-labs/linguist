@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linguist · The Course</title>
+  <meta name="description" content="Learn to prompt well. Eight short exercises — start by picking your platform.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --w-bg:           #FAF8F4;
+      --w-bg-card:      #F2EDE6;
+      --w-border:       #E5DFD6;
+      --w-text:         #2A2420;
+      --w-muted:        #7A6E68;
+      --w-faint:        #B0A89E;
+      --w-accent:       #8C7355;
+      --w-accent-soft:  #A08870;
+      --w-accent-light: #F5EFE6;
+      --c-bg:           #F0F4F8;
+      --c-bg-card:      #FFFFFF;
+      --c-border:       #D8E2ED;
+      --c-text:         #263340;
+      --c-muted:        #5F7485;
+      --c-faint:        #9EB0C0;
+      --c-accent:       #4A7FA5;
+      --c-accent-soft:  #6B9BBF;
+      --c-accent-light: #E5EFF7;
+      --serif:  'Newsreader', Georgia, serif;
+      --sans:   'Inter', system-ui, sans-serif;
+      --mono:   'JetBrains Mono', monospace;
+
+      /* active theme tokens — default warm */
+      --bg:           var(--w-bg);
+      --bg-card:      var(--w-bg-card);
+      --border:       var(--w-border);
+      --text:         var(--w-text);
+      --muted:        var(--w-muted);
+      --faint:        var(--w-faint);
+      --accent:       var(--w-accent);
+      --accent-soft:  var(--w-accent-soft);
+      --accent-light: var(--w-accent-light);
+    }
+
+    body.machine {
+      --bg:           var(--c-bg);
+      --bg-card:      var(--c-bg-card);
+      --border:       var(--c-border);
+      --text:         var(--c-text);
+      --muted:        var(--c-muted);
+      --faint:        var(--c-faint);
+      --accent:       var(--c-accent);
+      --accent-soft:  var(--c-accent-soft);
+      --accent-light: var(--c-accent-light);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; height: 100%; overflow: hidden; }
+
+    body {
+      font-family: var(--serif);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+      transition: background 0.25s, border-color 0.25s;
+    }
+
+    .nav-logo {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .nav-dots {
+      display: flex;
+      gap: 5px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.2s;
+    }
+    .nav-dot.done   { background: var(--accent); opacity: 0.45; }
+    .nav-dot.active { background: var(--accent); }
+
+    /* ── Mode toggle ── */
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+      flex-shrink: 0;
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      transition: border-color 0.25s;
+    }
+
+    .mode-btn {
+      padding: 5px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+      color: var(--faint);
+      transition: background 0.2s, color 0.2s;
+      line-height: 1;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    body.machine .mode-btn.active { background: var(--c-accent); color: #fff; }
+
+    /* ── Screens ── */
+    #screen-wrapper { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+
+    .screen {
+      position: absolute; inset: 0;
+      overflow-y: auto;
+      display: none;
+      background: transparent;
+    }
+    .screen.active { display: block; }
+
+    .screen-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    /* ── Mode-switched content ── */
+    [data-human] { display: block; }
+    [data-machine] { display: none; }
+    body.machine [data-human] { display: none; }
+    body.machine [data-machine] { display: block; }
+
+    /* inline spans need inline not block */
+    span[data-human] { display: inline; }
+    span[data-machine] { display: none; }
+    body.machine span[data-human] { display: none; }
+    body.machine span[data-machine] { display: inline; }
+
+    /* ── Typography ── */
+    .eyebrow {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      transition: color 0.25s;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      color: var(--text);
+      transition: color 0.25s;
+    }
+
+    body.machine h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.3rem, 3vw, 1.6rem);
+      font-weight: 600;
+    }
+
+    .subtext {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 50ch;
+      margin-bottom: 2.5rem;
+      transition: color 0.25s;
+    }
+
+    body.machine .subtext {
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-block;
+      padding: 0.65rem 1.5rem;
+      border-radius: 3px;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: background 0.15s, opacity 0.15s, border-color 0.25s, color 0.25s;
+      line-height: 1;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-soft); }
+    .btn-primary:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    /* ── Platform grid ── */
+    .platform-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .platform-card {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 18px 20px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .platform-card:hover { border-color: var(--accent); }
+    .platform-card.selected {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .platform-card-name {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: color 0.25s;
+    }
+    .platform-card.selected .platform-card-name { color: var(--accent); }
+
+    .platform-card-desc {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+      transition: color 0.25s;
+    }
+
+    body.machine .platform-card-desc { display: none; }
+    body.machine .platform-card { padding: 12px 16px; }
+
+    .help-btn {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      margin-bottom: 2rem;
+      display: block;
+    }
+    .help-btn:hover { color: var(--accent); }
+    body.machine .help-btn { display: none; }
+
+    /* ── Model picker ── */
+    .model-section-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .model-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 2rem; }
+    .model-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--sans);
+      transition: border-color 0.15s, background 0.15s;
+      width: 100%;
+    }
+    .model-row:hover { border-color: var(--accent); }
+    .model-row.selected { border-color: var(--accent); background: var(--accent-light); }
+    .model-row-main { flex: 1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .model-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .model-row.selected .model-name { color: var(--accent); }
+    .model-rec {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      border: 1px solid var(--accent);
+      padding: 1px 7px;
+      border-radius: 20px;
+    }
+    .model-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    body.machine .model-desc { display: none; }
+    body.machine .model-row { padding: 10px 14px; }
+
+    /* ── Concept callout ── */
+    .concept-callout {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      background: var(--accent-light);
+      padding: 16px 20px;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .concept-callout-label {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .concept-callout p {
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    body.machine .concept-callout p { line-height: 1.5; }
+
+    /* ── Orientation screen — steps ── */
+    .orient-steps {
+      display: flex;
+      flex-direction: column;
+      margin-top: 2rem;
+    }
+
+    .orient-step {
+      display: flex;
+      gap: 1.25rem;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.25s;
+    }
+    .orient-step:last-child { border-bottom: none; }
+
+    .orient-step-num {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 3px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+
+    .orient-step-title {
+      font-family: var(--sans);
+      font-size: 0.93rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+      transition: color 0.25s;
+    }
+
+    .orient-step-body {
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.65;
+      transition: color 0.25s;
+    }
+    .orient-step-body strong { color: var(--text); font-weight: 600; }
+
+    .orient-glossary-link {
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .orient-glossary-link:hover { opacity: 0.75; }
+
+    /* cycle diagram */
+    .orient-cycle {
+      margin-top: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+
+    .cycle-steps {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .cycle-step {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 12px;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+
+    .cycle-arrow {
+      font-size: 0.85rem;
+      color: var(--faint);
+    }
+
+    .cycle-return {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cycle-return-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      position: relative;
+      transition: background 0.25s;
+    }
+    .cycle-return-line::before {
+      content: '↩';
+      position: absolute;
+      left: 0;
+      top: -10px;
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    .cycle-return-label {
+      font-family: var(--sans);
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-style: italic;
+      white-space: nowrap;
+    }
+    body.machine .cycle-return-label { font-style: normal; font-weight: 600; }
+
+    /* ── Glossary nav button ── */
+    .glossary-nav-btn {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px 12px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: color 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+    .glossary-nav-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Glossary modal ── */
+    .glossary-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+      backdrop-filter: blur(2px);
+    }
+
+    @media (min-width: 640px) {
+      .glossary-overlay { align-items: center; padding: 2rem; }
+    }
+
+    .glossary-modal {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      max-width: 620px;
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.25s, border-color 0.25s;
+    }
+
+    @media (min-width: 640px) {
+      .glossary-modal { border-radius: 12px; max-height: 78vh; }
+    }
+
+    .glossary-modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 24px 28px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      transition: border-color 0.25s;
+    }
+
+    .glossary-modal-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .glossary-modal-title {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--text);
+      margin: 0;
+    }
+    body.machine .glossary-modal-title { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; }
+
+    .glossary-close-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .glossary-close-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .glossary-list {
+      overflow-y: auto;
+      padding: 8px 0 24px;
+    }
+
+    .g-term {
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.25s;
+    }
+    .g-term:last-child { border-bottom: none; }
+
+    .g-name {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+      transition: color 0.25s;
+    }
+
+    .g-def {
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.65;
+      transition: color 0.25s;
+    }
+    body.machine .g-def { line-height: 1.5; font-size: 0.82rem; }
+
+    /* ── Quiz ── */
+    .quiz-wrap {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      padding: 24px;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s, background 0.25s;
+    }
+
+    .quiz-q {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    body.machine .quiz-q {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+
+    .quiz-opt {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      cursor: pointer;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--text);
+      text-align: left;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .quiz-opt:hover { border-color: var(--accent); background: var(--accent-light); }
+
+    /* ── Setup card ── */
+    .setup-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      transition: border-color 0.25s;
+    }
+
+    .setup-header {
+      background: var(--accent-light);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+
+    .setup-platform-name {
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .setup-pitch {
+      font-family: var(--sans);
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    body.machine .setup-pitch { display: none; }
+
+    .setup-row {
+      display: flex;
+      gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.25s;
+    }
+    .setup-row:last-child { border-bottom: none; }
+
+    .setup-row-label {
+      flex-shrink: 0;
+      width: 76px;
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-top: 3px;
+      transition: color 0.25s;
+    }
+
+    .setup-row-content {
+      font-family: var(--sans);
+      flex: 1;
+      color: var(--text);
+      font-size: 0.875rem;
+      line-height: 1.65;
+      transition: color 0.25s;
+    }
+    .setup-row-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .setup-row-content code {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      background: var(--border);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* ── MCP callout ── */
+    .mcp-callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .mcp-callout strong { color: var(--accent); font-weight: 600; }
+    .mcp-callout a { color: var(--accent); }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; transition: border-color 0.25s; }
+
+    /* ── Next card ── */
+    .next-card {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 2rem;
+      background: var(--bg-card);
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .next-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 4px;
+    }
+    .next-title {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    body.machine .next-title { font-family: var(--sans); font-size: 0.9rem; font-weight: 600; }
+    .next-desc {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    body.machine .next-desc { display: none; }
+    .next-arrow { font-size: 1.1rem; color: var(--faint); flex-shrink: 0; }
+
+    /* ── Exercise list ── */
+    .exercise-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
+
+    .exercise-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      transition: border-color 0.15s, background 0.15s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    a.exercise-row:hover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      cursor: pointer;
+    }
+
+    .exercise-row.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .exercise-num {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--faint);
+      width: 20px;
+      flex-shrink: 0;
+    }
+
+    .exercise-info { flex: 1; }
+
+    .exercise-title {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .exercise-time {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      color: var(--faint);
+      transition: color 0.25s;
+    }
+    body.machine .exercise-time { display: none; }
+
+    .badge {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+    .badge-start { background: var(--accent-light); color: var(--accent); }
+    .badge-soon { color: var(--faint); border: 1px solid var(--border); background: transparent; }
+
+    /* ── Note text ── */
+    .note {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.65;
+      transition: color 0.25s;
+    }
+    body.machine .note { font-size: 0.8rem; }
+
+    /* ── Setup nudge ── */
+    .setup-nudge {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #c0392b;
+      background: #fdf2f2;
+      border: 1px solid #f5c6c6;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .setup-nudge:hover { background: #fce8e8; }
+
+    @media (max-width: 520px) {
+      .platform-grid { grid-template-columns: 1fr; }
+      .nav-dots { display: none; }
+      .screen-inner { padding: 2rem 1.25rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-logo" href="https://linguist.vuelolabs.com">Linguist</a>
+    <div class="nav-dots" id="nav-dots"></div>
+    <button class="glossary-nav-btn" onclick="openGlossary()">Glossary</button>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-human" onclick="setMode('human')">Human</button>
+      <button class="mode-btn" id="btn-machine" onclick="setMode('machine')">Machine</button>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       GLOSSARY MODAL
+  ══════════════════════════════════════ -->
+  <div id="glossary-overlay" class="glossary-overlay" style="display:none" onclick="closeGlossaryOnBg(event)">
+    <div class="glossary-modal" role="dialog" aria-modal="true" aria-label="Glossary">
+      <div class="glossary-modal-header">
+        <div>
+          <p class="glossary-modal-eyebrow">Reference</p>
+          <h2 class="glossary-modal-title">
+            <span data-human>Glossary</span>
+            <span data-machine>Terms</span>
+          </h2>
+        </div>
+        <button class="glossary-close-btn" onclick="closeGlossary()" aria-label="Close">✕</button>
+      </div>
+      <div class="glossary-list">
+
+        <div class="g-term">
+          <p class="g-name">Token</p>
+          <p class="g-def" data-human>The unit of measurement AI models use to process text. Roughly 3–4 characters, or about ¾ of a word. Every prompt you send and every response you receive costs tokens. Most models have a limit on how many tokens they can process in one conversation — this is called the context window. Tokens also determine cost: the more you send, the more you pay on paid plans.</p>
+          <p class="g-def" data-machine>Unit of AI text processing. ~¾ word. Tokens in = cost + context consumed. Controls pricing and context limits.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Prompt</p>
+          <p class="g-def" data-human>What you type and send to an AI model. A good prompt gives the model enough context to understand what you need, who you are, and what a good response looks like. A bad prompt is vague, assumes too much, or buries the actual request in unnecessary preamble.</p>
+          <p class="g-def" data-machine>Your input to the model. Contains: role + task + format + constraints. Quality of output is bounded by quality of prompt.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Model</p>
+          <p class="g-def" data-human>The AI itself — the thing doing the thinking. Different models (Claude Sonnet, GPT-4o, Gemini 2.5 Pro) have different strengths, speeds, and costs. Picking the right model for the right task is part of getting good results without overspending.</p>
+          <p class="g-def" data-machine>The AI system generating responses. Each model has different capability, latency, and cost tradeoffs. Match model to task complexity.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Context Window</p>
+          <p class="g-def" data-human>Think of it as the AI's working memory for a conversation. Everything in the window — your messages, its responses, any files you've shared — is what it can "see" and reason about. When a conversation runs long, older content can fall out of the window and the model effectively forgets it. This is why starting fresh threads and using persistent instructions matters.</p>
+          <p class="g-def" data-machine>Max tokens the model can attend to in one session. When exceeded, earlier content is dropped. Manage via: shorter threads, persistent instructions, re-seeding.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Persistent Instructions</p>
+          <p class="g-def" data-human>Instructions you set once that apply to every conversation — without you having to repeat them. Think of it as the AI reading your onboarding doc before every chat. Where these live depends on your platform: Claude calls them Custom Instructions or Project instructions, ChatGPT calls them Custom Instructions, Gemini uses Gems, Claude Code uses CLAUDE.md. Exercise 1 is entirely about this.</p>
+          <p class="g-def" data-machine>Instructions loaded at session start, applied globally. Platform equivalents: Claude → Custom Instructions / Project instructions · ChatGPT → Custom Instructions · Gemini → Gems · Claude Code → CLAUDE.md.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">System Prompt</p>
+          <p class="g-def" data-human>A hidden block of instructions that runs before the conversation starts — usually set by the developer or platform, not visible to you as a user. When you set Custom Instructions on ChatGPT or Project instructions on Claude, they get compiled into the system prompt behind the scenes. You don't usually write these directly unless you're building your own AI tool.</p>
+          <p class="g-def" data-machine>Pre-conversation instruction block. Set by developer/platform. Custom Instructions, Gems, and CLAUDE.md all compile into the effective system prompt.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Thread</p>
+          <p class="g-def" data-human>A single conversation with an AI model. Each thread has its own context window — it starts fresh and builds up as you exchange messages. Long threads degrade in quality as the window fills up or the model loses track of earlier context. Knowing when to start a new thread (and how to carry important context forward) is a core skill.</p>
+          <p class="g-def" data-machine>Single conversation session. Has isolated context window. Quality degrades over long threads. Start fresh + re-seed when needed.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Hallucination</p>
+          <p class="g-def" data-human>When an AI confidently states something that is wrong or made up — a date that doesn't exist, a citation for a paper that was never written, a function that doesn't exist in a library. It sounds plausible because the model is very good at generating fluent, confident text. Hallucinations are more likely when asking about very recent events, niche topics, or when the model is guessing at specifics.</p>
+          <p class="g-def" data-machine>Model output that is confident but factually incorrect. Higher risk: recent events, niche topics, specific citations. Mitigate: ask for sources, verify outputs, use retrieval-augmented tools.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Reasoning Model</p>
+          <p class="g-def" data-human>A type of AI model that takes extra time to think through a problem before responding — working through intermediate steps internally before giving you an answer. This makes them slower and more expensive, but much better at logic, maths, strategy, and complex multi-step problems. Examples: Claude with extended thinking, OpenAI's o3, Google's Gemini 2.5 Pro with thinking enabled.</p>
+          <p class="g-def" data-machine>Model that performs internal chain-of-thought before responding. Higher latency + cost. Better at: logic, maths, planning, multi-step tasks. Examples: o3, Claude extended thinking, Gemini 2.5 Pro thinking.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">MCP (Model Context Protocol)</p>
+          <p class="g-def" data-human>A standard, open protocol that lets AI models connect to external tools and data sources — your calendar, codebase, browser, databases — so they can act on the world rather than just respond with text. Think of it as a universal plug socket: any AI that supports MCP can use any tool built for MCP, without custom integration work. Claude invented it; most major platforms now support it.</p>
+          <p class="g-def" data-machine>Open protocol for connecting AI models to external tools + data. Enables action, not just generation. Supported by Claude, ChatGPT, Gemini, Tines. Claude invented it.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Temperature</p>
+          <p class="g-def" data-human>A setting that controls how creative or predictable the model's responses are. Low temperature (near 0) means the model picks the most likely next word at every step — useful for factual, consistent, or structured output. High temperature means more randomness and creativity — useful for brainstorming or creative writing. Most chat interfaces hide this setting, but it's useful to know it exists.</p>
+          <p class="g-def" data-machine>Controls output randomness. Low (→0): deterministic, consistent, factual. High (→1+): creative, varied. Usually abstracted in chat UIs. Relevant when using the API directly.</p>
+        </div>
+
+        <div class="g-term">
+          <p class="g-name">Re-seeding</p>
+          <p class="g-def" data-human>The practice of starting a new conversation thread and pasting in a summary of the context from a previous one. Useful when a thread has gone stale, hit the context limit, or wandered off track. Instead of trying to salvage a broken conversation, you start fresh and give the model exactly what it needs to know — no more, no less.</p>
+          <p class="g-def" data-machine>Starting a new thread with a distilled context summary from a previous one. Use when: thread is stale, context limit hit, or quality degraded. Carry signal, drop noise.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-wrapper">
+
+    <!-- ══════════════════════════════════════
+         SCREEN: ORIENTATION
+    ══════════════════════════════════════ -->
+    <div class="screen active" id="screen-orientation">
+      <div class="screen-inner">
+
+        <p class="eyebrow">The Course &nbsp;·&nbsp; Welcome</p>
+
+        <h1>
+          <span data-human>Here's what to know before you start</span>
+          <span data-machine>Orientation</span>
+        </h1>
+
+        <div class="orient-steps">
+
+          <!-- STEP 1: GOAL -->
+          <div class="orient-step">
+            <div class="orient-step-num">1</div>
+            <div>
+              <p class="orient-step-title">
+                <span data-human>This course teaches you to get better results from AI</span>
+                <span data-machine>Goal: better results per conversation</span>
+              </p>
+              <p class="orient-step-body">
+                <span data-human>Not by writing more — by writing better. The skill is clear communication: the right context, a specific ask, and knowing what a good answer looks like before you ask. That's it.</span>
+                <span data-machine>Clarity + context control + result recognition. Communication fundamentals applied to AI.</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- STEP 2: HUMAN / MACHINE -->
+          <div class="orient-step">
+            <div class="orient-step-num">2</div>
+            <div>
+              <p class="orient-step-title">
+                <span data-human>There are two ways to write — you'll practise both</span>
+                <span data-machine>Human / Machine toggle</span>
+              </p>
+              <p class="orient-step-body">
+                <span data-human>The <strong>Human / Machine</strong> toggle in the nav switches how this course is written. <strong>Human mode</strong> is warmer and more explanatory — good for learning. <strong>Machine mode</strong> is compact and precise — good for doing. Try both. Start in whichever feels right.</span>
+                <span data-machine>Toggle in nav. Human: context + reasoning + warmth. Machine: role · task · format · constraints. Neither extreme works alone.</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- STEP 3: ORDER -->
+          <div class="orient-step">
+            <div class="orient-step-num">3</div>
+            <div>
+              <p class="orient-step-title">
+                <span data-human>Do the exercises in order — each one builds on the last</span>
+                <span data-machine>Sequential — then cyclical</span>
+              </p>
+              <p class="orient-step-body">
+                <span data-human>It feels linear the first time. Once you've done it, you'll see it's a loop — every real project follows the same cycle, just faster each time.</span>
+                <span data-machine>Linear first pass. Cyclical in practice — each project repeats the loop at speed.</span>
+              </p>
+              <div class="orient-cycle" style="margin-top: 1rem;">
+                <div class="cycle-steps">
+                  <span class="cycle-step">Think</span>
+                  <span class="cycle-arrow">→</span>
+                  <span class="cycle-step">Seed</span>
+                  <span class="cycle-arrow">→</span>
+                  <span class="cycle-step">Build</span>
+                  <span class="cycle-arrow">→</span>
+                  <span class="cycle-step">Refine</span>
+                  <span class="cycle-arrow">→</span>
+                  <span class="cycle-step">Deliver</span>
+                </div>
+                <div class="cycle-return">
+                  <span class="cycle-return-line"></span>
+                  <span class="cycle-return-label">
+                    <span data-human>then start again — with better instincts</span>
+                    <span data-machine>repeat · faster each time</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: GLOSSARY -->
+          <div class="orient-step">
+            <div class="orient-step-num">4</div>
+            <div>
+              <p class="orient-step-title">
+                <span data-human>Don't know a word? The Glossary has you covered</span>
+                <span data-machine>Terminology</span>
+              </p>
+              <p class="orient-step-body">
+                <span data-human>We use a few specific terms — things like <em>context window</em> and <em>re-seeding</em>. They sound technical but they map to things you already do. Hit <button class="orient-glossary-link" onclick="openGlossary()">Glossary</button> in the nav any time.</span>
+                <span data-machine>Precise terms used throughout. All map to standard communication concepts. <button class="orient-glossary-link" onclick="openGlossary()">Glossary →</button></span>
+              </p>
+            </div>
+          </div>
+
+        </div><!-- /orient-steps -->
+
+        <div class="btn-row" style="margin-top: 2rem;">
+          <button class="btn btn-primary" onclick="showScreen('exercises')">
+            <span data-human>Got it — show me the exercises →</span>
+            <span data-machine>View exercises →</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: CHOOSE PLATFORM
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-choose">
+      <div class="screen-inner">
+
+        <p class="eyebrow">The Course &nbsp;·&nbsp; Step 0 of 7</p>
+
+        <h1>
+          <span data-human>First, pick your platform.</span>
+          <span data-machine>Select platform.</span>
+        </h1>
+
+        <p class="subtext">
+          <span data-human>Each AI platform has different quirks, different settings, and a different feel. Pick the one you want to learn on — we'll walk you through getting set up before the first exercise starts.</span>
+          <span data-machine>Determines setup steps and exercise prompts. Choose one to continue.</span>
+        </p>
+
+        <div class="platform-grid">
+          <button class="platform-card" data-p="claude" onclick="selectPlatform('claude',this)">
+            <span class="platform-card-name">Claude</span>
+            <span class="platform-card-desc">Best for writing, reasoning, and long context. Most generous free tier.</span>
+          </button>
+          <button class="platform-card" data-p="chatgpt" onclick="selectPlatform('chatgpt',this)">
+            <span class="platform-card-name">ChatGPT</span>
+            <span class="platform-card-desc">Most widely used. Strong general purpose. Biggest ecosystem.</span>
+          </button>
+          <button class="platform-card" data-p="gemini" onclick="selectPlatform('gemini',this)">
+            <span class="platform-card-name">Gemini</span>
+            <span class="platform-card-desc">Best if you're already in Google Workspace.</span>
+          </button>
+          <button class="platform-card" data-p="tines" onclick="selectPlatform('tines',this)">
+            <span class="platform-card-name">Tines Workbench</span>
+            <span class="platform-card-desc">For automation and security teams.</span>
+          </button>
+          <button class="platform-card" data-p="claudecode" onclick="selectPlatform('claudecode',this)">
+            <span class="platform-card-name">Claude Code</span>
+            <span class="platform-card-desc">For developers. Different setup from the rest.</span>
+          </button>
+        </div>
+
+        <!-- Model picker — shown after platform is selected -->
+        <div id="model-picker" style="display:none">
+          <p class="model-section-label">
+            <span data-human>Now pick your model</span>
+            <span data-machine>Model</span>
+          </p>
+          <div class="model-list" id="model-list"></div>
+        </div>
+
+        <button class="help-btn" onclick="toggleQuiz()">Not sure which one to pick? →</button>
+
+        <div id="quiz-wrap" style="display:none">
+          <div class="quiz-wrap">
+            <p class="quiz-q">
+              <span data-human>What will you mainly use it for?</span>
+              <span data-machine>Primary use case?</span>
+            </p>
+            <div class="quiz-options">
+              <button class="quiz-opt" onclick="quizPick('claude')">
+                <span data-human>Writing, thinking through problems, research</span>
+                <span data-machine>Writing / research</span>
+              </button>
+              <button class="quiz-opt" onclick="quizPick('claudecode')">
+                <span data-human>Writing or reviewing code</span>
+                <span data-machine>Code</span>
+              </button>
+              <button class="quiz-opt" onclick="quizPick('tines')">
+                <span data-human>Automating workflows or security tasks</span>
+                <span data-machine>Automation / security</span>
+              </button>
+              <button class="quiz-opt" onclick="quizPick('gemini')">
+                <span data-human>Day-to-day work — mostly in Google Workspace</span>
+                <span data-machine>Google Workspace</span>
+              </button>
+              <button class="quiz-opt" onclick="quizPick('chatgpt')">
+                <span data-human>Not sure yet — just want to get started</span>
+                <span data-machine>General / unsure</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="choose-next" onclick="goSetup()" disabled>
+            <span data-human>Get set up →</span>
+            <span data-machine>Continue →</span>
+          </button>
+          <button class="btn btn-ghost" onclick="showScreen('exercises')">← Back to exercises</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: SETUP
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-setup">
+      <div class="screen-inner">
+
+        <p class="eyebrow">The Course &nbsp;·&nbsp; Step 0 of 7 &nbsp;·&nbsp; Get set up</p>
+
+        <h1 id="setup-h1">Get set up on Claude</h1>
+
+        <p class="subtext">
+          <span data-human>Three things to check before your first exercise. Takes about two minutes — do it once and you won't need to think about it again.</span>
+          <span data-machine>Pre-exercise checklist. ~2 min.</span>
+        </p>
+
+        <div class="setup-card" id="setup-card"></div>
+
+        <div class="mcp-callout" id="mcp-callout" style="display:none"></div>
+
+        <hr>
+
+        <div class="next-card">
+          <div>
+            <p class="next-label">Up next</p>
+            <p class="next-title">Exercise 1 — Persistent Instructions</p>
+            <p class="next-desc">Set your context once so you never repeat yourself.</p>
+          </div>
+          <span class="next-arrow">→</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="goExercises()">
+            <span data-human>I'm set up — start Exercise 1 →</span>
+            <span data-machine>Start Exercise 1 →</span>
+          </button>
+          <button class="btn btn-ghost" onclick="showScreen('choose')">
+            <span data-human>← Change platform</span>
+            <span data-machine>← Back</span>
+          </button>
+          <button class="btn btn-ghost" onclick="showScreen('exercises')">← Back to exercises</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SCREEN: EXERCISES
+    ══════════════════════════════════════ -->
+    <div class="screen" id="screen-exercises">
+      <div class="screen-inner">
+
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 2rem; flex-wrap:wrap; gap: 10px;">
+          <p class="eyebrow" style="margin-bottom:0;">The Course &nbsp;·&nbsp; 7 Exercises</p>
+          <button class="setup-nudge" onclick="showScreen('choose')">⚠ Need to set up first?</button>
+        </div>
+
+        <h1>
+          <span data-human>Your exercises.</span>
+          <span data-machine>Exercise list.</span>
+        </h1>
+
+        <p class="subtext">
+          <span data-human>Seven short exercises, 2–5 minutes each. Work through them in order — each one builds the next. The goal is a balance between human warmth and machine precision.</span>
+          <span data-machine>7 exercises · 2–5 min · complete in order. Goal: calibrate your Human / Machine balance.</span>
+        </p>
+
+        <div class="exercise-list">
+          <a class="exercise-row" href="/course/exercise-1.html">
+            <span class="exercise-num">01</span>
+            <div class="exercise-info">
+              <p class="exercise-title">Persistent Instructions</p>
+              <p class="exercise-time">3 min &nbsp;·&nbsp; Set your context once</p>
+            </div>
+            <span class="badge badge-start">
+              <span data-human>Start here →</span>
+              <span data-machine>→</span>
+            </span>
+          </a>
+          <a class="exercise-row" href="/course/exercise-2.html">
+            <span class="exercise-num">02</span>
+            <div class="exercise-info">
+              <p class="exercise-title">The Opening Seed</p>
+              <p class="exercise-time">5 min &nbsp;·&nbsp; Same task, both projects, pick your primary</p>
+            </div>
+            <span class="badge badge-start">
+              <span data-human>Start →</span>
+              <span data-machine>→</span>
+            </span>
+          </a>
+          <div class="exercise-row locked">
+            <span class="exercise-num">03</span>
+            <div class="exercise-info">
+              <p class="exercise-title">Think → Collab → Dispatch → Iterate</p>
+              <p class="exercise-time">5 min &nbsp;·&nbsp; The core framework</p>
+            </div>
+            <span class="badge badge-soon">Soon</span>
+          </div>
+          <div class="exercise-row locked">
+            <span class="exercise-num">04</span>
+            <div class="exercise-info">
+              <p class="exercise-title">Tone Calibration</p>
+              <p class="exercise-time">3 min &nbsp;·&nbsp; Find your register</p>
+            </div>
+            <span class="badge badge-soon">Soon</span>
+          </div>
+          <div class="exercise-row locked">
+            <span class="exercise-num">05</span>
+            <div class="exercise-info">
+              <p class="exercise-title">Token Efficiency</p>
+              <p class="exercise-time">2 min &nbsp;·&nbsp; Three habits</p>
+            </div>
+            <span class="badge badge-soon">Soon</span>
+          </div>
+          <div class="exercise-row locked">
+            <span class="exercise-num">06</span>
+            <div class="exercise-info">
+              <p class="exercise-title">Migration &amp; Re-seed</p>
+              <p class="exercise-time">2 min &nbsp;·&nbsp; When threads go wrong</p>
+            </div>
+            <span class="badge badge-soon">Soon</span>
+          </div>
+          <div class="exercise-row locked">
+            <span class="exercise-num">07</span>
+            <div class="exercise-info">
+              <p class="exercise-title">Your Reference Card</p>
+              <p class="exercise-time">2 min &nbsp;·&nbsp; Everything on one page</p>
+            </div>
+            <span class="badge badge-soon">Soon</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <p class="note">
+          <span data-human>While the individual exercises are being built, the <strong>full prompt walkthrough</strong> covers all seven concepts in one guided session on your chosen platform — about 15 minutes.</span>
+          <span data-machine>Full walkthrough available now. Covers all 7 concepts. ~15 min.</span>
+        </p>
+
+        <div class="btn-row">
+          <a class="btn btn-primary" href="/course/exercise-1.html" style="text-decoration:none;">
+            <span data-human>Open full walkthrough →</span>
+            <span data-machine>Full walkthrough →</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /screen-wrapper -->
+
+  <script>
+    var state = { platform: null, model: null, screen: 'orientation', mode: 'human' };
+    var STEPS = 8;
+
+    // ── Model data ──
+    var MODELS = {
+      claude: [
+        { id: 'claude-sonnet-4-5', label: 'Claude Sonnet', rec: true,
+          human: 'Best balance of speed and capability. Sharp enough for complex work, fast enough for everyday tasks. Start here.',
+          machine: 'Recommended. Best speed/quality ratio.' },
+        { id: 'claude-opus-4', label: 'Claude Opus', rec: false,
+          human: 'Most capable model. Best for hard reasoning, nuanced writing, and anything where quality matters more than speed.',
+          machine: 'Most capable. Slower + pricier. Use for hard tasks.' },
+        { id: 'claude-haiku-4-5', label: 'Claude Haiku', rec: false,
+          human: 'Fastest and cheapest. Good for quick questions and high-volume tasks where speed matters more than depth.',
+          machine: 'Fastest. Simple/high-volume tasks only.' },
+      ],
+      chatgpt: [
+        { id: 'gpt-4o', label: 'GPT-4o', rec: true,
+          human: "OpenAI's flagship model. Handles text, images, and voice. Fast and capable — the right default for most tasks.",
+          machine: 'Recommended. Flagship. Multimodal.' },
+        { id: 'o3', label: 'o3', rec: false,
+          human: 'A reasoning model — slower but thinks through complex problems step by step. Use it for strategy, maths, or careful planning.',
+          machine: 'Reasoning model. Slower. Use for logic/strategy.' },
+        { id: 'gpt-4o-mini', label: 'GPT-4o mini', rec: false,
+          human: 'Fast and cheap. Good for quick questions and everyday tasks that do not need the full model.',
+          machine: 'Fast + cheap. Simple tasks.' },
+      ],
+      gemini: [
+        { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', rec: true,
+          human: "Google's best model. Strong reasoning, huge context window, native Workspace integration. Best choice for serious work.",
+          machine: 'Recommended. Best reasoning + largest context.' },
+        { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', rec: false,
+          human: 'Fast and efficient. Good for quick responses and Workspace tasks where you do not need deep reasoning.',
+          machine: 'Fast. Workspace tasks + quick queries.' },
+      ],
+      tines: null,
+      claudecode: [
+        { id: 'claude-sonnet-4-5', label: 'Claude Sonnet', rec: true,
+          human: 'Default in Claude Code. Fast enough for interactive sessions, capable enough for complex refactors. Start here.',
+          machine: 'Default. Best balance for interactive coding.' },
+        { id: 'claude-opus-4', label: 'Claude Opus', rec: false,
+          human: 'For hard architecture problems, complex debugging, and anything where you need the most capable model. Uses more of your budget.',
+          machine: 'Most capable. Architecture + hard bugs. More expensive.' },
+      ],
+    };
+
+    // ── Platform data ──
+    var P = {
+      claude: {
+        name: 'Claude',
+        pitch_human: 'Excellent for writing, research, and working through complex problems. Has the most generous free tier for getting started.',
+        pitch_machine: 'Writing, research, long context. Best free tier.',
+        signup: 'https://claude.ai',
+        signup_label: 'claude.ai →',
+        free_human: 'Free tier gives you Claude in a standard conversation — enough to complete this course. <strong>Claude Pro ($20/mo)</strong> adds longer context, priority access, and Projects. Projects are the most useful feature in this course.',
+        free_machine: 'Free: standard access. Pro ($20/mo): Projects + longer context. Projects needed for Ex. 1.',
+        first_human: 'Go to <strong>Settings → Profile</strong> and fill in "What would you like Claude to know about you?" — this follows you across every conversation. Then create a <strong>Project</strong> for any recurring work and add instructions there. These two settings are your foundation for everything that follows.',
+        first_machine: '1. Settings → Profile → fill in your context. 2. Create a Project → add instructions. Do both before Ex. 1.',
+        mcp_human: 'Claude invented MCP (Model Context Protocol) — a way to connect it to external tools like your calendar, codebase, or browser so it can act, not just respond. You don\'t need this for the course. When you\'re ready: <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">modelcontextprotocol.io →</a>',
+        mcp_machine: 'MCP available. Connects Claude to external tools. Not required for this course. <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Docs →</a>',
+      },
+      chatgpt: {
+        name: 'ChatGPT',
+        pitch_human: 'The most widely used AI assistant. Strong general-purpose model with the largest ecosystem of integrations and plugins.',
+        pitch_machine: 'General purpose. Largest ecosystem.',
+        signup: 'https://chat.openai.com',
+        signup_label: 'chat.openai.com →',
+        free_human: 'Free tier is usable but limited. <strong>ChatGPT Plus ($20/mo)</strong> unlocks GPT-4o, longer context, and Custom GPTs. Worth it if you\'ll use it regularly.',
+        free_machine: 'Free: limited. Plus ($20/mo): GPT-4o + Custom GPTs.',
+        first_human: 'Go to <strong>Settings → Personalisation → Custom Instructions</strong>. Fill in both fields: what you want it to know about you, and how you want it to respond. These apply to every conversation — set them before your first exercise.',
+        first_machine: 'Settings → Personalisation → Custom Instructions. Fill both fields. Do this first.',
+        mcp_human: 'ChatGPT now supports MCP servers — a way to connect it to external tools without copy-pasting data in. Optional for now. <a href="https://openai.com/index/model-context-protocol" target="_blank" rel="noopener">Learn more →</a>',
+        mcp_machine: 'MCP supported. Optional. <a href="https://openai.com/index/model-context-protocol" target="_blank" rel="noopener">Docs →</a>',
+      },
+      gemini: {
+        name: 'Gemini',
+        pitch_human: "Google's AI assistant. Best choice if you're already in Google Workspace — it connects to Drive, Gmail, and Calendar natively, without any extra setup.",
+        pitch_machine: 'Best with Google Workspace. Native Drive/Gmail/Calendar access.',
+        signup: 'https://gemini.google.com',
+        signup_label: 'gemini.google.com →',
+        free_human: 'Free tier covers the basics. <strong>Gemini Advanced</strong> (Google One AI Premium, ~$20/mo) unlocks Gems — saved configurations that act as persistent instructions. Gems are important for this course.',
+        free_machine: 'Free: basic. Advanced (~$20/mo): Gems (persistent instructions). Gems needed for Ex. 1.',
+        first_human: 'If you have Gemini Advanced: open the left sidebar and create a <strong>Gem</strong> for your main use case — give it a name, instructions, and a tone. If you\'re on free: go to Settings and connect your Google apps via Extensions.',
+        first_machine: 'Advanced: left sidebar → New Gem → add instructions. Free: Settings → Extensions → connect Google apps.',
+        mcp_human: 'Google has official MCP servers for BigQuery and Google Cloud services. Only relevant if you work in Google infrastructure. <a href="https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services" target="_blank" rel="noopener">Learn more →</a>',
+        mcp_machine: 'MCP: BigQuery + GCP only. <a href="https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services" target="_blank" rel="noopener">Docs →</a>',
+      },
+      tines: {
+        name: 'Tines Workbench',
+        pitch_human: 'AI built into a workflow automation platform. Unlike standard chat, the model has your tools connected — it can look things up and trigger actions, not just respond with text.',
+        pitch_machine: 'AI + automation. Model has tools connected. Can execute, not just respond.',
+        signup: 'https://www.tines.com/get-started',
+        signup_label: 'tines.com →',
+        free_human: '<strong>Community Edition is free</strong> — includes Workbench and MCP server creation. More than enough to run this course and start building real automations alongside it.',
+        free_machine: 'Free (Community Edition). Includes Workbench + MCP.',
+        first_human: 'In Workbench, click the <strong>settings icon (top right)</strong> and open Custom Instructions. Important: unlike other platforms, changes here apply immediately to <em>all</em> existing conversations — not just new ones. Set your role, your connected tools, what to prioritise, and what to avoid.',
+        first_machine: 'Settings (top right) → Custom Instructions. Note: applies to ALL existing conversations immediately. Set role + constraints.',
+        mcp_human: 'Tines is unique — you can <em>build</em> MCP servers directly from your own storyboards. Any Tines workflow can become a tool for an AI model. Available free on all plans. <a href="https://www.tines.com/docs/actions/templates/mcp-server/" target="_blank" rel="noopener">Learn more →</a>',
+        mcp_machine: 'Can build MCP servers from storyboards. Free on all plans. <a href="https://www.tines.com/docs/actions/templates/mcp-server/" target="_blank" rel="noopener">Docs →</a>',
+      },
+      claudecode: {
+        name: 'Claude Code',
+        pitch_human: 'Claude embedded in your terminal. It reads your codebase, writes and runs code, and executes tasks — this is a fundamentally different discipline from chat prompting.',
+        pitch_machine: 'Claude in terminal. Reads + writes + runs code. Not chat.',
+        signup: 'https://docs.anthropic.com/en/docs/claude-code',
+        signup_label: 'Setup docs →',
+        free_human: 'Requires a Claude Pro or API account. Usage is metered — a typical session costs cents, not dollars. Install via npm: <code>npm install -g @anthropic-ai/claude-code</code>',
+        free_machine: 'Requires Pro or API key. Metered. Install: <code>npm install -g @anthropic-ai/claude-code</code>',
+        first_human: 'Create a <strong>CLAUDE.md</strong> file in your project root. This is your persistent context — it\'s version-controlled with the project and read at the start of every session. Cover: what the project is, the stack, conventions to follow, what not to touch, and what "done" looks like.',
+        first_machine: 'Create <code>CLAUDE.md</code> in project root. Include: project overview, stack, conventions, out-of-bounds files, definition of done.',
+        mcp_human: 'Claude Code has deep MCP support — connect it to GitHub, databases, browser tools, and more. MCP servers run locally and give the agent access to your real environment. <a href="https://docs.anthropic.com/en/docs/claude-code/mcp" target="_blank" rel="noopener">Learn more →</a>',
+        mcp_machine: 'MCP: GitHub, DBs, browser, local tools. <a href="https://docs.anthropic.com/en/docs/claude-code/mcp" target="_blank" rel="noopener">Docs →</a>',
+      },
+    };
+
+    // ── Mode toggle ──
+    function setMode(mode) {
+      state.mode = mode;
+      document.body.classList.toggle('machine', mode === 'machine');
+      document.getElementById('btn-human').classList.toggle('active', mode === 'human');
+      document.getElementById('btn-machine').classList.toggle('active', mode === 'machine');
+      // Re-render model descriptions when mode switches
+      if (state.platform && MODELS[state.platform]) {
+        var models = MODELS[state.platform];
+        document.querySelectorAll('.model-row').forEach(function(btn, i) {
+          var descEl = btn.querySelector('.model-desc');
+          if (descEl && models[i]) {
+            descEl.textContent = mode === 'human' ? models[i].human : models[i].machine;
+          }
+        });
+      }
+      if (state.platform && state.screen === 'setup') renderSetupCard();
+    }
+
+    // ── Platform selection ──
+    function selectPlatform(key, btn) {
+      state.platform = key;
+      state.model = null;
+      document.querySelectorAll('.platform-card').forEach(function(b) { b.classList.remove('selected'); });
+      if (btn) btn.classList.add('selected');
+      renderModelPicker(key);
+    }
+
+    function renderModelPicker(key) {
+      var picker = document.getElementById('model-picker');
+      var list = document.getElementById('model-list');
+      var models = MODELS[key];
+      if (!models) {
+        // Tines — no model choice
+        picker.style.display = 'none';
+        state.model = 'tines-managed';
+        document.getElementById('choose-next').disabled = false;
+        return;
+      }
+      list.innerHTML = '';
+      models.forEach(function(m) {
+        var btn = document.createElement('button');
+        btn.className = 'model-row' + (m.rec ? ' selected' : '');
+        btn.innerHTML =
+          '<div class="model-row-main">'
+          + '<span class="model-name">' + m.label + '</span>'
+          + (m.rec ? '<span class="model-rec">Recommended</span>' : '')
+          + '</div>'
+          + '<span class="model-desc">' + (state.mode === 'human' ? m.human : m.machine) + '</span>';
+        btn.onclick = function() { selectModel(m.id, btn, m); };
+        list.appendChild(btn);
+        if (m.rec) {
+          state.model = m.id;
+          document.getElementById('choose-next').disabled = false;
+        }
+      });
+      picker.style.display = 'block';
+    }
+
+    function selectModel(id, btn, modelData) {
+      state.model = id;
+      document.querySelectorAll('.model-row').forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+    }
+
+    function toggleQuiz() {
+      var el = document.getElementById('quiz-wrap');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function quizPick(key) {
+      document.querySelectorAll('.platform-card').forEach(function(b) {
+        b.classList.remove('selected');
+        if (b.dataset.p === key) { b.classList.add('selected'); selectPlatform(key, b); }
+      });
+      document.getElementById('quiz-wrap').style.display = 'none';
+    }
+
+    // ── Render setup card ──
+    function renderSetupCard() {
+      var p = P[state.platform];
+      if (!p) return;
+      var m = state.mode;
+
+      // Find selected model info
+      var modelLabel = '';
+      var modelDesc = '';
+      var models = MODELS[state.platform];
+      if (models && state.model) {
+        models.forEach(function(mo) {
+          if (mo.id === state.model) {
+            modelLabel = mo.label;
+            modelDesc = mo[m === 'human' ? 'human' : 'machine'];
+          }
+        });
+      }
+
+      document.getElementById('setup-h1').textContent = (m === 'human' ? 'Get set up on ' : '') + p.name;
+
+      var modelRow = modelLabel
+        ? '<div class="setup-row"><span class="setup-row-label">Model</span><span class="setup-row-content"><strong>' + modelLabel + '</strong> — ' + modelDesc + '</span></div>'
+        : '';
+
+      document.getElementById('setup-card').innerHTML =
+        '<div class="setup-header">'
+        + '<p class="setup-platform-name">' + p.name + '</p>'
+        + '<p class="setup-pitch">' + p['pitch_' + m] + '</p>'
+        + '</div>'
+        + '<div class="setup-row"><span class="setup-row-label">Sign up</span><span class="setup-row-content"><a href="' + p.signup + '" target="_blank" rel="noopener">' + p.signup_label + '</a></span></div>'
+        + modelRow
+        + '<div class="setup-row"><span class="setup-row-label">Free vs paid</span><span class="setup-row-content">' + p['free_' + m] + '</span></div>'
+        + '<div class="setup-row"><span class="setup-row-label">Do first</span><span class="setup-row-content">' + p['first_' + m] + '</span></div>';
+
+      var mcp = document.getElementById('mcp-callout');
+      mcp.innerHTML = '<strong>' + (m === 'human' ? 'When you\'re ready — MCP: ' : 'MCP: ') + '</strong>' + p['mcp_' + m];
+      mcp.style.display = 'block';
+    }
+
+    // ── Navigation ──
+    function goSetup() {
+      if (!state.platform) return;
+      renderSetupCard();
+      showScreen('setup');
+    }
+
+    function goExercises() { showScreen('exercises'); }
+
+    function showScreen(name) {
+      state.screen = name;
+      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('screen-' + name).classList.add('active');
+      document.getElementById('screen-' + name).scrollTop = 0;
+      updateDots();
+    }
+
+    function updateDots() {
+      var idx = { orientation: 0, exercises: 1, choose: 2, setup: 3 }[state.screen] || 0;
+      var bar = document.getElementById('nav-dots');
+      bar.innerHTML = '';
+      for (var i = 0; i < STEPS; i++) {
+        var d = document.createElement('div');
+        d.className = 'nav-dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
+        bar.appendChild(d);
+      }
+    }
+
+    updateDots();
+
+    // ── Glossary ──
+    function openGlossary() {
+      var el = document.getElementById('glossary-overlay');
+      el.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeGlossary() {
+      document.getElementById('glossary-overlay').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function closeGlossaryOnBg(e) {
+      if (e.target === document.getElementById('glossary-overlay')) closeGlossary();
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeGlossary();
+    });
+  </script>
+
+</body>
+</html>

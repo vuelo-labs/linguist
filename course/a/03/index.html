@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLAUDE.md · Linguist</title>
+  <meta name="description" content="Write a CLAUDE.md file that gives Claude Code standing instructions for your project.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body class="module-page">
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <div class="module-nav-bar">
+    <a href="/course">Course</a>
+    <span class="sep">›</span>
+    <span>Advanced Practitioner</span>
+    <span class="sep">›</span>
+    <span>A-03</span>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section class="module-hero">
+        <p class="module-eyebrow">Advanced Practitioner · Module 03</p>
+        <h1 class="module-title">CLAUDE.md — Your Persistent Instructions</h1>
+        <p class="module-objective">After this, you will have created a CLAUDE.md file, started a Claude Code session with it active, and observed the difference it makes to Claude Code's default behaviour.</p>
+      </section>
+
+      <div class="module-body">
+
+        <hr>
+
+        <h2>What you already know</h2>
+
+        <p>In B-09 you set up persistent instructions inside a Claude.ai Project. Those instructions told the AI how to behave in every conversation you started in that project — your preferred length, your working style, what to skip.</p>
+
+        <p>CLAUDE.md is the Claude Code equivalent. But instead of living in a platform's settings panel, it lives as a plain text file in your project folder. This means it travels with the project. Anyone who opens that project in Claude Code inherits the same instructions automatically.</p>
+
+        <p>The connection between B-09 and CLAUDE.md is exact: same idea, different location. If you understood persistent instructions on Claude.ai, you already understand what CLAUDE.md does. This module is about where it lives, what goes in it, and how to write your first one.</p>
+
+        <hr>
+
+        <h2>What CLAUDE.md is</h2>
+
+        <p>CLAUDE.md is a plain text file named CLAUDE.md that Claude Code reads at the start of every session. Whatever you write in it is treated as standing instructions — active in every conversation, without you having to repeat them.</p>
+
+        <p>Claude Code loads CLAUDE.md files from a defined hierarchy. You have two main options:</p>
+
+        <p><strong>Project-level CLAUDE.md</strong> — a file in your project's root folder. Applies only to that project. The right place for project-specific rules: the tools your project uses, the file structure, the naming conventions, what to leave alone.</p>
+
+        <p><strong>User-level CLAUDE.md</strong> — a file at <code>~/.claude/CLAUDE.md</code> on your computer. Applies to every project you open in Claude Code. The right place for personal preferences that should follow you everywhere: your preferred response style, your working habits, how you like feedback given.</p>
+
+        <hr>
+
+        <h2>What belongs in CLAUDE.md</h2>
+
+        <p>Standing rules that you would otherwise repeat in every session.</p>
+
+        <p><strong>For a project-level file:</strong></p>
+        <ul>
+          <li>The technologies the project uses ("we use Bun, not Node")</li>
+          <li>Naming conventions ("test files use the .spec.ts suffix")</li>
+          <li>File boundaries ("never modify files outside the src/ directory")</li>
+          <li>Workflow rules ("always tell me what you plan to do before making changes")</li>
+          <li>Terminology ("we call it a workspace, not a project")</li>
+        </ul>
+
+        <p><strong>For a user-level file:</strong></p>
+        <ul>
+          <li>Your preferred response length</li>
+          <li>Your preferred format (bullet points vs prose vs structured headers)</li>
+          <li>What you want Claude Code to skip (no preamble, no "great question", no unsolicited suggestions)</li>
+          <li>How you want uncertainty handled ("if you're not sure, ask rather than guessing")</li>
+          <li>Your working style ("explain your reasoning, don't just give me the answer")</li>
+        </ul>
+
+        <p><strong>What does not belong in CLAUDE.md:</strong><br>
+        Task-specific context, notes about work in progress, or session state. CLAUDE.md is for standing rules, not for information that changes between tasks. Put that kind of context in your opening message for each session.</p>
+
+        <hr>
+
+        <h2>Without / With</h2>
+
+        <h3>Without CLAUDE.md: Coding project</h3>
+
+        <p>A developer starts a new Claude Code session each day and types the same constraints at the start of every conversation: "We use TypeScript strict mode. All errors must be typed, no <code>any</code>. Tests must be in <code>.spec.ts</code> files, not <code>.test.ts</code>. Don't modify files outside of <code>src/</code>."</p>
+
+        <p>By the third week they stop remembering to type all of them. The model starts generating <code>.test.ts</code> files. The violations reach code review before anyone catches them.</p>
+
+        <h3>With CLAUDE.md: Coding project</h3>
+
+        <p>A CLAUDE.md in the project root:</p>
+
+        <blockquote>
+          <p>## Project conventions</p>
+          <p>- TypeScript strict mode is on. All types must be explicit. No <code>any</code>.<br>
+          - Test files: use .spec.ts naming only. Never .test.ts.<br>
+          - File boundaries: only modify files inside src/. Never touch configuration files unless I explicitly ask.<br>
+          - Before making any change, tell me what you plan to do and wait for my confirmation.</p>
+        </blockquote>
+
+        <p>These rules are present in every session without being typed.</p>
+
+        <h3>Without CLAUDE.md: Content and research work</h3>
+
+        <p>An editor starts each Claude Code session by pasting their style guide into the chat: second-person address, active voice only, no jargon, maximum 20-word sentences, Oxford comma. On long sessions this context gets compressed and lost. Articles drift in register over the course of a session.</p>
+
+        <h3>With CLAUDE.md: Content and research work</h3>
+
+        <p>A user-level CLAUDE.md at <code>~/.claude/CLAUDE.md</code>:</p>
+
+        <blockquote>
+          <p>## Writing style — apply to all content work</p>
+          <p>- Address the reader as "you" (second person)<br>
+          - Active voice only. Flag passive voice rather than using it.<br>
+          - No jargon: if a word needs explaining, replace it with a simpler one<br>
+          - Maximum sentence length: 20 words. Split longer sentences.<br>
+          - Oxford comma always<br>
+          - Em dashes are fine; semicolons should be rare</p>
+        </blockquote>
+
+        <p>Because it is in the user-level file, these rules apply to every project the editor opens in Claude Code.</p>
+
+        <hr>
+
+        <h2>The exercise: write your first CLAUDE.md</h2>
+
+        <p>This takes about ten minutes. You will write a minimal CLAUDE.md, start a Claude Code session with it active, and observe its effect.</p>
+
+        <h3>Step 1: Decide where your CLAUDE.md lives</h3>
+
+        <p>If you are working on a specific project: create the file in that project's root folder.</p>
+
+        <p>If you want rules that apply to everything you do in Claude Code: create the file at <code>~/.claude/CLAUDE.md</code>. The <code>~/.claude/</code> folder is in your home directory. If it does not exist yet, create it.</p>
+
+        <h3>Step 2: Write three to five rules</h3>
+
+        <p>Start small. Ask yourself: what do I find myself repeating in every Claude Code session? What does Claude Code do by default that I consistently want changed?</p>
+
+        <p>Good rules are specific and testable. "Be careful" is not a rule — it tells Claude Code nothing it can act on. "Never modify files outside the src/ directory" is a rule — Claude Code can check every action against it.</p>
+
+        <h3>Step 3: Test it</h3>
+
+        <p>Start a Claude Code session in the project (or from any directory, if you wrote a user-level file). Give Claude Code a task that your rules should affect — something that would normally trigger the behaviour you wanted to change.</p>
+
+        <p>Observe whether the behaviour changed. If it did not, check that you saved the file, that it is in the right location, and that you are using it in a new session (CLAUDE.md is read at session start; opening a new session is required for changes to take effect).</p>
+
+        <h3>Step 4: Iterate</h3>
+
+        <p>Your first CLAUDE.md will be incomplete. That is expected. Add rules as you notice patterns — each time you find yourself saying the same thing to Claude Code that you have said before, consider whether it belongs in CLAUDE.md.</p>
+
+        <hr>
+
+        <h2>Copy, Personalise, Use</h2>
+
+        <p>This template gives you a starting CLAUDE.md. Replace every bracket with your own preferences.</p>
+
+        <blockquote>
+          <p># Instructions for [this project / all my Claude Code work]</p>
+          <p>## Role<br>
+          I am a [your role or description of your work]. The tasks I bring to Claude Code are mainly [brief description of typical work — e.g. "writing and editing long-form content", "maintaining a data pipeline", "building internal tools"].</p>
+          <p>## Working style<br>
+          - Before making any changes, tell me what you plan to do and wait for my confirmation.<br>
+          - Ask a clarifying question if my instruction is ambiguous. Don't guess.<br>
+          - [Any other working style preference]</p>
+          <p>## Output preferences<br>
+          - Keep responses [brief / at whatever length the task requires / under X words by default].<br>
+          - Format: [bullet points / prose / structured with headers — state your preference].<br>
+          - Skip preambles and sign-offs. Start with the answer.</p>
+          <p>## What to avoid<br>
+          - [Something Claude Code does by default that you do not want — e.g. "Don't suggest next steps unless I ask", "Don't reformat content I did not ask you to reformat", "Don't add caveats or disclaimers unless they are critical"]<br>
+          - [A second thing to avoid]</p>
+        </blockquote>
+
+        <p>How to edit this:</p>
+
+        <ul>
+          <li>[this project / all my Claude Code work]: Pick one. Project-level or user-level. Different placement, different scope.</li>
+          <li>[your role]: What you do. "Content strategist", "data analyst", "software developer", "researcher". One phrase.</li>
+          <li>[brief description of typical work]: Two or three words about the kind of tasks you bring to Claude Code. This helps Claude Code calibrate its behaviour for your domain.</li>
+          <li>[Any other working style preference]: Think about what frustrates you in current Claude Code sessions. State the opposite as a rule.</li>
+          <li>[Output preferences]: These are your most personal rules. Most people want shorter responses and cleaner formatting than the defaults. State specifically what you want.</li>
+          <li>[Something to avoid]: The most useful rules are often negative constraints. What does Claude Code add that you consistently remove?</li>
+        </ul>
+
+        <hr>
+
+        <h2>Next</h2>
+
+        <p>A-04 covers session hygiene — what to do within a session to keep Claude Code focused, and when to use <code>/clear</code> to start fresh without closing your terminal.</p>
+
+        <nav class="module-pagination">
+          <a href="/course/a/02" class="module-pagination-prev">
+            <span class="module-pagination-label">Previous</span>
+            <span class="module-pagination-title">← A-02: Mental Model Refresher</span>
+          </a>
+          <span class="module-pagination-spacer"></span>
+          <a href="/course/a/04" class="module-pagination-next">
+            <span class="module-pagination-label">Next</span>
+            <span class="module-pagination-title">A-04: Session Hygiene →</span>
+          </a>
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

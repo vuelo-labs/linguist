@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verb Taxonomy · Linguist</title>
+  <meta name="description" content="A reference guide to safe and risky verbs for AI instructions — what each verb signals, what it produces, and what to use instead.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body class="module-page">
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <div class="module-nav-bar">
+    <a href="/course">Course</a>
+    <span class="sep">›</span>
+    <span>Reference</span>
+    <span class="sep">›</span>
+    <span>Verb Taxonomy</span>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section class="module-hero">
+        <p class="module-eyebrow">Reference</p>
+        <h1 class="module-title">Verb Taxonomy</h1>
+        <p class="module-objective">The verb you lead with tells the AI how much it is allowed to decide on its own. Safe verbs set a clear ceiling. Risky verbs have no ceiling. This reference covers both.</p>
+      </section>
+
+      <div class="module-body">
+
+        <hr>
+
+        <h2>Quick reference</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Verb</th>
+              <th>What the AI does with it</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Summarise</strong></td>
+              <td>Condenses to key points — does not add or rewrite</td>
+            </tr>
+            <tr>
+              <td><strong>Explain</strong></td>
+              <td>Describes what something means — read-only, no changes</td>
+            </tr>
+            <tr>
+              <td><strong>List</strong></td>
+              <td>Produces structured items — no prose, no recommendations</td>
+            </tr>
+            <tr>
+              <td><strong>Fix</strong></td>
+              <td>Addresses the named problem only — does not touch the rest</td>
+            </tr>
+            <tr>
+              <td><strong>Draft</strong></td>
+              <td>Creates a first version — treats output as a starting point</td>
+            </tr>
+            <tr>
+              <td><strong>Rewrite</strong></td>
+              <td>Changes expression, not meaning — keeps your content intact</td>
+            </tr>
+            <tr>
+              <td><strong>Compare</strong></td>
+              <td>Shows differences between things — does not recommend or merge</td>
+            </tr>
+            <tr>
+              <td><strong>Improve</strong></td>
+              <td>Risky — use with caution. No ceiling. AI decides what counts as better.</td>
+            </tr>
+            <tr>
+              <td><strong>Clean up</strong></td>
+              <td>Risky — use with caution. Scope undefined. AI decides what needs tidying.</td>
+            </tr>
+            <tr>
+              <td><strong>Make better</strong></td>
+              <td>Risky — avoid. Vague direction with no ceiling.</td>
+            </tr>
+            <tr>
+              <td><strong>Enhance</strong></td>
+              <td>Risky — avoid. Invites additions you did not request.</td>
+            </tr>
+            <tr>
+              <td><strong>Optimise</strong></td>
+              <td>Risky — avoid. AI decides what the goal is.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <hr>
+
+        <h2>The safe verbs</h2>
+
+        <p>These verbs set a clear ceiling. The AI does only what you specified and stops there. Use these as your defaults.</p>
+
+        <h3>Summarise</h3>
+
+        <p><strong>What it means:</strong> Condense this into the key points, without changing what it says.</p>
+        <p><strong>What the AI will do:</strong> Shorten the material, keep the substance, preserve your meaning.</p>
+        <p><strong>What the AI will not do:</strong> Rewrite your voice, restructure your argument, or add ideas of its own.</p>
+
+        <blockquote>
+          <p>Summarise this meeting transcript in five bullet points. Focus on decisions made and next steps agreed. Do not include any discussion that did not lead to a decision.</p>
+        </blockquote>
+
+        <p>How to edit this: Replace "meeting transcript" with whatever you want shortened (a report, an email thread, a document). Replace "five bullet points" with however many you need. Replace the last sentence with whatever you want left out.</p>
+
+        <h3>Explain</h3>
+
+        <p><strong>What it means:</strong> Help me understand this — read-only, no changes.</p>
+        <p><strong>What the AI will do:</strong> Walk you through what something means, how it works, or why it matters.</p>
+        <p><strong>What the AI will not do:</strong> Rewrite, edit, or touch the original in any way.</p>
+
+        <blockquote>
+          <p>Explain what this contract clause means in plain language. Don't rewrite the clause — just tell me what it's saying and what I'd be agreeing to.</p>
+        </blockquote>
+
+        <p>How to edit this: Replace "contract clause" with whatever you need explained (a policy, a graph, a set of figures, a legal term). The instruction "don't rewrite" is worth keeping every time — it makes explicit that this is a read-only task.</p>
+
+        <h3>List</h3>
+
+        <p><strong>What it means:</strong> Give me structured output — options, items, or steps — without writing prose.</p>
+        <p><strong>What the AI will do:</strong> Produce a set of items relevant to what you asked for.</p>
+        <p><strong>What the AI will not do:</strong> Write lengthy paragraphs, make recommendations beyond what you asked, or decide the format for you.</p>
+
+        <blockquote>
+          <p>List five possible subject lines for this customer apology email. Keep them under ten words each. Don't rewrite the email itself.</p>
+        </blockquote>
+
+        <p>How to edit this: Replace "five possible subject lines" with what you want listed (agenda items, possible responses, talking points, questions to ask). Keep the number specific — "list some" produces a different result than "list five."</p>
+
+        <h3>Fix</h3>
+
+        <p><strong>What it means:</strong> Find and correct the specific problem I've named. Do not touch anything else.</p>
+        <p><strong>What the AI will do:</strong> Address the exact issue you identified.</p>
+        <p><strong>What the AI will not do:</strong> Rewrite surrounding content, improve things you didn't mention, or expand the scope beyond the stated problem.</p>
+
+        <blockquote>
+          <p>Fix the grammar errors in the second paragraph of this report. Do not rewrite or rephrase any sentences — only correct errors.</p>
+        </blockquote>
+
+        <p>How to edit this: Replace "grammar errors in the second paragraph" with the specific problem you want fixed (a date that is wrong, a figure that doesn't match, a name that is misspelled). The more precisely you name the problem, the less the AI decides for itself.</p>
+
+        <h3>Draft</h3>
+
+        <p><strong>What it means:</strong> Create a first version of something that does not yet exist.</p>
+        <p><strong>What the AI will do:</strong> Produce a starting point you can edit — a first attempt, not a finished product.</p>
+        <p><strong>What the AI will not do:</strong> Treat this as finished. Draft signals that this is material to be worked with, not delivered as-is.</p>
+
+        <blockquote>
+          <p>Draft a short email to a client letting them know their project deadline has moved by one week. Keep the tone apologetic but confident. Three short paragraphs maximum.</p>
+        </blockquote>
+
+        <p>How to edit this: Replace the description of the email with whatever you need a first version of (a presentation introduction, a job description, a policy notice). Specify tone and length — without them, the AI picks its own defaults.</p>
+
+        <h3>Rewrite</h3>
+
+        <p><strong>What it means:</strong> Same content, different style or format. The meaning stays; the expression changes.</p>
+        <p><strong>What the AI will do:</strong> Rephrase, restructure, or change the register of what you have given it.</p>
+        <p><strong>What the AI will not do:</strong> Add new content, remove points you haven't told it to cut, or change the underlying message.</p>
+
+        <blockquote>
+          <p>Rewrite this performance review comment in a warmer, more encouraging tone. Keep all the same feedback points — don't add or remove anything, just change how it sounds.</p>
+        </blockquote>
+
+        <p>How to edit this: Replace "performance review comment" with what you want rewritten (a customer complaint response, a formal notice, a team update). Be explicit about what to keep — "keep all the same points" and "don't add or remove anything" are useful constraints to carry over.</p>
+
+        <h3>Compare</h3>
+
+        <p><strong>What it means:</strong> Show me the meaningful differences between two things.</p>
+        <p><strong>What the AI will do:</strong> Identify and describe the differences (and similarities, if useful) between the items you give it.</p>
+        <p><strong>What the AI will not do:</strong> Recommend which is better unless you ask, make changes to either item, or merge them together.</p>
+
+        <blockquote>
+          <p>Compare these two supplier quotes side by side. For each one, tell me: total cost, delivery time, and payment terms. Don't recommend one — just lay out the facts.</p>
+        </blockquote>
+
+        <p>How to edit this: Replace "two supplier quotes" with whatever you want compared (two versions of a document, two job candidates' CVs, two proposals). Specify the dimensions you want compared — without them, the AI decides which differences matter.</p>
+
+        <hr>
+
+        <h2>The risky verbs</h2>
+
+        <p>These verbs have no ceiling. When you use them, you are giving the AI permission to decide what "better" means — and it will. Use these only when you genuinely do not mind what changes.</p>
+
+        <h3>Improve</h3>
+
+        <p><strong>Why it's risky:</strong> "Improve" tells the AI to make this better without defining what better means. It may change your tone, restructure your argument, cut things you wanted to keep, or add things you never asked for. Every decision it makes feels justified — it was asked to improve.</p>
+
+        <p><strong>What to use instead:</strong> Choose the specific dimension you want improved and use a safe verb.</p>
+
+        <ul>
+          <li>Instead of "improve this email" — try "rewrite this email to be more concise. Keep all the main points. No longer than three short paragraphs."</li>
+          <li>Instead of "improve this report introduction" — try "rewrite the first paragraph so it leads with the key finding. Don't change anything else."</li>
+        </ul>
+
+        <p><strong>Before (risky):</strong></p>
+        <blockquote><p>Improve this customer complaint response.</p></blockquote>
+
+        <p><strong>After (safe):</strong></p>
+        <blockquote><p>Rewrite this customer complaint response so it opens with an apology in the first sentence. Keep the resolution I've offered unchanged. Don't add new information.</p></blockquote>
+
+        <h3>Clean up</h3>
+
+        <p><strong>Why it's risky:</strong> "Clean up" sounds minor, but it has no defined scope. The AI may rewrite sentences, restructure paragraphs, cut repetition you intended, or change your voice — all in the name of tidying. Each change seems reasonable. The cumulative effect may not be what you wanted.</p>
+
+        <p><strong>What to use instead:</strong> Name the specific thing you want cleaned.</p>
+
+        <ul>
+          <li>Instead of "clean up this document" — try "fix any spelling and grammar errors in this document. Do not rewrite or rephrase anything."</li>
+          <li>Instead of "clean up my notes" — try "reformat these notes as a bulleted list. Keep every point — don't cut or combine anything."</li>
+        </ul>
+
+        <p><strong>Before (risky):</strong></p>
+        <blockquote><p>Clean up my presentation draft.</p></blockquote>
+
+        <p><strong>After (safe):</strong></p>
+        <blockquote><p>Fix the spelling errors in this presentation draft. Do not rewrite any slides or change the structure.</p></blockquote>
+
+        <h3>Make better / Enhance / Optimise</h3>
+
+        <p><strong>Why they're risky:</strong> These are all variations of "improve" with different words. Each one delegates the definition of success to the AI. "Enhance" invites additions you didn't ask for. "Optimise" lets the AI decide what the goal even is. "Make better" is the vaguest of all.</p>
+
+        <p><strong>What to use instead:</strong> Stop and ask yourself what specifically you want to be better. Then use a safe verb for that thing.</p>
+
+        <ul>
+          <li>Instead of "make this better" — try "summarise this into three key points" or "fix the awkward sentence in the second paragraph."</li>
+          <li>Instead of "optimise this agenda" — try "reorder these agenda items so the most time-sensitive ones come first. Don't add or remove any items."</li>
+          <li>Instead of "enhance this report" — try "add a one-sentence summary at the top of each section. Don't change anything else."</li>
+        </ul>
+
+        <hr>
+
+        <h2>The pattern</h2>
+
+        <p>Every well-formed instruction has three parts:</p>
+
+        <blockquote>
+          <p>[Safe verb] [specific thing]. [Stopping condition]. [What to leave alone].</p>
+        </blockquote>
+
+        <p>Worked example:</p>
+
+        <blockquote>
+          <p>Summarise the key decisions from this board meeting transcript. Stop after five bullet points. Do not include discussion that did not result in a decision or an action.</p>
+        </blockquote>
+
+        <ul>
+          <li>Safe verb: <strong>Summarise</strong></li>
+          <li>Specific thing: <strong>the key decisions from this board meeting transcript</strong></li>
+          <li>Stopping condition: <strong>Stop after five bullet points</strong></li>
+          <li>What to leave alone: <strong>Do not include discussion that did not result in a decision or an action</strong></li>
+        </ul>
+
+        <p>The amount a verb extends the AI's decision-making authority is sometimes called its "blast radius" — how far the effects can spread beyond what you intended. Safe verbs have a small blast radius. Risky verbs have no ceiling.</p>
+
+        <hr>
+
+        <p><a href="/course">← Back to course</a></p>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

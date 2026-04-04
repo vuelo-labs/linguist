@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Hygiene · Linguist</title>
+  <meta name="description" content="Start every Claude Code session in a known state and keep context costs under control.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body class="module-page">
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <div class="module-nav-bar">
+    <a href="/course">Course</a>
+    <span class="sep">›</span>
+    <span>Advanced Practitioner</span>
+    <span class="sep">›</span>
+    <span>A-04</span>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section class="module-hero">
+        <p class="module-eyebrow">Advanced Practitioner · Module 04</p>
+        <h1 class="module-title">Session Hygiene</h1>
+        <p class="module-objective">After this, you can scope a Claude Code session to a single task, use <code>/clear</code> when changing direction, and recognise when a session has accumulated enough unrelated context that starting fresh will produce better results.</p>
+      </section>
+
+      <div class="module-body">
+
+        <hr>
+
+        <h2>What you already know</h2>
+
+        <p>In E-06 you learned that conversations have a useful lifespan. When the AI starts repeating itself, forgetting your instructions, or drifting from your topic, it is faster to start fresh than to keep correcting. You learned to write a re-seed — a clean opening message that carries forward what was valuable from the old conversation.</p>
+
+        <p>In B-08 you learned that the AI mirrors your session's accumulated style and context. The longer a conversation runs, the more its earlier content shapes later responses — sometimes helpfully, sometimes not.</p>
+
+        <p>Session hygiene in Claude Code is the same principle, applied more deliberately. Claude Code sessions accumulate context from tool calls, file reads, and multiple turns. When you switch tasks without clearing that context, the earlier task's details become background noise that affects the new task's output. The <code>/clear</code> command is how you reset without leaving the terminal. The session scoping habit is how you avoid needing to clear in the first place.</p>
+
+        <hr>
+
+        <h2>The three practices</h2>
+
+        <h3>Practice 1: Scope the session before you start</h3>
+
+        <p>Decide what one task this session is for before you open it. Not "work on the project" — a specific task with a clear done state.</p>
+
+        <p>Good scopes: "Draft the introduction section of the report." "Fix the null pointer error in the payment flow." "Build the weekly metrics summary for the Monday email."</p>
+
+        <p>Vague scopes create sessions that drift. Drifting sessions compound context from unrelated work. Compounded context degrades output.</p>
+
+        <p>This is the same discipline as "one task per message" from B-05, applied at the session level.</p>
+
+        <h3>Practice 2: Use /clear between tasks</h3>
+
+        <p><code>/clear</code> resets Claude Code's memory within the current session. It is like starting a new conversation without closing the terminal. Your CLAUDE.md instructions stay active (they are reloaded at the start of every context). The accumulated conversation history goes away.</p>
+
+        <p>Use <code>/clear</code> when:</p>
+        <ul>
+          <li>You have finished one task and are starting a different, unrelated task</li>
+          <li>The current session has gone in a direction you want to abandon</li>
+          <li>You want a fresh read on something without the earlier conversation influencing the response</li>
+        </ul>
+
+        <p>You do not need to use <code>/clear</code> between closely related steps in the same task. If you are drafting section 3 of a report and just finished section 2 in the same session, the context from section 2 is useful — keep it.</p>
+
+        <h3>Practice 3: Front-load your constraints</h3>
+
+        <p>State everything Claude Code needs to know about a task before it starts working. Not during. Not after.</p>
+
+        <p>This is the same principle as E-02 (constraints), but in Claude Code it has a cost dimension: when Claude Code makes a wrong choice because a constraint was missing, correcting it requires rework. Rework means more tool calls. More tool calls means more tokens. Stating the constraint upfront costs nothing extra.</p>
+
+        <p>Front-loading also protects your constraints through compaction. Constraints stated before the model begins work are stated in early, prominent user messages — exactly the messages that compaction preserves. Constraints added mid-task as conversational corrections are far more likely to be compressed or lost.</p>
+
+        <hr>
+
+        <h2>Without / With</h2>
+
+        <h3>Session scoping: Coding</h3>
+
+        <p>Without: A developer debugs a Redis connection issue, then in the same session switches to building a new API endpoint. The session grows long and compacts. The summary now contains extensive context about Redis connection strings, retry logic, and environment variables — none of which is relevant to the API endpoint. The model's response to the new task is subtly contaminated: it adds unnecessary connection error handling to the endpoint code because it is "aware" of connectivity problems that were already resolved.</p>
+
+        <p>With: After the Redis issue is resolved, the developer types <code>/clear</code>. The new session starts with only the endpoint task in context. The output is clean.</p>
+
+        <h3>Session scoping: Content and research</h3>
+
+        <p>Without: A researcher investigates two separate competitive topics in one session — first a competitor's new product, then a second competitor's pricing changes. By the time they reach the second topic, the model's context is full of details about the first competitor. The compaction blends the two. The model draws comparisons between the two competitors that were not requested, and occasionally attributes features to the wrong company.</p>
+
+        <p>With: Two sessions. One per topic. Each starts with a clean brief. The research stays separate.</p>
+
+        <h3>Front-loading constraints: Coding</h3>
+
+        <p>Without: A developer writes "add date formatting to the new feature." The project is mid-migration from one date library to another. The model picks the old library because it appears throughout the existing code. The developer has to correct it. Two turns instead of one.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Add a date formatting function to the utilities file. Use the new date library we are migrating to — not the old one you will see in the existing files. Format: "January 5, 2026" (full month name, day, four-digit year).</p>
+        </blockquote>
+
+        <p>The constraint is present before the model writes a single line.</p>
+
+        <h3>Front-loading constraints: Content and research</h3>
+
+        <p>Without: A product manager asks for help preparing for a difficult stakeholder meeting. The model produces a full preparation document: context summary, stakeholder profiles, recommended framing, complete question-and-answer prep, and talking points. The PM wanted three bullet points addressing one specific objection.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Give me three bullet points — one to two sentences each — addressing the most likely objection from finance to a six-week roadmap delay: that the team underestimated the work.</p>
+          <p>Do not give me background context, a prep document, or framing advice. Just the three bullets.</p>
+        </blockquote>
+
+        <hr>
+
+        <h2>Connecting to B-08 and E-06</h2>
+
+        <p>The session hygiene skills in this module are Claude Code versions of two things you already know.</p>
+
+        <p><strong>B-08 (Recovery)</strong> taught you what to do when output goes wrong. <code>/clear</code> and session scoping are how you prevent the conditions that make recovery necessary in the first place. Clean sessions produce cleaner output; you recover less often.</p>
+
+        <p><strong>E-06 (Migration and Re-seed)</strong> taught you to recognise when a conversation has run its useful course and to start fresh with a re-seed. In Claude Code, <code>/clear</code> gives you a faster version of the same reset — you do not need to open a new conversation, just type <code>/clear</code> and write your opening message for the new task as a re-seed would.</p>
+
+        <p>The re-seed format from E-06 works here:</p>
+
+        <blockquote>
+          <p>I've been working on [previous task]. That work is done. The new task is: [new task, with constraints].</p>
+        </blockquote>
+
+        <hr>
+
+        <h2>Copy, Personalise, Use</h2>
+
+        <p>Use this starter at the opening of any Claude Code session. It front-loads your task scope and constraints before any work begins.</p>
+
+        <blockquote>
+          <p>Session scope: [one-sentence description of the single task for this session]</p>
+          <p>What I need:<br>
+          [Verb] [the specific thing]. [Stopping condition — format, length, scope].</p>
+          <p>Constraints:<br>
+          - [What to leave alone or not change]<br>
+          - [Any tool, method, or boundary restriction]<br>
+          - [What not to add, suggest, or include]</p>
+          <p>Done when: [specific description of the finished output]</p>
+        </blockquote>
+
+        <p>How to edit this:</p>
+
+        <ul>
+          <li>[one-sentence description]: One task. If it takes more than one sentence to describe, you are probably scoping more than one session's worth of work. Split it.</li>
+          <li>[Verb]: Start with a precise verb. Fix, draft, summarise, research, read, compare. Not "help me with" or "look at."</li>
+          <li>[Stopping condition]: Tell Claude Code when to stop. Word count, number of items, a specific format, or an explicit "stop here and wait for my feedback."</li>
+          <li>[What to leave alone]: Any constraint that protects something you want preserved. Anything Claude Code might change by default that you do not want changed.</li>
+          <li>[Done when]: Describe the finished state specifically enough that you will know when you have arrived. "A draft" is not specific. "A 150-word draft email, professional tone, no sign-off" is specific.</li>
+        </ul>
+
+        <hr>
+
+        <h2>Next</h2>
+
+        <p>A-05 covers context awareness and compaction in depth — what happens when a session gets long, what survives the automatic summarisation, and how to write messages that preserve what matters.</p>
+
+        <nav class="module-pagination">
+          <a href="/course/a/03" class="module-pagination-prev">
+            <span class="module-pagination-label">Previous</span>
+            <span class="module-pagination-title">← A-03: CLAUDE.md</span>
+          </a>
+          <span class="module-pagination-spacer"></span>
+          <a href="/course/a/05" class="module-pagination-next">
+            <span class="module-pagination-label">Next</span>
+            <span class="module-pagination-title">A-05: Context Awareness and Compaction →</span>
+          </a>
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

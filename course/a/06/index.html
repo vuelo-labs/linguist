@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Output Engineering · Linguist</title>
+  <meta name="description" content="Control the format, length, and structure of Claude Code's responses.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body class="module-page">
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <div class="module-nav-bar">
+    <a href="/course">Course</a>
+    <span class="sep">›</span>
+    <span>Advanced Practitioner</span>
+    <span class="sep">›</span>
+    <span>A-06</span>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section class="module-hero">
+        <p class="module-eyebrow">Advanced Practitioner · Module 06</p>
+        <h1 class="module-title">Output Engineering in Claude Code</h1>
+        <p class="module-objective">After this, you can separate the planning phase from the execution phase in Claude Code sessions, and specify the format, length, and structure of Claude Code's responses to get exactly what you need — not what the defaults produce.</p>
+      </section>
+
+      <div class="module-body">
+
+        <hr>
+
+        <h2>What you already know</h2>
+
+        <p>In E-05 you learned the habit of reading Claude Code's full response before acting on it — treating the first response as a draft, not a final product.</p>
+
+        <p>That habit assumes the response is worth reading critically. This module is about the step before: making sure Claude Code produces the right kind of response in the first place.</p>
+
+        <p>Two skills here. The first is separating plan from execution. The second is controlling output format. They are related: both are about taking deliberate control of what Claude Code produces before it starts, rather than correcting it after.</p>
+
+        <hr>
+
+        <h2>Plan before execute</h2>
+
+        <p>Asking Claude Code to describe its intended approach before it acts — and reviewing that plan before confirming — is the single highest-leverage habit in Claude Code work involving multiple steps or file changes.</p>
+
+        <p>The reason: catching a wrong approach in the plan costs one turn. Catching it after execution costs as many turns as it takes to undo, correct, and redo the work. For tasks that touch multiple files or make irreversible changes, the difference is significant.</p>
+
+        <p>Claude Code has a built-in planning mode activated with <code>/plan</code>. This mode instructs Claude Code to describe what it will do rather than doing it immediately. You can also achieve the same result without a mode switch by adding explicit planning instructions to your message: "Before doing anything, tell me what you plan to do. Wait for my approval."</p>
+
+        <p>Both approaches work. The key is making planning a deliberate step, not an optional one.</p>
+
+        <p><strong>When to separate plan from execution:</strong></p>
+        <ul>
+          <li>Any task touching more than two or three files</li>
+          <li>Any architectural choice — storage approach, structural change, tool or library selection</li>
+          <li>Any task in an unfamiliar area of the project</li>
+          <li>Any task where the wrong approach would require significant effort to reverse</li>
+        </ul>
+
+        <p><strong>When it is fine to skip the plan step:</strong></p>
+        <ul>
+          <li>Single, clearly bounded changes you have done before</li>
+          <li>Tasks where the entire scope is stated in the message and there is no room for interpretation</li>
+        </ul>
+
+        <h3>Without / With: Coding</h3>
+
+        <p>Without: "Add rate limiting to the API."</p>
+
+        <p>Claude Code picks an in-memory approach. The team's infrastructure runs multiple servers — in-memory rate limiting does not work across them. Significant rework required.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Before implementing: describe two or three approaches to adding rate limiting to this API. For each approach, state what method or library, where the state lives, and whether it works across multiple servers.</p>
+          <p>Do not write any code yet. I will pick the approach, then we will implement it.</p>
+        </blockquote>
+
+        <p>The developer picks the right approach. Claude Code implements it. No rework.</p>
+
+        <h3>Without / With: Content and research</h3>
+
+        <p>Without: "Write a case study about the customer's deployment."</p>
+
+        <p>Claude Code picks a structure — problem, solution, results — and writes the full draft. The writer wanted results first, in an inverted-pyramid style. The full draft needs to be restructured.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Before drafting: propose two structures for this case study:</p>
+          <p>1. A traditional problem-solution-results structure<br>
+          2. An inverted-pyramid structure (results first, then how we got there)</p>
+          <p>For each, give me a one-sentence description of the opening paragraph and the section order. Do not write the full draft yet. I will choose the structure.</p>
+        </blockquote>
+
+        <p>One turn to choose. No rework.</p>
+
+        <hr>
+
+        <h2>Connecting to E-05</h2>
+
+        <p>In E-05 you learned the two-message pattern for planning: first ask the AI to plan, then confirm before it acts. In Claude Code, <code>/plan</code> activates a dedicated planning mode that formalises this into the session. The same principle — see the approach before it becomes action — is now a built-in feature, not just a prompting technique.</p>
+
+        <p>If you use <code>/plan</code>, Claude Code will present its intended approach and wait. You review. You either approve or redirect. Then it acts.</p>
+
+        <p>If you prefer not to use <code>/plan</code>, add "Before you do anything, tell me what you plan to do. Wait for my approval before starting." to any message. The effect is the same.</p>
+
+        <hr>
+
+        <h2>Output format control</h2>
+
+        <p>Claude Code's default behaviour is to be brief and direct. It leads with the answer and keeps text short. This is a sensible default for many tasks — but it is a default, not a fixed behaviour. When you need reasoning shown, a specific structure, a particular length, or a different register, you must ask for it.</p>
+
+        <p>Claude Code also mirrors your verbosity: a short message tends to produce a short response; a detailed message tends to produce a detailed response. Format control is about going beyond the mirror — specifying exactly what you want.</p>
+
+        <p><strong>Format controls you can use:</strong></p>
+        <ul>
+          <li>Structure: headers, bullet lists, tables, numbered sections, continuous prose</li>
+          <li>Length: word count, paragraph count, number of items</li>
+          <li>Reasoning: "walk me through your reasoning before the answer", "explain why, not just what"</li>
+          <li>Audience: "write for someone who has not seen this codebase before", "write for a non-technical manager"</li>
+          <li>Tone: "formal", "plain language", "concise like a status update"</li>
+          <li>Negative constraints: "no subheadings", "no bullet points", "no caveats or disclaimers"</li>
+        </ul>
+
+        <h3>Without / With: Coding</h3>
+
+        <p>Without: "Explain this async code."</p>
+
+        <p>Claude Code gives a two-sentence summary of what the code does. A junior developer needs to understand why these choices were made, not just what they produce.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Explain this async function to a developer who understands the language but has not worked with parallel execution before.</p>
+          <p>Structure your explanation as:</p>
+          <p>1. What the code does (one paragraph)<br>
+          2. Why parallel execution is used here instead of sequential calls (one paragraph)<br>
+          3. What would break if you removed the error handling (one paragraph)</p>
+          <p>Write for understanding, not brevity. Each section should be three to five sentences.</p>
+        </blockquote>
+
+        <h3>Without / With: Content and research (length control)</h3>
+
+        <p>Without: "Brief me on the AI infrastructure market."</p>
+
+        <p>Claude Code produces 600 words across four sections with subheadings. The person asking needed one paragraph for an email they are writing right now.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Write one paragraph, maximum 100 words, summarising the current state of the AI infrastructure market. Focus on: what is growing fastest and who the dominant players are. No subheadings, no bullet points, no caveats. Write it as if I am forwarding it in an email.</p>
+        </blockquote>
+
+        <hr>
+
+        <h2>Copy, Personalise, Use</h2>
+
+        <h3>Starter 1: Planning message</h3>
+
+        <p>Use this before any multi-step task.</p>
+
+        <blockquote>
+          <p>I want to [describe the task in one sentence].</p>
+          <p>Before you do anything: tell me</p>
+          <p>1. What you will need to read or review to do this<br>
+          2. What changes you plan to make<br>
+          3. What order you will work in</p>
+          <p>Do not start working until I confirm the plan.</p>
+        </blockquote>
+
+        <p>How to edit this:</p>
+
+        <ul>
+          <li>[describe the task in one sentence]: Be specific. "Restructure the research report's argument" rather than "work on the report."</li>
+          <li>The three numbered items are the standard planning questions for most tasks. For simple tasks, reduce to one question: "What do you plan to do?" For very complex tasks, add: "What are the main risks or decision points in this approach?"</li>
+          <li>"Do not start working until I confirm the plan" is load-bearing. Without it, Claude Code may begin executing while describing the plan.</li>
+        </ul>
+
+        <h3>Starter 2: Format control message</h3>
+
+        <p>Use this to specify exactly what form you want the response to take.</p>
+
+        <blockquote>
+          <p>[Verb] [the specific thing].</p>
+          <p>Format:</p>
+          <p>- Structure: [bullet points / numbered list / headers / prose / table]<br>
+          - Length: [word count or item count]<br>
+          - Audience: [who will read this — their background, what they care about]<br>
+          - Tone: [formal / plain / concise / explanatory]</p>
+          <p>Do not include: [what to leave out — caveats, recommendations, introductions, conclusions, anything that would appear by default that you do not want]</p>
+        </blockquote>
+
+        <p>How to edit this:</p>
+
+        <ul>
+          <li>[Verb] [the specific thing]: The format control section only works if the task itself is clearly stated first. Verb and target, then format.</li>
+          <li>You do not need to fill in every format field. Use only the ones where the default is not what you want. If the default length is fine, skip the length line.</li>
+          <li>"Do not include" is often the most useful line. Claude Code adds introductions, closing summaries, and unsolicited suggestions by default. If you want clean output, name what to cut.</li>
+        </ul>
+
+        <hr>
+
+        <h2>Next</h2>
+
+        <p>A-07 covers tool fluency — naming specific tools in your message, understanding the cost hierarchy, and taking control of which tool Claude Code uses for a given task.</p>
+
+        <nav class="module-pagination">
+          <a href="/course/a/05" class="module-pagination-prev">
+            <span class="module-pagination-label">Previous</span>
+            <span class="module-pagination-title">← A-05: Context Awareness and Compaction</span>
+          </a>
+          <span class="module-pagination-spacer"></span>
+          <a href="/course/a/07" class="module-pagination-next">
+            <span class="module-pagination-label">Next</span>
+            <span class="module-pagination-title">A-07: Tool Fluency →</span>
+          </a>
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

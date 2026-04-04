@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cost, Tokens, and What Things Actually Cost · Linguist</title>
+  <meta name="description" content="Build a mental model of Claude Code costs so you can make deliberate spend decisions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body class="module-page">
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <div class="module-nav-bar">
+    <a href="/course">Course</a>
+    <span class="sep">›</span>
+    <span>Advanced Practitioner</span>
+    <span class="sep">›</span>
+    <span>A-01</span>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section class="module-hero">
+        <p class="module-eyebrow">Advanced Practitioner · Module 01</p>
+        <h1 class="module-title">Cost, Tokens, and What Things Actually Cost</h1>
+        <p class="module-objective">After this, you can estimate the cost of a Claude Code session before starting, read token usage after, and understand what makes sessions expensive.</p>
+      </section>
+
+      <div class="module-body">
+
+        <hr>
+
+        <h2>Before You Go Further</h2>
+
+        <p>You have run your first session. You know what Claude Code can do — it reads files, writes files, runs commands, and reports back. You have approved your first tool call and seen your first response.</p>
+
+        <p>Before you go further, know what it costs.</p>
+
+        <p>Claude Code is not free. Every session is metered. This module gives you the mental model to use it with intention, not surprises. It is not here to make you cautious. It is here to make you informed.</p>
+
+        <hr>
+
+        <h2>What a Token Is</h2>
+
+        <p>A token is roughly three-quarters of a word. "Hello world" is about 3 tokens. A short paragraph is about 75 tokens. A full page of text is about 400 tokens.</p>
+
+        <p>Everything you send and everything Claude Code responds with costs tokens. The files it reads become tokens. The commands it runs produce tokens. Token cost is what becomes your bill.</p>
+
+        <hr>
+
+        <h2>How Billing Works</h2>
+
+        <p>Claude Code uses the Anthropic API. You are billed based on how many tokens flow through each session.</p>
+
+        <p>There are two sides to every exchange:</p>
+
+        <ul>
+          <li><strong>Input tokens</strong> — what you send. This includes your messages and any file content Claude Code reads on your behalf. If you ask Claude Code to read a 10-page report, every word of that report becomes input tokens.</li>
+          <li><strong>Output tokens</strong> — what Claude Code generates. Its responses, any files it writes, any plans it explains. Output tokens cost more per token than input tokens.</li>
+        </ul>
+
+        <p><strong>Tool calls add up.</strong> Every time Claude Code reads a file, searches your folders, or runs a command, the action and its result both contribute tokens. A session with 15 tool calls uses significantly more tokens than a session with 2.</p>
+
+        <p><strong>Different models, different costs.</strong> Claude Code can use different models depending on the task:</p>
+
+        <ul>
+          <li><strong>claude-opus-4-6</strong> — the most capable model. Also the most expensive per token. Used for complex reasoning and difficult tasks.</li>
+          <li><strong>claude-sonnet-4-6</strong> — the default for most Claude Code sessions. Strong capability at a moderate price.</li>
+          <li><strong>claude-haiku-4-5</strong> — the fastest and cheapest model. Used for simpler tasks where speed matters more than depth.</li>
+        </ul>
+
+        <p>Pricing changes over time. For current per-token rates, check anthropic.com/pricing.</p>
+
+        <hr>
+
+        <h2>What Makes a Session Expensive</h2>
+
+        <p>Four things drive cost. Each one is within your control.</p>
+
+        <h3>Long context</h3>
+
+        <p>Sharing a 50-page report costs more than sharing one page. Every token of that document is processed as input.</p>
+
+        <p>You learned in E-03 that context is fuel — the more relevant material you give Claude Code, the better the result. That remains true. The cost side is straightforward: give it what it needs, not everything you have. If you need a summary of chapter 3, share chapter 3, not the whole book.</p>
+
+        <h3>Many tool calls</h3>
+
+        <p>Each file read, each command, each search adds tokens to the session. A session where Claude Code reads 20 files costs more than one where it reads 2.</p>
+
+        <p>This does not mean you should avoid tool calls. It means you should be specific. "Read the introduction of annual-report.pdf" costs less than "Look through all the documents in this folder and figure out what's relevant." Name the file. Name the section. Reduce the search space.</p>
+
+        <h3>Long sessions</h3>
+
+        <p>Claude Code resends the conversation history with every message. The longer a session runs, the more context accumulates, and the more tokens are sent with each new exchange. Message 25 in a session costs more than message 3, even if both messages are the same length.</p>
+
+        <p>Keep sessions focused on one task. When you finish, start a new session for the next task. Use <code>/clear</code> to reset context when you change direction within a session. Fresh sessions are cheaper.</p>
+
+        <h3>Agent delegation</h3>
+
+        <p>When Claude Code spawns a subagent — a separate AI instance that handles part of the work — that subagent runs its own context window. It reads its own files, generates its own responses, and costs its own tokens. Delegation multiplies cost because you are paying for two or more AI sessions at once.</p>
+
+        <p>A-08 covers agent delegation in detail. For now, know that it exists and that it is the single biggest cost multiplier in Claude Code. Do not use delegation until you reach that module.</p>
+
+        <hr>
+
+        <h2>Reading Your Usage</h2>
+
+        <p>Token counts appear in two places.</p>
+
+        <p><strong>In Claude Code:</strong> at the end of each response, you will see the number of input tokens and output tokens used. This tells you what that exchange cost.</p>
+
+        <p><strong>In console.anthropic.com:</strong> the usage dashboard shows your total usage over time, with per-session breakdowns. This is where you see the full picture — which sessions used the most tokens, how your usage trends over days and weeks.</p>
+
+        <h3>What the numbers mean</h3>
+
+        <p>The two numbers that matter are input tokens and output tokens. Input is everything you sent — your messages plus every file Claude Code read. Output is everything Claude Code generated — its responses plus any files it wrote.</p>
+
+        <p>Here is a worked example. Suppose a session shows:</p>
+
+        <ul>
+          <li>15,000 input tokens</li>
+          <li>3,000 output tokens</li>
+          <li>Model: claude-sonnet-4-6</li>
+        </ul>
+
+        <p>At approximate current pricing (which may have changed since this was written), Sonnet input tokens cost around $3 per million and output tokens cost around $15 per million. That session would cost roughly:</p>
+
+        <ul>
+          <li>Input: 15,000 / 1,000,000 x $3 = $0.045</li>
+          <li>Output: 3,000 / 1,000,000 x $15 = $0.045</li>
+          <li>Total: approximately $0.09</li>
+        </ul>
+
+        <p>Nine cents for a focused working session. That is a realistic number for a short-to-medium session with a few file reads and clear messages.</p>
+
+        <p>The numbers scale linearly. Double the tokens, double the cost. A session with 150,000 input tokens and 30,000 output tokens on the same model would cost roughly $0.90. A session on Opus with the same token counts would cost several times more.</p>
+
+        <hr>
+
+        <h2>Setting a Mental Budget</h2>
+
+        <p>Before starting a session, ask yourself:</p>
+
+        <ol>
+          <li><strong>How many messages am I likely to send?</strong> A focused 5-message session is cheap. A 30-message exploration costs more.</li>
+          <li><strong>Will Claude Code need to read large files?</strong> Each file read adds tokens proportional to the file size.</li>
+          <li><strong>Will I be using agent delegation?</strong> If yes, multiply your estimate.</li>
+          <li><strong>What is my limit for this task?</strong> Set it before you start, not after.</li>
+        </ol>
+
+        <h3>Rough benchmarks</h3>
+
+        <p>These are honest approximations to build your intuition. Actual costs depend on the model, the length of your messages, and the size of files involved.</p>
+
+        <ul>
+          <li><strong>Short focused session</strong> (5-10 messages, no large file reads, minimal tool calls): a few cents. This is your typical "summarise this document" or "rewrite this paragraph" session.</li>
+          <li><strong>Medium working session</strong> (20-30 messages, several file reads, back-and-forth iteration): tens of cents to low single-digit dollars. This is a realistic session where you are working through a task with some complexity.</li>
+          <li><strong>Long session with many tool calls</strong> (30+ messages, reading and writing across multiple files, running searches and commands): several dollars. This is a deep research or multi-file editing session.</li>
+          <li><strong>Agent delegation on a complex task</strong> (subagents reading and writing across many files, running their own tool chains): $5-20 depending on scope. This is the high end, and you will not reach it until A-08.</li>
+        </ul>
+
+        <p>The pattern is simple: more tokens in, more tokens out, more cost. You now have the mental model to predict which sessions will be cheap and which will not.</p>
+
+        <hr>
+
+        <h2>The Cost Gate</h2>
+
+        <p>From here in the course, two modules carry a cost warning before their exercises:</p>
+
+        <ul>
+          <li><strong>A-07: Tool Fluency</strong> — where you learn to guide Claude Code's tool selection. Each tool call costs tokens, and some tools are more expensive than others.</li>
+          <li><strong>A-08: Agent Delegation</strong> — where you learn to delegate tasks to subagents. Delegation multiplies cost because each subagent runs its own context window.</li>
+        </ul>
+
+        <p>These are where cost can escalate quickly. You have the mental model to use them wisely.</p>
+
+        <hr>
+
+        <h2>Next</h2>
+
+        <p>You understand what tokens are, how billing works, what makes sessions expensive, and how to set a mental budget.</p>
+
+        <p>Continue to A-02: Mental Model Refresher for Claude Code.</p>
+
+        <nav class="module-pagination">
+          <a href="/course/a/00" class="module-pagination-prev">
+            <span class="module-pagination-label">Previous</span>
+            <span class="module-pagination-title">← A-00: Getting Started with Claude Code</span>
+          </a>
+          <span class="module-pagination-spacer"></span>
+          <a href="/course/a/02" class="module-pagination-next">
+            <span class="module-pagination-label">Next</span>
+            <span class="module-pagination-title">A-02: Mental Model Refresher →</span>
+          </a>
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

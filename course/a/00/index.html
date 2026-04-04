@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started with Claude Code · Linguist</title>
+  <meta name="description" content="Install Claude Code, send your first command, and understand what makes it different from the chat interface.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body class="module-page">
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <div class="module-nav-bar">
+    <a href="/course">Course</a>
+    <span class="sep">›</span>
+    <span>Advanced Practitioner</span>
+    <span class="sep">›</span>
+    <span>A-00</span>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section class="module-hero">
+        <p class="module-eyebrow">Advanced Practitioner · Module 00</p>
+        <h1 class="module-title">Getting Started with Claude Code</h1>
+        <p class="module-objective">After this, Claude Code is installed, you have completed one session, and you understand how it differs from the AI tools you have used so far.</p>
+      </section>
+
+      <div class="module-body">
+
+        <hr>
+
+        <h2>What You Are Leaving Behind and What You Are Keeping</h2>
+
+        <p>Until now, you have been using a web or desktop tool — Claude.ai, ChatGPT, Gemini, or something similar. You type a message, the AI responds, you read the response. The conversation happens inside a browser window.</p>
+
+        <p>Claude Code is different. It runs in your terminal. You type, Claude Code reads your files, writes files, runs commands, and reports back. The conversation is the same kind of exchange. The environment is not.</p>
+
+        <p><strong>What carries forward:</strong> every principle from the Enabled User stage. Opening seeds, verb choice, constraints, context loading, re-seeding — all of it. The principles do not change. The tool does.</p>
+
+        <p><strong>What is new:</strong> Claude Code can see your file system, with your permission. It can write files, run commands, and use specialised tools. This means results are not just words in a chat window — they are actual changes to actual files on your computer.</p>
+
+        <hr>
+
+        <h2>What Claude Code Is</h2>
+
+        <p>Imagine your AI tool could open files on your computer, read them, make changes to them, and save them — while you watch and approve each step. That is Claude Code.</p>
+
+        <p>It runs in your terminal — the text-based interface where you type commands instead of clicking buttons. It asks permission before taking any action. You can approve or reject each action. You are always in control. Nothing happens to your files without your say-so.</p>
+
+        <hr>
+
+        <h2>Installation</h2>
+
+        <p>You need three things: Node.js, the Claude Code package, and an Anthropic API key.</p>
+
+        <h3>Step 1: Check for Node.js</h3>
+
+        <p>Open your terminal and type:</p>
+
+        <pre><code>node --version</code></pre>
+
+        <p>If you see a version number (something like v18.17.0 or higher), you have Node.js. Move to Step 2.</p>
+
+        <p>If you see "command not found" or an error, you need to install Node.js. Go to nodejs.org, download the LTS version, and follow the installer. Once finished, close and reopen your terminal, then try <code>node --version</code> again.</p>
+
+        <h3>Step 2: Install Claude Code</h3>
+
+        <p>In your terminal, type:</p>
+
+        <pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
+
+        <p>Wait for the installation to finish. It may take a minute.</p>
+
+        <h3>Step 3: Authenticate</h3>
+
+        <p>Type:</p>
+
+        <pre><code>claude</code></pre>
+
+        <p>The first time you run this, it will ask you to log in or provide an API key. If you need an API key, go to console.anthropic.com, create an account, and generate one. Paste it when prompted.</p>
+
+        <h3>Step 4: Verify</h3>
+
+        <p>Type:</p>
+
+        <pre><code>claude --version</code></pre>
+
+        <p>You should see a version number. Claude Code is installed.</p>
+
+        <h3>If you see an error at any step</h3>
+
+        <ul>
+          <li><strong>"permission denied" or "EACCES"</strong> — try <code>sudo npm install -g @anthropic-ai/claude-code</code> and enter your computer password when prompted. On some systems, you may need to fix your npm prefix instead — search "npm global install permission error" for your operating system.</li>
+          <li><strong>"npm: command not found"</strong> — Node.js did not install correctly. Reinstall from nodejs.org and make sure to restart your terminal afterwards.</li>
+          <li><strong>"claude: command not found" after installing</strong> — close your terminal completely and open a new one. The command sometimes does not register until you do this.</li>
+        </ul>
+
+        <hr>
+
+        <h2>Your First Session</h2>
+
+        <p>Open your terminal. Navigate to a folder that has a file you would like to work with — a text file, a document, a piece of code. Any folder with at least one file in it will do.</p>
+
+        <p>Start Claude Code by typing:</p>
+
+        <pre><code>claude</code></pre>
+
+        <p>You will see a prompt where you can type a message, just like in a chat tool. The difference is that Claude Code can see the files in your current folder.</p>
+
+        <p>Try this: ask Claude Code to summarise a file. Type a message like:</p>
+
+        <pre><code>Summarise README.md in 5 bullet points.</code></pre>
+
+        <p>Replace README.md with the name of a real file in your folder.</p>
+
+        <p>Here is what will happen:</p>
+
+        <ol>
+          <li>Claude Code will ask to read the file. You will see a description of the action it wants to take.</li>
+          <li>Type <strong>y</strong> and press Enter to approve. The file is read.</li>
+          <li>Claude Code responds with a summary.</li>
+        </ol>
+
+        <p>That is one complete interaction. You sent a message, approved a tool call, and received a response.</p>
+
+        <p>To end your session, type <strong>exit</strong> or press <strong>Ctrl+C</strong>.</p>
+
+        <h3>Copy-Personalise-Use</h3>
+
+        <p>Here is a starter message for your first Claude Code session:</p>
+
+        <pre><code>I'm a [role]. Summarise [filename] in [format]. Focus on [angle]. Keep it under [length]. Don't include [what to leave out].</code></pre>
+
+        <p><strong>How to edit this:</strong></p>
+
+        <ul>
+          <li><code>[role]</code> — what you do. Same as every opening seed you have written.</li>
+          <li><code>[filename]</code> — the name of a file in your current folder. This is the only new part. Claude Code can read it directly if you name it.</li>
+          <li><code>[format]</code> — bullet points, a paragraph, a table. Your choice.</li>
+          <li><code>[angle]</code> — what matters to you about this file. "Key decisions," "action items," "technical details."</li>
+          <li><code>[length]</code> — a word count or item count. "5 bullet points," "under 100 words."</li>
+          <li><code>[what to leave out]</code> — anything you do not need. "Background context," "introductory material," "formatting details."</li>
+        </ul>
+
+        <p>This is the same opening seed from the Enabled User stage. The only change is <code>[filename]</code> — Claude Code can see your files if you name them.</p>
+
+        <hr>
+
+        <h2>The Permission Model</h2>
+
+        <p>Claude Code will always ask before reading a file, writing a file, or running a command. You approve or reject each action. This is your control layer.</p>
+
+        <p>Never approve an action you do not understand. If you are not sure what an action will do, type <strong>n</strong> to reject it and ask Claude Code to explain what it was going to do and why.</p>
+
+        <hr>
+
+        <h2>Cost Preview</h2>
+
+        <p>Claude Code uses the Anthropic API. Every message, every tool call, every file read costs tokens. Tokens cost money. The next module — A-01 — covers this in full. Before you go further, know this: Claude Code is not free. You are billed for usage through your Anthropic account. Set a budget for yourself before your next session.</p>
+
+        <hr>
+
+        <h2>Next</h2>
+
+        <p>You have Claude Code installed and working. You have completed one session. You know how to approve and reject tool calls.</p>
+
+        <p>The next step is understanding what things cost, so you can use Claude Code with intention, not surprises. Continue to A-01: Cost, Tokens, and What Things Actually Cost.</p>
+
+        <nav class="module-pagination">
+          <a href="/course/e/07" class="module-pagination-prev">
+            <span class="module-pagination-label">Previous</span>
+            <span class="module-pagination-title">← E-07: Your Reference Card</span>
+          </a>
+          <span class="module-pagination-spacer"></span>
+          <a href="/course/a/01" class="module-pagination-next">
+            <span class="module-pagination-label">Next</span>
+            <span class="module-pagination-title">A-01: Cost, Tokens, and What Things Actually Cost →</span>
+          </a>
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
