@@ -43,7 +43,7 @@ One sentence about what you are working on right now. Keep it short.
 - Examples: "planning a team meeting for next Monday", "writing a reply to a client who asked for a refund"
 
 **[verb: summarise / explain / draft / list]**
-Pick the one closest to what you need. You do not have to use one from the list -- any clear action word works.
+Pick the one closest to what you need. Stick to these four for now — they have a clear ceiling and will do only what you asked. You will learn the full set of safe verbs in B-05.
 - "summarise" means: make this shorter
 - "explain" means: help me understand this
 - "draft" means: write a first version of this

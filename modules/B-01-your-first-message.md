@@ -34,7 +34,7 @@ Go to gemini.google.com and sign in with your Google account. You will see a tex
 
 ### Tines
 
-Open your Tines workspace and go to the AI chat feature. Type or paste your message in the text area at the bottom of the chat panel. Press **Enter** or click the send button. The response appears in the same panel. To start fresh, open a new chat session from the panel menu.
+_Platform orientation for Tines will be added once updated UI details are confirmed. If you are using Tines, check with your workspace administrator for how to access the AI chat feature._
 
 ### Claude Code
 
