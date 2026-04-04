@@ -32,7 +32,9 @@ This is a reference module. Read only the section for the platform you are using
 
 **Where your past conversations are:** The left sidebar lists your conversation history. Click any item to reopen it.
 
-**How to start a new conversation:** Click **New chat** at the top of the left sidebar.
+**Which model to use:** You may see a model name or dropdown near the top of the screen. If you are on the free plan, it will be set to the right model automatically. Leave it as-is — you do not need to change it for any exercise in this course.
+
+**How to start a new conversation:** Click **New chat** at the top of the left sidebar. The new conversation is a blank slate — the AI has no memory of anything from previous conversations.
 
 **Where Custom Instructions live:** Click your account name or icon in the bottom-left corner, then select **Personalise** or **Custom instructions** from the menu. This is where you can add standing instructions that apply to every conversation. B-09 walks you through setting these up.
 
@@ -46,9 +48,13 @@ This is a reference module. Read only the section for the platform you are using
 
 **Where your past conversations are:** The left sidebar shows your recent conversations. Click any item to reopen it.
 
+**Which option to use:** You may see options labelled something like Fast, Thinking, or Pro near the text area. For everyday tasks and all the exercises in this course, any of these will work. If you are unsure, leave it on the default.
+
 **How to start a new conversation:** Click **New chat** in the left sidebar, or use the **+** button if one is visible.
 
 **Where Gems live:** Gems are saved AI personas with custom instructions. Find them in the left sidebar under **Gems**, or access them via the Explore Gems option. B-09 covers how to use these for standing instructions.
+
+**Data and privacy:** On Gemini's free plan, Google may use your conversations to improve its products. If you are working with sensitive or confidential material, keep this in mind before pasting it in. Paid plans offer stronger data privacy.
 
 **Where settings are:** Click the menu icon (three horizontal lines) or your Google account icon in the top-right corner to reach settings.
 

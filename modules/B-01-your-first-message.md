@@ -42,6 +42,12 @@ Claude Code is a command-line tool for developers. If you are using Claude Code,
 
 ---
 
+## Before you type
+
+Before you paste work documents or other sensitive content into any AI tool, check the platform's data policy. On some free plans, the AI company may use your conversations to improve the product — paid plans typically do not. If you are using a tool provided by your employer, ask your IT team what applies. For this exercise, you are typing one test sentence, so there is nothing sensitive at stake. But it is a good habit to know the policy before you share anything that matters.
+
+---
+
 ## The exercise
 
 This takes under three minutes. Two steps. The first is required. The second is optional.
@@ -72,7 +78,17 @@ This is a pattern you will use throughout the course: start with a message someo
 
 ## If your response looks different from what you expected
 
-That is normal. Every conversation with an AI is slightly different, even when you send the same message twice. The wording, the length, and the level of detail will vary. If the response was clearly about the right topic, it worked. If it seemed completely unrelated to what you asked, start a new conversation and try sending the same message again.
+That is normal. Every conversation with an AI is slightly different, even when you send the same message twice. The wording, the length, and the level of detail will vary. If the response was clearly about the right topic, it worked. If it seemed completely unrelated to what you asked, start a new conversation and try sending the same message again. Starting a new conversation is instant and free — the AI has no memory of previous conversations, so there is nothing to lose.
+
+---
+
+## If it asks you to upgrade
+
+Free accounts have a message limit. If you see a prompt asking you to subscribe or upgrade, you have not done anything wrong — you have used your free allowance. It resets, usually within a few hours. Come back and continue then, or try a different platform in the meantime.
+
+- **Claude.ai** — a usage note appears when you are near the limit. The limit resets daily.
+- **ChatGPT** — a rolling message limit applies on the free plan. An upgrade prompt appears when it is reached.
+- **Gemini** — free accounts may switch to a lighter model when daily limits are reached. This is automatic and usually does not affect everyday tasks.
 
 ---
 

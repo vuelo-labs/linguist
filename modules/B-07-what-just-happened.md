@@ -18,13 +18,15 @@ Many people assume the AI's first response is the final answer. It is not. It is
 
 Reading the response before reacting — really reading it — is what separates a useful AI interaction from a frustrating one. If you ask for changes without reading carefully, you might ask for the wrong fix. If you start over without reading carefully, you might abandon something that was actually mostly good.
 
-There are three signals that the AI may have misunderstood:
+There are four signals that the AI may have misunderstood or reached its limits:
 
 1. **Generic language where you needed specifics.** If you asked about your team's meeting agenda and the response sounds like it could apply to any team meeting in any company, the AI did not have enough to work with.
 
 2. **Wrong framing.** If you asked for a casual message to a friend and got a formal letter, the AI misread the tone signal. If you asked for a summary and got an essay, the stopping condition did not register.
 
 3. **Made-up details.** If the response includes names, dates, figures, or facts that you did not provide and that the AI could not know, treat those with caution. This is the AI filling in gaps you left open. It is not lying — it is guessing. Check anything that matters.
+
+4. **Outdated information.** AI tools are trained on data up to a certain date. If the response gives you information about something that changes frequently — laws, prices, current events, recent news — it may be out of date. Check any time-sensitive facts from a current source before acting on them.
 
 ---
 
