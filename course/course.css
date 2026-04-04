@@ -177,7 +177,7 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
 
 /* ---- Module hero / intro ---- */
 .module-hero {
-  padding: var(--space-2xl) 0 var(--space-xl);
+  padding: var(--space-xl) 0 var(--space-lg);
   border-bottom: 1px solid var(--w-border);
 }
 
@@ -213,7 +213,7 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
 
 /* ---- Module body prose ---- */
 .module-body {
-  padding-top: var(--space-xl);
+  padding-top: var(--space-lg);
 }
 
 .module-body h2 {
@@ -221,7 +221,7 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 500;
   color: var(--w-text);
-  margin-top: var(--space-2xl);
+  margin-top: 2.5rem;
   margin-bottom: var(--space-md);
   line-height: 1.3;
 }
