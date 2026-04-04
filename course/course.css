@@ -483,34 +483,88 @@
 /* ---- Collapsible stage sections ---- */
 .stage-details {
   width: 100%;
+  border: 1px solid var(--w-border);
+  border-radius: 6px;
+  margin-bottom: 1.25rem;
+  background: var(--w-bg-card);
 }
 
 .stage-summary {
   list-style: none;
   cursor: pointer;
-  padding-bottom: var(--space-md);
-  position: relative;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  user-select: none;
+  border-radius: 6px;
+  transition: background 0.15s;
 }
 
+.stage-summary:hover { background: var(--w-accent-light); }
+.stage-details[open] > .stage-summary { border-bottom: 1px solid var(--w-border); border-radius: 6px 6px 0 0; }
 .stage-summary::-webkit-details-marker { display: none; }
 
-.stage-summary::after {
-  content: '↓';
-  position: absolute;
-  right: 0;
-  top: 0.25rem;
+.stage-summary-text {
+  flex: 1;
+}
+
+.stage-summary-text .stage-label {
+  margin-bottom: 0.15rem;
+}
+
+.stage-summary-text h2 {
+  margin: 0;
+}
+
+.stage-summary-text .stage-intro {
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--w-muted);
+}
+
+.stage-toggle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: var(--sans);
-  font-size: 0.85rem;
-  color: var(--w-faint);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--w-accent);
+  border: 1px solid var(--w-border);
+  background: var(--w-bg);
+  padding: 0.35rem 0.85rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.stage-summary:hover .stage-toggle {
+  border-color: var(--w-accent);
+  background: var(--w-accent-light);
+}
+
+.stage-toggle-arrow {
+  display: inline-block;
   transition: transform 0.2s ease;
 }
 
-.stage-details[open] > .stage-summary::after {
+.stage-details[open] .stage-toggle-arrow {
   transform: rotate(180deg);
 }
 
-.stage-summary:hover .stage-summary::after {
-  color: var(--w-muted);
+.stage-details[open] .stage-toggle-label::before { content: 'Collapse'; }
+.stage-toggle-label::before { content: 'Expand'; }
+
+.stage-details > .module-list,
+.stage-details > .callout-note {
+  padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.stage-details > .module-list:last-child,
+.stage-details > .callout-note + .module-list {
+  padding-bottom: 1rem;
 }
 
 .module-count {
