@@ -73,7 +73,7 @@ If nothing comes to mind, use the same piece of work from Part 1 and try two mor
 
 The full verb reference for this course is at:
 
-`/reference/verb-taxonomy.md`
+`/course/reference/verbs`
 
 Keep it. You will use it in every module from here.
 
