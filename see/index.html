@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>See the difference — Linguist</title>
+  <meta name="description" content="Two modes. One skill you'll never un-learn.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* =============================================
+       LINGUIST EXPERIENCE — Styles
+       ============================================= */
+
+    :root {
+      /* Warm */
+      --w-bg:           #FAF8F4;
+      --w-bg-card:      #F2EDE6;
+      --w-bg-input:     #FDFBF8;
+      --w-border:       #E5DFD6;
+      --w-border-focus: #8C7355;
+      --w-text:         #2A2420;
+      --w-muted:        #7A6E68;
+      --w-faint:        #B0A89E;
+      --w-accent:       #8C7355;
+      --w-accent-soft:  #A08870;
+      --w-accent-light: #F5EFE6;
+      /* Cool */
+      --c-bg:           #F0F4F8;
+      --c-bg-card:      #FFFFFF;
+      --c-border:       #D8E2ED;
+      --c-text:         #263340;
+      --c-muted:        #5F7485;
+      --c-faint:        #9EB0C0;
+      --c-accent:       #4A7FA5;
+      --c-accent-soft:  #6B9BBF;
+      --c-accent-light: #E5EFF7;
+      /* Type */
+      --serif:  'Newsreader', Georgia, serif;
+      --mono:   'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+      --sans:   'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 17px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--serif);
+      background: var(--w-bg);
+      color: var(--w-text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ---- Nav ---- */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2rem;
+      border-bottom: 1px solid var(--w-border);
+      background: var(--w-bg);
+      z-index: 10;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .nav-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      margin-left: auto;
+    }
+
+    .nav-link {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--w-faint);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-link:hover { color: var(--w-muted); }
+
+    .nav-steps {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      list-style: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-steps li {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      color: var(--w-faint);
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .nav-steps li.active { color: var(--w-text); font-weight: 600; }
+    .nav-steps li.done   { color: var(--w-muted); }
+
+    /* Step mode icons */
+    .step-icon {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      flex-shrink: 0;
+      opacity: 0.3;
+    }
+
+    .step-icon--warm {
+      background: var(--w-accent);
+      border-radius: 50%;
+    }
+
+    .step-icon--both {
+      background: linear-gradient(to right, var(--w-accent) 50%, var(--c-accent) 50%);
+      border-radius: 50%;
+    }
+
+    .nav-steps li.active .step-icon { opacity: 1; }
+    .nav-steps li.done   .step-icon { opacity: 0.55; }
+
+    /* ---- Screen wrapper fills space below nav ---- */
+    #screen-wrapper {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ---- Screens ---- */
+    .screen {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      overflow-y: auto;
+      display: none;
+      background: var(--w-bg);
+    }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ---- Shared ---- */
+    .screen-inner {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .screen-inner--narrow {
+      max-width: 700px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.75rem;
+      border: none;
+      border-radius: 3px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, opacity 0.15s;
+      font-family: var(--sans);
+    }
+    .btn-warm { background: var(--w-accent); color: #fff; }
+    .btn-warm:hover { background: var(--w-accent-soft); }
+    .btn-ghost { background: transparent; border: 1px solid var(--w-border); color: var(--w-muted); }
+    .btn-ghost:hover { border-color: var(--w-accent); color: var(--w-accent); }
+
+    /* =============================================
+       SCREEN 0 — INTRO
+       ============================================= */
+    #screen-intro {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    #screen-intro h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: normal;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    #screen-intro p {
+      color: var(--w-muted);
+      font-size: 1.1rem;
+      margin: 0 auto 2.5rem;
+      max-width: 42ch;
+    }
+
+    /* =============================================
+       SCREEN 1 — SEE
+       ============================================= */
+    #screen-see {
+      padding: 1.75rem 0;
+    }
+
+    .see-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .see-header .beat-label {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .see-header h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: normal;
+      margin-bottom: 0.75rem;
+    }
+
+    .see-header p {
+      color: var(--w-muted);
+      font-size: 1rem;
+      margin: 0 auto;
+      max-width: 50ch;
+    }
+
+    /* Two-panel layout */
+    .see-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--w-border);
+      border-radius: 4px;
+      overflow: hidden;
+      max-width: 900px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .see-panel {
+      padding: 1.5rem;
+    }
+
+    .see-panel--warm {
+      background: var(--w-bg-card);
+      border-right: 1px solid var(--w-border);
+    }
+
+    .see-panel--cool {
+      background: var(--c-bg);
+    }
+
+    .panel-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .panel-label--warm { color: var(--w-accent); }
+    .panel-label--cool { color: var(--c-accent); font-family: var(--mono); }
+
+    .panel-label .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-warm { background: var(--w-accent); }
+    .dot-cool { background: var(--c-accent); }
+
+    /* The messages */
+    .panel-message {
+      border-radius: 3px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .panel-message--warm {
+      background: var(--w-bg-input);
+      border: 1px solid var(--w-border);
+      font-family: var(--serif);
+      color: var(--w-text);
+    }
+
+    .panel-message--cool {
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--c-text);
+      line-height: 1.9;
+    }
+
+    .panel-caption {
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .panel-caption--warm { color: var(--w-muted); }
+    .panel-caption--cool { color: var(--c-muted); font-family: var(--mono); font-style: normal; font-size: 0.75rem; }
+
+    /* Sine / flat divider in panels */
+    .panel-wave {
+      margin: 1rem 0 0.5rem;
+      height: 24px;
+      overflow: hidden;
+    }
+
+    .panel-wave svg { width: 100%; height: 100%; }
+
+    /* Framing text */
+    .see-framing {
+      text-align: center;
+      max-width: 54ch;
+      margin: 0 auto 1.25rem;
+    }
+
+    .see-framing p {
+      font-size: 1.05rem;
+      color: var(--w-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .see-framing strong {
+      color: var(--w-text);
+    }
+
+    .see-nav {
+      text-align: center;
+    }
+
+    /* =============================================
+       SCREEN 2 — RECOGNISE
+       ============================================= */
+    #screen-try {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quiz-inner {
+      max-width: 520px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .try-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .try-header h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: normal;
+      color: var(--w-text);
+      margin-bottom: 0.5rem;
+    }
+
+    .try-header p {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-muted);
+    }
+
+    .quiz-progress {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .quiz-passage {
+      border-radius: 4px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      min-height: 100px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .quiz-passage.passage-warm {
+      font-family: var(--serif);
+      color: var(--w-text);
+      background: var(--w-bg-card);
+      border: 1px solid var(--w-border);
+    }
+
+    .quiz-passage.passage-cool {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--c-text);
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      white-space: pre-wrap;
+    }
+
+    .quiz-passage.passage-neutral {
+      font-family: var(--sans);
+      color: var(--w-muted);
+      background: var(--w-bg);
+      border: 1px solid var(--w-border);
+    }
+
+    .quiz-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .quiz-choice {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      padding: 0.65rem 1.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid;
+      background: transparent;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .quiz-choice--warm { border-color: var(--w-accent); color: var(--w-accent); }
+    .quiz-choice--warm:hover:not(:disabled) { background: var(--w-accent-light); }
+
+    .quiz-choice--cool { border-color: var(--c-accent); color: var(--c-accent); font-family: var(--mono); }
+    .quiz-choice--cool:hover:not(:disabled) { background: var(--c-accent-light); }
+
+    .quiz-choice:disabled { opacity: 0.45; cursor: default; }
+
+    .quiz-feedback {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      padding: 0.75rem 1.1rem;
+      border-radius: 3px;
+      margin-bottom: 1.25rem;
+      display: none;
+      line-height: 1.55;
+    }
+
+    .quiz-feedback.correct { background: #EDF5ED; border: 1px solid #B8D8B8; color: #3A6B3A; }
+    .quiz-feedback.wrong   { background: #FDF3F0; border: 1px solid #E8C4B8; color: #7A3A2A; }
+
+    .quiz-next { text-align: center; display: none; }
+
+    /* =============================================
+       SCREEN 3 — KNOW
+       ============================================= */
+    #screen-know {
+      padding: 3.5rem 0 4rem;
+    }
+
+    .know-inner {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Split panel */
+    .know-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 260px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 3rem;
+    }
+
+    .know-half {
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .know-half--warm {
+      background: var(--w-bg-card);
+      border: 1px solid var(--w-border);
+      border-right: none;
+    }
+
+    .know-half--cool {
+      background: var(--c-bg);
+      border: 1px solid var(--c-border);
+    }
+
+    .know-half-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .know-half-label--warm { color: var(--w-accent); }
+    .know-half-label--cool { color: var(--c-accent); font-family: var(--mono); }
+
+    .know-half-content {
+      font-size: 1rem;
+      line-height: 1.65;
+      flex-grow: 1;
+      margin-bottom: 1rem;
+    }
+
+    .know-half--warm .know-half-content { font-family: var(--serif); color: var(--w-text); }
+    .know-half--cool .know-half-content { font-family: var(--mono); font-size: 0.85rem; color: var(--c-text); }
+
+    .know-wave {
+      height: 20px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .know-wave svg { width: 100%; height: 100%; }
+
+    .know-flatline {
+      height: 20px;
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .know-flatline svg { width: 100%; }
+
+    /* Closing text */
+    .know-close {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .know-close h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+      font-weight: normal;
+      line-height: 1.35;
+      margin-bottom: 1.5rem;
+      color: var(--w-text);
+    }
+
+    .know-close .go-human {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-family: var(--serif);
+      color: var(--w-accent);
+      display: block;
+      margin-top: 1.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .go-human-btn {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-family: var(--serif);
+      color: var(--w-accent);
+      display: block;
+      margin-top: 1.5rem;
+      letter-spacing: -0.01em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-align: center;
+      width: 100%;
+    }
+
+    .go-human-btn:hover { opacity: 0.75; }
+
+    .know-permission {
+      max-width: 44ch;
+      margin: 0 auto 2rem;
+      color: var(--w-muted);
+      font-size: 1rem;
+    }
+
+    .know-pdf-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .know-pdf-row input[type="email"] {
+      flex: 1;
+      min-width: 0;
+      padding: 0.55rem 0.85rem;
+      border: 1px solid var(--w-border);
+      border-radius: 3px;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      background: var(--w-bg-input);
+      color: var(--w-text);
+      outline: none;
+    }
+
+    .know-pdf-row input[type="email"]:focus {
+      border-color: var(--w-border-focus);
+    }
+
+    .know-pdf-success {
+      display: none;
+      font-family: var(--serif);
+      font-size: 0.95rem;
+      color: var(--w-accent);
+      font-style: italic;
+    }
+
+    /* =============================================
+       SCREEN 4 — DONE
+       ============================================= */
+    #screen-done {
+      background: var(--w-bg);
+      padding: 3.5rem 0 4rem;
+    }
+
+    .done-inner {
+      max-width: 520px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 2rem;
+      text-align: center;
+    }
+
+    .done-heading {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: normal;
+      color: var(--w-text);
+      line-height: 1.2;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Pause block */
+    .done-pause {
+      margin-bottom: 1.5rem;
+    }
+
+    .done-pause-machine {
+      font-family: var(--serif);
+      font-size: 1rem;
+      color: var(--w-text);
+      margin-bottom: 0.85rem;
+    }
+
+    .done-pause-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 auto;
+      display: inline-block;
+      text-align: left;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-muted);
+      line-height: 2;
+    }
+
+    .done-pause-list li::before {
+      content: '—';
+      margin-right: 0.6rem;
+      color: var(--w-faint);
+    }
+
+    .done-go-human {
+      display: block;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-family: var(--serif);
+      color: var(--w-accent);
+      text-decoration: none;
+      font-weight: normal;
+      letter-spacing: -0.01em;
+      margin-top: 1.25rem;
+      transition: opacity 0.15s;
+    }
+    .done-go-human:hover { opacity: 0.75; }
+
+    /* Share block */
+    .done-share {
+      border-top: 1px solid var(--w-border);
+      padding-top: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .done-share-row {
+      display: flex;
+      border: 1px solid var(--w-border);
+      border-radius: 3px 3px 0 0;
+      overflow: hidden;
+    }
+
+    .done-share-row .share-btn {
+      flex: 1;
+      border: none;
+      border-right: 1px solid var(--w-border);
+      border-radius: 0;
+      padding: 0.6rem 0.4rem;
+      font-size: 0.75rem;
+      margin: 0;
+      background: var(--w-bg-card);
+      white-space: nowrap;
+    }
+
+    .done-share-row .share-btn:last-child { border-right: none; }
+
+    .done-support-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: var(--w-accent);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.65rem;
+      border-radius: 0 0 3px 3px;
+      border: 1px solid var(--w-accent);
+      border-top: none;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .done-support-btn:hover { background: var(--w-accent-soft); }
+
+    /* PDF callout */
+    .done-pdf {
+      border-top: 1px solid var(--w-border);
+      padding-top: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .done-pdf-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 0.4rem;
+    }
+
+    .done-pdf-headline {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      color: var(--w-text);
+      margin-bottom: 1.2rem;
+    }
+
+    .done-pdf-or {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-muted);
+      margin-top: 0.75rem;
+      line-height: 1.6;
+    }
+
+    .done-pdf-or a {
+      color: var(--w-accent);
+      text-decoration: none;
+    }
+
+    .done-pdf-or a:hover { text-decoration: underline; }
+
+    .done-pdf-or span {
+      color: var(--w-faint);
+    }
+
+    /* Read-more links */
+    .done-more {
+      border-top: 1px solid var(--w-border);
+      padding-top: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .done-more-label {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .done-links {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 0.75rem 1.5rem;
+    }
+
+    .done-links a {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      color: var(--w-accent);
+      text-decoration: none;
+      border: 1px solid var(--w-border);
+      border-radius: 3px;
+      padding: 0.5rem 1rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .done-links a:hover { background: var(--w-accent-light); border-color: var(--w-accent); }
+
+    /* =============================================
+       RESPONSIVE
+       ============================================= */
+    @media (max-width: 700px) {
+      .see-panels,
+      .know-split {
+        grid-template-columns: 1fr;
+      }
+
+      .see-panel--warm { border-right: none; border-bottom: 1px solid var(--w-border); }
+      .know-half--warm { border-right: none; border-bottom: 1px solid var(--w-border); }
+
+      .nav-steps { display: none; }
+
+      .screen-inner { padding: 0 1rem; }
+
+      #screen-see, #screen-try { padding: 2rem 0; }
+
+      .done-share-row { flex-wrap: wrap; }
+
+      .nav-links { display: none; }
+    }
+
+    /* ---- Fade transition ---- */
+    .screen.active { animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <!-- ---- Nav ---- -->
+  <nav class="nav">
+    <a href="/" class="nav-logo">Linguist</a>
+    <ol class="nav-steps" id="nav-steps">
+      <li id="step-intro" class="active"><span class="step-icon step-icon--warm"></span>Start</li>
+      <li id="step-see"><span class="step-icon step-icon--both"></span>See</li>
+      <li id="step-try"><span class="step-icon step-icon--both"></span>Try</li>
+      <li id="step-know"><span class="step-icon step-icon--warm"></span>Know</li>
+      <li id="step-done"><span class="step-icon step-icon--warm"></span>Pause</li>
+    </ol>
+    <div class="nav-links">
+      <a href="/manifesto" class="nav-link">Full manifesto →</a>
+      <a href="/guide" class="nav-link">Practical guide →</a>
+    </div>
+  </nav>
+
+  <div id="screen-wrapper">
+
+  <!-- ===================================================
+       SCREEN 0 — INTRO
+       =================================================== -->
+  <section class="screen active" id="screen-intro" role="main">
+    <div>
+      <h1>Two modes.<br>One skill.</h1>
+      <p>You've been talking to machines like they're people. Here's what that's costing you — and the only thing you need to do differently.</p>
+      <button class="btn btn-warm" onclick="goTo('see')">Begin</button>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       SCREEN 1 — SEE
+       =================================================== -->
+  <section class="screen" id="screen-see">
+    <div class="screen-inner">
+
+      <div class="see-header">
+        <p class="beat-label">Step 1 of 3 — See</p>
+        <h2>Two absurdities.<br>You'll recognise both.</h2>
+        <p>One happens constantly with machines. One happens when the machine shows up in your human conversations.</p>
+      </div>
+
+      <div class="see-panels">
+
+        <!-- Warm panel: human talking to machine -->
+        <div class="see-panel see-panel--warm">
+          <div class="panel-label panel-label--warm">
+            <span class="dot dot-warm"></span>
+            Human mode — talking to a machine
+          </div>
+
+          <div class="panel-message panel-message--warm">
+            "Hey! Hope you're having a good day ☺ I was just wondering — and sorry if this is a dumb question — but do you think you could maybe take a look at this data when you get a chance? Absolutely no rush at all, only if you have time! Thank you so much, you're amazing! 🙏"
+          </div>
+
+          <div class="panel-wave" aria-hidden="true">
+            <svg viewBox="0 0 300 24" preserveAspectRatio="none" fill="none">
+              <path d="M0,12 C25,0 50,24 75,12 C100,0 125,24 150,12 C175,0 200,24 225,12 C250,0 275,24 300,12"
+                    stroke="#8C7355" stroke-width="1.5" opacity="0.35"/>
+            </svg>
+          </div>
+
+          <p class="panel-caption panel-caption--warm">The greeting. The apology. The hedge. The permission. A complete social performance — for something that was just waiting for the question.</p>
+        </div>
+
+        <!-- Cool panel: human talking to human like a machine -->
+        <div class="see-panel see-panel--cool">
+          <div class="panel-label panel-label--cool">
+            <span class="dot dot-cool"></span>
+            machine mode — talking to a human
+          </div>
+
+          <div class="panel-message panel-message--cool">
+            Request: lift to airport.<br>
+            Departure: 02:00.<br>
+            Origin: home.<br>
+            Query: available?<br>
+            Expected output: yes/no.<br>
+            Deadline: immediate.
+          </div>
+
+          <div class="panel-wave" aria-hidden="true">
+            <svg viewBox="0 0 300 24" preserveAspectRatio="none" fill="none">
+              <line x1="0" y1="12" x2="300" y2="12" stroke="#4A7FA5" stroke-width="1.5" opacity="0.35"/>
+            </svg>
+          </div>
+
+          <p class="panel-caption panel-caption--cool">// your friend is not a REST API</p>
+        </div>
+
+      </div>
+
+      <div class="see-framing">
+        <p><strong>Both are wrong. Both happen constantly.</strong></p>
+        <p>The skill is just knowing which one you're in.</p>
+      </div>
+
+      <div class="see-nav">
+        <button class="btn btn-warm" onclick="goTo('try')">I see it — now let me try it</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================================================
+       SCREEN 2 — RECOGNISE
+       =================================================== -->
+  <section class="screen" id="screen-try">
+    <div class="quiz-inner">
+
+      <div class="try-header">
+        <h2>Human mode or machine mode?</h2>
+        <p>Read each one. Trust your gut.</p>
+      </div>
+
+      <p class="quiz-progress" id="quiz-progress">1 of 4</p>
+
+      <div class="quiz-passage passage-neutral" id="quiz-passage"></div>
+
+      <div class="quiz-buttons">
+        <button class="quiz-choice quiz-choice--warm" id="btn-warm" onclick="quizAnswer('warm')">Human mode</button>
+        <button class="quiz-choice quiz-choice--cool" id="btn-cool" onclick="quizAnswer('cool')">machine mode</button>
+      </div>
+
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+
+      <div class="quiz-next" id="quiz-next">
+        <button class="btn btn-warm" id="quiz-next-btn">Next →</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================================================
+       SCREEN 3 — KNOW
+       =================================================== -->
+  <section class="screen" id="screen-know">
+    <div class="know-inner">
+
+      <!-- Split panel: same moment, two languages -->
+      <div class="know-split">
+        <div class="know-half know-half--warm">
+          <div>
+            <p class="know-half-label know-half-label--warm">Human mode</p>
+            <p class="know-half-content">Laughing with a colleague. Circling around an idea. Letting the conversation go somewhere unexpected. Taking the long way because the long way matters.</p>
+          </div>
+          <div class="know-wave" aria-hidden="true">
+            <svg viewBox="0 0 300 20" preserveAspectRatio="none" fill="none">
+              <path d="M0,10 C37,0 62,20 100,10 C137,0 162,20 200,10 C237,0 262,20 300,10"
+                    stroke="#8C7355" stroke-width="1.5" opacity="0.4"/>
+            </svg>
+          </div>
+        </div>
+        <div class="know-half know-half--cool">
+          <div>
+            <p class="know-half-label know-half-label--cool">machine mode</p>
+            <p class="know-half-content">task: summarise Q3 data<br>format: table<br>metrics: revenue, growth<br>length: &lt;100 words<br>deadline: eod</p>
+          </div>
+          <div class="know-flatline" aria-hidden="true">
+            <svg viewBox="0 0 300 4" preserveAspectRatio="none">
+              <line x1="0" y1="2" x2="300" y2="2" stroke="#4A7FA5" stroke-width="1.5" opacity="0.4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Closing text -->
+      <div class="know-close">
+        <h2>You can now recognise which mode you're in.<br>That is the only skill.</h2>
+        <p class="know-permission">The machine will wait. It does not mind. It will always want more instructions. But it can wait.</p>
+        <button class="go-human-btn" onclick="goTo('done')">Before you go →</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================================================
+       SCREEN 4 — DONE
+       =================================================== -->
+  <section class="screen" id="screen-done">
+    <div class="done-inner">
+
+      <h2 class="done-heading">That's it.</h2>
+
+      <!-- Pause -->
+      <div class="done-pause">
+        <p class="done-pause-machine">The machine will wait. Go be somewhere else.</p>
+        <ul class="done-pause-list">
+          <li>Go walk.</li>
+          <li>Go eat.</li>
+          <li>Go talk to someone.</li>
+          <li>Go be done for the day.</li>
+        </ul>
+        <a href="/course" class="done-go-human">Start the course →</a>
+      </div>
+
+      <!-- Read more -->
+      <div class="done-more">
+        <p class="done-more-label">Or learn more</p>
+        <div class="done-links">
+          <a href="/guide">Guide →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  </div><!-- /#screen-wrapper -->
+
+  <script>
+    // =============================================
+    // State
+    // =============================================
+    const screens = ['intro', 'see', 'try', 'know', 'done'];
+    let currentScreen = 'intro';
+
+    // =============================================
+    // Navigation
+    // =============================================
+    function goTo(screen) {
+      const prev = document.getElementById('screen-' + currentScreen);
+      const next = document.getElementById('screen-' + screen);
+      if (!next) return;
+
+      prev.classList.remove('active');
+      next.classList.add('active');
+      currentScreen = screen;
+
+      // Update nav steps
+      screens.forEach((s, i) => {
+        const el = document.getElementById('step-' + s);
+        if (!el) return;
+        el.classList.remove('active', 'done');
+        const currentIdx = screens.indexOf(screen);
+        if (i < currentIdx) el.classList.add('done');
+        else if (i === currentIdx) el.classList.add('active');
+      });
+
+      next.scrollTo({ top: 0, behavior: 'instant' });
+
+      // Analytics — fire and forget, never block navigation
+      try { trackEvent('screen_' + screen); } catch (e) {}
+    }
+
+    // =============================================
+    // Beat 2 — Recognition quiz
+    // =============================================
+    const quizItems = [
+      {
+        text: "I'm not sure this is the right direction — can we pause and think it through together?",
+        mode: 'warm',
+        note: "Uncertain, relational, open-ended. This is warm — it needs a human to receive it."
+      },
+      {
+        text: "objective: draft project update\nformat: bullet points\naudience: exec team\nlength: under 80 words",
+        mode: 'cool',
+        note: "Structured, specific, no ambiguity. The machine knows exactly what to produce."
+      },
+      {
+        text: "She seemed off in that meeting. I want to check in before it becomes a thing.",
+        mode: 'warm',
+        note: "Emotional, contextual, human judgment. Not for the machine — for a person."
+      },
+      {
+        text: "context: billing error, customer upset\ntask: write apology email\ntone: professional, empathetic\nconstraint: propose solution, no excuses",
+        mode: 'cool',
+        note: "Clear task with constraints. machine mode — the machine can act on this directly."
+      },
+      {
+        text: "Can you just write me something quick — like a short paragraph — that explains why the project is behind? Keep it simple, nothing fancy.",
+        mode: 'cool',
+        note: "Sounds casual, but it's a machine mode instruction: clear task, defined format, implied constraints. The conversational wrapper doesn't change what it is."
+      }
+    ];
+
+    let quizIndex = 0;
+
+    function renderQuiz() {
+      const item = quizItems[quizIndex];
+      const passage = document.getElementById('quiz-passage');
+      passage.textContent = item.text;
+      passage.className = 'quiz-passage passage-neutral';
+      document.getElementById('quiz-progress').textContent = `${quizIndex + 1} of ${quizItems.length}`;
+      document.getElementById('quiz-feedback').style.display = 'none';
+      document.getElementById('quiz-next').style.display = 'none';
+      document.getElementById('btn-warm').disabled = false;
+      document.getElementById('btn-cool').disabled = false;
+    }
+
+    function quizAnswer(choice) {
+      const item = quizItems[quizIndex];
+      const correct = choice === item.mode;
+
+      document.getElementById('btn-warm').disabled = true;
+      document.getElementById('btn-cool').disabled = true;
+      document.getElementById('quiz-passage').className = 'quiz-passage passage-' + item.mode;
+
+      const fb = document.getElementById('quiz-feedback');
+      fb.className = 'quiz-feedback ' + (correct ? 'correct' : 'wrong');
+      fb.textContent = (correct ? '✓ ' : '✗ ') + item.note;
+      fb.style.display = 'block';
+
+      const isLast = quizIndex === quizItems.length - 1;
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.textContent = isLast ? "That's the skill →" : "Next →";
+      nextBtn.onclick = isLast ? () => goTo('know') : quizNext;
+      document.getElementById('quiz-next').style.display = 'block';
+    }
+
+    function quizNext() {
+      quizIndex++;
+      renderQuiz();
+    }
+
+    // Initialise quiz on load
+    renderQuiz();
+
+    // =============================================
+    // Share
+    // =============================================
+    const shareUrl = 'https://linguist.vuelolabs.com/see';
+    const shareText = 'Two modes. One skill. Worth 5 minutes.';
+
+    function shareTwitter() {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+    }
+
+    function shareLinkedIn() {
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
+    }
+
+    function copyLink(btn) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      });
+    }
+
+    // =============================================
+    // Analytics — experience event tracking
+    // =============================================
+    const SUPABASE_URL      = 'https://odnzrykfmfgdfybnmcfd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kbnpyeWtmbWZnZGZ5Ym5tY2ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDUyNDQsImV4cCI6MjA4ODk4MTI0NH0.c17-eCaIsnBAD1csQBxqYpwe-u0fd2KaJtVuWH6AR1Y';
+
+    let _db = null;
+    function db() {
+      if (!_db) { _db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+      return _db;
+    }
+
+    function sessionId() {
+      let id = sessionStorage.getItem('lng_sid');
+      if (!id) { id = crypto.randomUUID(); sessionStorage.setItem('lng_sid', id); }
+      return id;
+    }
+
+    async function trackEvent(event) {
+      const client = db();
+      if (!client) return;
+      await client.from('experience_events').insert({ session_id: sessionId(), event });
+    }
+
+    // Fire start event after Supabase CDN has loaded
+    window.addEventListener('load', () => {
+      try { trackEvent('experience_start'); } catch (e) {}
+    });
+
+    // =============================================
+    // PDF signup — via subscribe Netlify Function
+    // =============================================
+    async function submitPdf(btn) {
+      const emailRaw = document.getElementById('pdf-email').value;
+      const email = emailRaw.toLowerCase().trim().replace(/[^a-z0-9@._+\-]/g, '').slice(0, 254);
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        document.getElementById('pdf-email').focus();
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'One moment…';
+
+      try {
+        const res = await fetch('/functions/subscribe', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email }),
+        });
+
+        if (!res.ok) throw new Error('subscribe failed');
+      } catch (e) {
+        // Silent fail — show success regardless to avoid email enumeration
+      }
+
+      document.getElementById('know-pdf-form').style.display    = 'none';
+      document.getElementById('know-pdf-success').style.display = 'block';
+      try { trackEvent('pdf_signup'); } catch (e) {}
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+</body>
+</html>

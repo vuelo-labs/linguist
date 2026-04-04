@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercise 1 — Your Two Projects · Linguist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --w-bg:           #FAF8F4;
+      --w-bg-card:      #F2EDE6;
+      --w-border:       #E5DFD6;
+      --w-text:         #2A2420;
+      --w-muted:        #7A6E68;
+      --w-faint:        #B0A89E;
+      --w-accent:       #8C7355;
+      --w-accent-soft:  #A08870;
+      --w-accent-light: #F5EFE6;
+      --c-bg:           #F0F4F8;
+      --c-bg-card:      #FFFFFF;
+      --c-border:       #D8E2ED;
+      --c-text:         #263340;
+      --c-muted:        #5F7485;
+      --c-faint:        #9EB0C0;
+      --c-accent:       #4A7FA5;
+      --c-accent-soft:  #6B9BBF;
+      --c-accent-light: #E5EFF7;
+      --serif:  'Newsreader', Georgia, serif;
+      --sans:   'Inter', system-ui, sans-serif;
+      --mono:   'JetBrains Mono', monospace;
+      --bg:           var(--w-bg);
+      --bg-card:      var(--w-bg-card);
+      --border:       var(--w-border);
+      --text:         var(--w-text);
+      --muted:        var(--w-muted);
+      --faint:        var(--w-faint);
+      --accent:       var(--w-accent);
+      --accent-soft:  var(--w-accent-soft);
+      --accent-light: var(--w-accent-light);
+    }
+    body.machine {
+      --bg:           var(--c-bg);
+      --bg-card:      var(--c-bg-card);
+      --border:       var(--c-border);
+      --text:         var(--c-text);
+      --muted:        var(--c-muted);
+      --faint:        var(--c-faint);
+      --accent:       var(--c-accent);
+      --accent-soft:  var(--c-accent-soft);
+      --accent-light: var(--c-accent-light);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; height: 100%; overflow: hidden; }
+
+    body {
+      font-family: var(--serif);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .nav-back {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.15s;
+    }
+    .nav-back:hover { color: var(--accent); }
+    .nav-title {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--faint);
+      flex: 1;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+      flex-shrink: 0;
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      transition: border-color 0.25s;
+    }
+    .mode-btn {
+      padding: 5px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+      color: var(--faint);
+      transition: background 0.2s, color 0.2s;
+      line-height: 1;
+    }
+    .mode-btn.active { background: var(--accent); color: #fff; }
+
+    /* ── Main scroll ── */
+    .main { flex: 1; overflow-y: auto; min-height: 0; }
+    .inner { max-width: 680px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+
+    /* ── Header ── */
+    .eyebrow {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      transition: color 0.25s;
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      transition: color 0.25s;
+    }
+    body.machine h1 { font-family: var(--sans); font-size: clamp(1.3rem, 3vw, 1.6rem); font-weight: 600; }
+
+    .subtext {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 50ch;
+      margin-bottom: 2rem;
+      transition: color 0.25s;
+    }
+    body.machine .subtext { font-family: var(--sans); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem; }
+
+    /* ── Goal card ── */
+    .goal-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s;
+    }
+    .goal-card-header {
+      background: var(--accent-light);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .goal-chip {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--bg);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 2px 10px;
+      white-space: nowrap;
+      transition: background 0.25s;
+    }
+    .goal-card-body {
+      padding: 0;
+    }
+    .goal-row {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.25s;
+    }
+    .goal-row:last-child { border-bottom: none; }
+    .goal-row-label {
+      flex-shrink: 0;
+      width: 90px;
+      padding: 14px 16px;
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      border-right: 1px solid var(--border);
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .goal-row-content {
+      padding: 14px 20px;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.6;
+      flex: 1;
+      transition: color 0.25s;
+    }
+    body.machine .goal-row-content { font-size: 0.82rem; }
+
+    /* ── Platform picker ── */
+    .platform-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .p-btn {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .p-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .p-btn.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+    /* ── Concept card ── */
+    .concept-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s;
+    }
+    .concept-header {
+      padding: 18px 24px;
+      background: var(--accent-light);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .concept-label {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .concept-title {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--text);
+    }
+    body.machine .concept-title { font-family: var(--sans); font-weight: 600; font-size: 1rem; }
+    .concept-body { padding: 20px 24px; }
+    .concept-body p {
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .concept-body p:last-child { margin-bottom: 0; }
+    .concept-body strong { font-weight: 600; }
+    body.machine .concept-body p { line-height: 1.5; margin-bottom: 8px; }
+
+    /* ── Bad prompting section ── */
+    .bad-section {
+      margin-bottom: 2rem;
+    }
+    .bad-section-label {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .bad-example {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      transition: border-color 0.25s;
+    }
+    .bad-example-prompt {
+      background: var(--bg-card);
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text);
+      line-height: 1.55;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .bad-example-why {
+      padding: 10px 16px;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .bad-example-why .why-label {
+      flex-shrink: 0;
+      font-weight: 700;
+      color: #b85c38;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding-top: 1px;
+    }
+
+    /* ── Section divider with label ── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 2.5rem 0 1.5rem;
+    }
+    .section-divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      transition: background 0.25s;
+    }
+    .section-divider-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    /* ── Project part ── */
+    .project-part {
+      margin-bottom: 2rem;
+    }
+    .project-part-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .project-part-badge {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+    }
+    .project-part-title {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .project-where {
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .project-where strong { color: var(--text); font-weight: 600; }
+    body.machine .project-where { font-size: 0.8rem; }
+
+    /* ── Prompt box ── */
+    .prompt-section { margin-bottom: 1rem; }
+    .prompt-label {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .prompt-wrap { position: relative; }
+    .prompt-box {
+      display: block;
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 18px 18px 52px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 380px;
+      overflow-y: auto;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+    .copy-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      padding: 7px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: var(--accent-soft); }
+
+    /* ── Platform note (Tines) ── */
+    .platform-note {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--faint);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 2rem;
+      display: none;
+      transition: border-color 0.25s;
+    }
+    .platform-note strong { color: var(--text); font-weight: 600; }
+
+    /* ── What good looks like ── */
+    .outcome-callout {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      background: var(--accent-light);
+      padding: 16px 20px;
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .outcome-callout strong { color: var(--accent); font-weight: 600; }
+
+    /* ── Evaluation block ── */
+    .eval-block {
+      margin-bottom: 2rem;
+    }
+    .eval-intro {
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+    body.machine .eval-intro { font-size: 0.82rem; }
+    .eval-questions {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 1.25rem;
+      counter-reset: eval-counter;
+    }
+    .eval-questions li {
+      display: flex;
+      gap: 14px;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.6;
+      counter-increment: eval-counter;
+    }
+    .eval-questions li::before {
+      content: counter(eval-counter);
+      flex-shrink: 0;
+      width: 22px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      padding-top: 2px;
+      font-weight: 600;
+    }
+    body.machine .eval-questions li { font-size: 0.82rem; line-height: 1.5; }
+    .eval-note {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      border-left: 2px solid var(--border);
+      padding-left: 14px;
+      transition: border-color 0.25s;
+    }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; transition: border-color 0.25s; }
+
+    /* ── Nav footer ── */
+    .ex-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.65rem 1.4rem;
+      border-radius: 3px;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: background 0.15s, opacity 0.15s;
+      line-height: 1;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-soft); }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-locked { background: transparent; border: 1px solid var(--border); color: var(--faint); cursor: not-allowed; opacity: 0.5; }
+
+    /* ── Mode-switched content ── */
+    [data-human] { display: block; }
+    [data-machine] { display: none; }
+    body.machine [data-human] { display: none; }
+    body.machine [data-machine] { display: block; }
+    span[data-human] { display: inline; }
+    span[data-machine] { display: none; }
+    body.machine span[data-human] { display: none; }
+    body.machine span[data-machine] { display: inline; }
+
+    @media (max-width: 520px) {
+      .inner { padding: 2rem 1.25rem 5rem; }
+      .nav { padding: 0.8rem 1.25rem; }
+      .nav-title { display: none; }
+      .goal-row-label { width: 70px; padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-back" href="/course/">← <span data-human>All exercises</span><span data-machine>Exercises</span></a>
+    <span class="nav-title">
+      <span data-human>Chapter 1 · Exercise 1</span>
+      <span data-machine>Ch.1 · Ex.1</span>
+    </span>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-human" onclick="setMode('human')">Human</button>
+      <button class="mode-btn" id="btn-machine" onclick="setMode('machine')">Machine</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="inner">
+
+      <p class="eyebrow">
+        <span data-human>Chapter 1 &nbsp;·&nbsp; Foundation &nbsp;·&nbsp; Exercise 1 of 7 &nbsp;·&nbsp; 5 min</span>
+        <span data-machine>Ch.1 · Foundation · Ex.1 · 5 min</span>
+      </p>
+
+      <h1>
+        <span data-human>Your two projects.</span>
+        <span data-machine>Create two projects.</span>
+      </h1>
+
+      <p class="subtext">
+        <span data-human>Build your foundation: two projects, one for exploring, one for executing.</span>
+        <span data-machine>Build your working foundation before prompting. Two projects: one for exploration, one for structured output. All exercises build on this.</span>
+      </p>
+
+      <!-- ── Goal card ── -->
+      <div class="goal-card">
+        <div class="goal-card-header">
+          <span class="goal-chip">
+            <span data-human>Learning goal</span>
+            <span data-machine>Goal</span>
+          </span>
+          <span style="font-family:var(--sans);font-size:0.84rem;color:var(--muted);">
+            <span data-human>Understand the Human/Machine balance by building both sides of it.</span>
+            <span data-machine>Build both working modes as concrete projects.</span>
+          </span>
+        </div>
+        <div class="goal-card-body">
+          <div class="goal-row">
+            <span class="goal-row-label">You'll build</span>
+            <span class="goal-row-content">
+              <span data-human>Two projects in your AI tool — one set up for human-mode work (exploring, thinking out loud, open questions) and one for machine-mode work (structured tasks, repeatable output, clear constraints). You'll write the instructions for both.</span>
+              <span data-machine>Two projects. Human Mode: open-ended, exploratory. Machine Mode: structured, repeatable. Instructions for each.</span>
+            </span>
+          </div>
+          <div class="goal-row">
+            <span class="goal-row-label">Outcome</span>
+            <span class="goal-row-content">
+              <span data-human>A working setup you'll actually use — not a demo. By the end you'll have real persistent instructions in place for both modes, and you'll have felt the difference between writing each one.</span>
+              <span data-machine>Working persistent instructions for both modes. Usable immediately.</span>
+            </span>
+          </div>
+          <div class="goal-row">
+            <span class="goal-row-label">Watch for</span>
+            <span class="goal-row-content">
+              <span data-human>The moment you realise you're writing very differently for each project. That gap — between the instructions you'd give a collaborator and the instructions you'd give a machine — is the whole course in miniature.</span>
+              <span data-machine>Notice: the instructions you write for each project will feel completely different. That gap is the concept.</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Platform picker ── -->
+      <div class="platform-row" id="platform-row">
+        <button class="p-btn active" data-p="claude"     onclick="setPlatform('claude',this)">Claude</button>
+        <button class="p-btn"        data-p="chatgpt"    onclick="setPlatform('chatgpt',this)">ChatGPT</button>
+        <button class="p-btn"        data-p="gemini"     onclick="setPlatform('gemini',this)">Gemini</button>
+        <button class="p-btn"        data-p="tines"      onclick="setPlatform('tines',this)">Tines</button>
+        <button class="p-btn"        data-p="claudecode" onclick="setPlatform('claudecode',this)">Claude Code</button>
+      </div>
+
+      <!-- ── Concept ── -->
+      <div class="concept-card">
+        <div class="concept-header">
+          <p class="concept-label">
+            <span data-human>What you're setting up</span>
+            <span data-machine>Context</span>
+          </p>
+          <p class="concept-title" id="concept-title">Persistent context on Claude</p>
+        </div>
+        <div class="concept-body" id="concept-body"></div>
+      </div>
+
+      <!-- ── Bad prompting ── -->
+      <div class="bad-section">
+        <p class="bad-section-label">
+          <span data-human>What most people do wrong first</span>
+          <span data-machine>Common failure patterns</span>
+        </p>
+
+        <div class="bad-example">
+          <div class="bad-example-prompt">"Help me with work stuff."</div>
+          <div class="bad-example-why">
+            <span class="why-label">Why</span>
+            <span>
+              <span data-human>No role, no context, no format. The model invents all three and usually gets them wrong. You get a response calibrated for nobody.</span>
+              <span data-machine>No role · no context · no format. Model guesses all three. Output is calibrated for nobody.</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="bad-example">
+          <div class="bad-example-prompt">"Hi! I was hoping you could help me when I need it. I'd love it if you were really helpful and friendly :)"</div>
+          <div class="bad-example-why">
+            <span class="why-label">Why</span>
+            <span>
+              <span data-human>This tells the model nothing useful. You're spending tokens on politeness. The model reads it and learns you're friendly — that's not context. It changes nothing about the output.</span>
+              <span data-machine>Zero signal. Pleasantries consume tokens and calibrate nothing. Model learns: you're polite. Irrelevant to output.</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="bad-example">
+          <div class="bad-example-prompt">"I need you to help me with everything I work on. I'm a marketing manager but also sometimes I do strategy and occasionally I help with product decisions. I want responses that are professional but also friendly, not too long but detailed enough to be useful, and please always consider..."  <em>[continues for 300 more words]</em></div>
+          <div class="bad-example-why">
+            <span class="why-label">Why</span>
+            <span>
+              <span data-human>Length is not precision. A 300-word blob of stream-of-consciousness can't be applied consistently — the model will weight things arbitrarily. Structure and specificity beat volume every time.</span>
+              <span data-machine>Length ≠ precision. Unstructured instructions are applied inconsistently. Structure + specificity &gt; volume.</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Part 1: Human Mode ── -->
+      <div class="section-divider">
+        <div class="section-divider-line"></div>
+        <span class="section-divider-label">
+          <span data-human>Part 1 — Human Mode project</span>
+          <span data-machine>Part 1 — Human Mode</span>
+        </span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="project-part">
+        <div class="project-part-header">
+          <span class="project-part-badge">Human Mode</span>
+          <span class="project-part-title" id="human-title">Exploring and thinking out loud</span>
+        </div>
+        <p class="project-where" id="human-where"></p>
+
+        <div class="prompt-section">
+          <p class="prompt-label">
+            <span data-human>Paste this into a new conversation to build your Human Mode instructions</span>
+            <span data-machine>Prompt — paste into new conversation</span>
+          </p>
+          <div class="prompt-wrap">
+            <div class="prompt-box" id="human-prompt-box"></div>
+            <button class="copy-btn" id="copy-human-btn" onclick="copyPrompt('human-prompt-box','copy-human-btn')">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Part 2: Machine Mode ── -->
+      <div class="section-divider">
+        <div class="section-divider-line"></div>
+        <span class="section-divider-label">
+          <span data-human>Part 2 — Machine Mode project</span>
+          <span data-machine>Part 2 — Machine Mode</span>
+        </span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="project-part">
+        <div class="project-part-header">
+          <span class="project-part-badge">Machine Mode</span>
+          <span class="project-part-title" id="machine-title">Structured tasks and repeatable output</span>
+        </div>
+        <p class="project-where" id="machine-where"></p>
+
+        <div class="prompt-section">
+          <p class="prompt-label">
+            <span data-human>Paste this into a new conversation to build your Machine Mode instructions</span>
+            <span data-machine>Prompt — paste into new conversation</span>
+          </p>
+          <div class="prompt-wrap">
+            <div class="prompt-box" id="machine-prompt-box"></div>
+            <button class="copy-btn" id="copy-machine-btn" onclick="copyPrompt('machine-prompt-box','copy-machine-btn')">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tines note ── -->
+      <div class="platform-note" id="tines-note">
+        <strong>Note on Tines:</strong> Workbench has one global instruction set — you can't create two separate projects the way other platforms can. The workaround: set your Machine Mode instructions globally (most automation work is structured and benefits from precision), and keep your Human Mode instructions as a short block of text you paste at the start of explorative conversations. Label the paste clearly: <code>// Human Mode — exploratory, push back, ask questions.</code>
+      </div>
+
+      <!-- ── What good looks like ── -->
+      <div class="outcome-callout">
+        <strong>
+          <span data-human>What a good response looks like</span>
+          <span data-machine>Expected output</span>
+        </strong><br>
+        <span data-human>When you paste either prompt, the model should ask you one focused question — then produce structured instructions based on your answer. If it skips the question and writes generic boilerplate, or asks you five questions at once, your setup isn't working yet. Good instructions are specific, scannable, and under 15 lines.</span>
+        <span data-machine>Model should: ask 1 question → receive answer → produce structured instructions (&lt;15 lines). Red flags: generic boilerplate · 5 questions at once · no questions at all.</span>
+      </div>
+
+      <!-- Evaluation step -->
+      <div class="section-divider">
+        <div class="section-divider-line"></div>
+        <span class="section-divider-label">
+          <span data-human>Now evaluate what came back</span>
+          <span data-machine>Evaluate output</span>
+        </span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="eval-block">
+        <p class="eval-intro">
+          <span data-human>Before you move on, read both sets of instructions the model produced — one for each project. Then answer these questions. You don't need to write them down, but you do need to actually think through them.</span>
+          <span data-machine>Read both outputs. Answer each question before continuing.</span>
+        </p>
+        <ol class="eval-questions">
+          <li>
+            <span data-human>Which set of instructions is more specific? Could a stranger read them and know exactly how to work with you?</span>
+            <span data-machine>Which output is more specific? Would a stranger know how to work from it?</span>
+          </li>
+          <li>
+            <span data-human>Did the Human Mode instructions describe a working relationship — tone, collaboration style, when to ask questions? Did the Machine Mode instructions describe a task spec — format, length, what to skip?</span>
+            <span data-machine>Human Mode: relationship or spec? Machine Mode: spec or relationship? Each should be clearly one.</span>
+          </li>
+          <li>
+            <span data-human>Is there anything in either set that wouldn't change the output if you removed it? If so, cut it now. Every line should earn its place.</span>
+            <span data-machine>Apply the load-bearing test: remove any line that wouldn't change output if absent.</span>
+          </li>
+          <li>
+            <span data-human>Which project are you more likely to actually use? That's your primary project — you'll work from it in the exercises from Chapter 2 onwards.</span>
+            <span data-machine>Which project is your primary? You'll use it from Exercise 3 onwards.</span>
+          </li>
+        </ol>
+        <p class="eval-note">
+          <span data-human>In Exercise 2 you'll run the same real task in both projects and see how the same opening lands differently depending on which one you're in. That contrast is the last thing the two-project setup is here to teach.</span>
+          <span data-machine>Exercise 2: same task, both projects, compare output. After that — one primary project.</span>
+        </p>
+      </div>
+
+      <hr>
+
+      <div class="ex-nav">
+        <a class="btn btn-ghost" href="/course/">← All exercises</a>
+        <a class="btn btn-primary" href="/course/exercise-2.html">Exercise 2 →</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    var mode = 'human';
+    var platform = 'claude';
+
+    var CONTENT = {
+      claude: {
+        title: 'Projects and Profile on Claude',
+        concept_human: '<p>Claude gives you two places to set context that persists across conversations.</p><p><strong>Projects</strong> are workspaces for recurring work. Each Project has its own instructions — everything you do inside that Project inherits them. Create one Project for your Human Mode work and another for Machine Mode. The instructions you write in each Project shape how Claude behaves there.</p><p><strong>Your Profile</strong> (Settings → Profile → "What would you like Claude to know?") is different — it follows you everywhere, across all Projects and conversations. Use it for personal defaults: your role, your communication preferences, your level of expertise.</p><p>Think of Projects as context for the work. Your Profile as context for you.</p>',
+        concept_machine: '<p><strong>Projects:</strong> per-workspace context. Instructions inherited by all conversations inside. Create one per mode.</p><p><strong>Profile:</strong> Settings → Profile → global. Applies across all Projects + conversations. Use for personal defaults: role, preferences, expertise level.</p>',
+        human_where_human: 'Create a new Project — name it something that signals exploration to you (<em>Thinking Space</em>, <em>Open Questions</em>, your own name). Open Project Settings and find the Instructions field.',
+        human_where_machine: 'New Project → name (e.g. "Human Mode") → Project Settings → Instructions field.',
+        machine_where_human: 'Create a second Project — name it something that signals precision and output (<em>Work Output</em>, <em>Machine Mode</em>, a specific domain). Same process: Project Settings → Instructions.',
+        machine_where_machine: 'Second Project → name (e.g. "Machine Mode" or domain name) → Project Settings → Instructions.',
+        human_prompt_human: `I'm setting up a Human Mode project on Claude — for work where I'm exploring, thinking out loud, or haven't fully formed the question yet.
+
+I'll describe my work in a moment. First, ask me one question to understand it better — what I do, who I work with, or what I usually bring here when I'm stuck.
+
+Then write two things:
+
+1. Project Instructions for this Human Mode project (under 12 lines). These should:
+   - Set a collaborative, curious tone
+   - Tell you to ask questions back when my goal isn't clear
+   - Give you permission to push back or offer a different angle
+   - Describe what "helpful" looks like when I'm exploring, not executing
+
+2. A Profile field entry for Settings → Profile (under 6 lines) — personal defaults that follow me across everything.
+
+—
+Note to the reader: Notice how these instructions describe a working relationship, not a task list. You're setting expectations for how to collaborate — not what to produce. That's the shape of Human Mode. It's warmer, more flexible, and built for uncertainty.`,
+
+        human_prompt_machine: `Setting up Human Mode project on Claude.
+
+Task: generate Project Instructions + Profile field.
+Mode: exploratory — collaborative tone, questions welcome, push-back encouraged.
+
+Ask me 1 question about my work first.
+
+Then output:
+1. Project Instructions (<12 lines): tone · collaboration style · when to ask vs. infer · what "helpful" means here
+2. Profile field (<6 lines): role · domain · global formatting defaults
+
+Note: Human Mode instructions describe a relationship. Machine Mode describes a task. This is Human Mode.`,
+
+        machine_prompt_human: `I'm setting up a Machine Mode project on Claude — for structured, repeatable work where I know what I want and I need it done efficiently.
+
+I'll describe my work in a moment. First, ask me one question: what's a task I do repeatedly where I always want the same format?
+
+Then write two things:
+
+1. Project Instructions for this Machine Mode project (under 12 lines). These should:
+   - State my role and domain clearly (1–2 lines)
+   - Set a default output format (bullets / prose / markdown / table)
+   - Set a default length (concise / thorough)
+   - Say what to skip (preamble, unsolicited suggestions, trailing summaries)
+   - Define when to ask a question vs. when to just do it
+
+2. A Profile field entry for Settings → Profile (under 6 lines) — if different from what you'd write for Human Mode.
+
+—
+Note to the reader: Every line in these instructions earns its place. No "I'd love to help with that!" No pleasantries. The model doesn't need encouragement — it needs instructions. Notice how different this feels to write compared to the Human Mode version. That difference is the lesson.`,
+
+        machine_prompt_machine: `Setting up Machine Mode project on Claude.
+
+Task: generate Project Instructions + Profile field.
+Mode: structured — output over exploration, minimal back-and-forth.
+
+Ask me 1 question: what repeatable task always needs the same format?
+
+Then output:
+1. Project Instructions (<12 lines): role · domain · default format · default length · what to skip · when to ask vs. execute
+2. Profile field (<6 lines): role · domain · formatting defaults
+
+Note: Machine Mode instructions are a spec, not a relationship. Every word is signal.`,
+      },
+
+      chatgpt: {
+        title: 'Custom Instructions + Custom GPTs on ChatGPT',
+        concept_human: '<p>ChatGPT has two mechanisms for persistent context.</p><p><strong>Custom Instructions</strong> (Settings → Personalisation) apply globally — every conversation. There are two fields: what you want it to know about you, and how you want it to respond. These are your global defaults.</p><p><strong>Custom GPTs</strong> (if you have Plus) are separate assistants you configure with their own instructions, tone, and even tools. This is where you create your two modes: one GPT for Human Mode work, one for Machine Mode. Each has its own instruction set and lives in your sidebar.</p><p>If you\'re on the free plan, use Custom Instructions for one mode and override with a pasted block at the start of conversations for the other.</p>',
+        concept_machine: '<p><strong>Custom Instructions:</strong> Settings → Personalisation → global. Two fields: your context / output preferences.</p><p><strong>Custom GPTs (Plus):</strong> separate assistants, each with own instructions. Create one per mode. Free tier: use Custom Instructions for one mode, paste override block for the other.</p>',
+        human_where_human: 'If you have ChatGPT Plus: go to <strong>Explore GPTs → Create</strong>. Name it something exploratory. If on free: go to <strong>Settings → Personalisation → Custom Instructions</strong> and set these as your global defaults.',
+        human_where_machine: 'Plus: Explore GPTs → Create → name (Human Mode). Free: Settings → Personalisation → Custom Instructions (field 1 + 2).',
+        machine_where_human: 'Create a second Custom GPT — name it for structured output. If on free: keep Human Mode in Custom Instructions and paste the Machine Mode block at the start of any structured conversation.',
+        machine_where_machine: 'Plus: second Custom GPT → name (Machine Mode). Free: paste Machine Mode block at conversation start.',
+        human_prompt_human: `I'm setting up a Human Mode assistant on ChatGPT — for open-ended work where I'm exploring ideas or haven't fully formed the question yet.
+
+I'll describe my work in a moment. First, ask me one question to understand it better.
+
+Then write:
+
+1. GPT Instructions for this Human Mode assistant (under 15 lines):
+   - Collaborative, curious tone
+   - Instruction to ask clarifying questions when the goal isn't clear
+   - Permission to push back or offer a different angle
+   - What "helpful" means in exploratory, open-ended work
+
+2. Custom Instructions for both fields in Settings → Personalisation:
+   - Field 1 (about me): role, background, what I work on
+   - Field 2 (how to respond): tone, format, what to avoid
+
+—
+Note to the reader: GPT Instructions describe a personality and working style. Custom Instructions describe you and your preferences. Human Mode leans warm — it's designed for the conversations you don't have a crisp question for yet.`,
+
+        human_prompt_machine: `Setting up Human Mode GPT on ChatGPT.
+
+Ask me 1 question about my work first.
+
+Then output:
+1. GPT Instructions (<15 lines): collaborative tone · ask questions when goal is unclear · permission to push back · definition of "helpful" for exploratory work
+2. Custom Instructions — Field 1 (<6 lines): role · background · use case
+3. Custom Instructions — Field 2 (<6 lines): tone · format · what to avoid
+
+Note: Human Mode = relationship + style. Not a task spec.`,
+
+        machine_prompt_human: `I'm setting up a Machine Mode assistant on ChatGPT — for structured, repeatable tasks where I know what I want.
+
+I'll describe my work in a moment. First, ask me one question: what task do I do repeatedly where I always want the same format?
+
+Then write:
+
+1. GPT Instructions for this Machine Mode assistant (under 15 lines):
+   - My role and domain (1–2 lines)
+   - Default output format
+   - Default length
+   - What to skip (preamble, summaries, suggestions I didn't ask for)
+   - When to ask a question vs. when to execute
+
+2. Custom Instructions for both fields if they'd differ from Human Mode.
+
+—
+Note to the reader: Machine Mode GPT Instructions read like a spec sheet. You're configuring behaviour, not describing a relationship. The test: could you hand these instructions to a junior hire and have them produce the same output? If yes, they're machine-mode instructions.`,
+
+        machine_prompt_machine: `Setting up Machine Mode GPT on ChatGPT.
+
+Ask me 1 question: what repeatable task always needs the same format?
+
+Then output:
+1. GPT Instructions (<15 lines): role · domain · output format · length · what to skip · ask vs. execute rule
+2. Custom Instructions Field 1 + 2 if different from Human Mode
+
+Note: Machine Mode = spec sheet. Test: could a junior hire follow these instructions exactly?`,
+      },
+
+      gemini: {
+        title: 'Gems on Gemini Advanced',
+        concept_human: '<p>Gemini Advanced has <strong>Gems</strong> — saved assistant configurations you create in the left sidebar. Each Gem has a name and a set of instructions. Every conversation you open with that Gem starts from those instructions, every time.</p><p>This is where you build your two modes. Create a Gem for Human Mode work — exploratory, collaborative, open questions. Create a second Gem for Machine Mode work — structured output, clear constraints, no unnecessary back-and-forth.</p><p>If you\'re on the free tier, Gems aren\'t available. You can still set persistent context by connecting your Google Workspace apps via Extensions — less flexible, but it gives the model access to your actual working environment.</p>',
+        concept_machine: '<p><strong>Gems (Advanced):</strong> sidebar → New Gem. Name + instructions. One per mode.</p><p><strong>Free tier:</strong> no Gems. Use Extensions (Settings → Extensions) to connect Google Workspace. Less flexible — context from data, not instructions.</p>',
+        human_where_human: 'Open the left sidebar and click <strong>New Gem</strong>. Give it an exploratory name. The instructions field is where your Human Mode setup goes.',
+        human_where_machine: 'Sidebar → New Gem → name (Human Mode) → Instructions field.',
+        machine_where_human: 'Create a second Gem — name it for structured output. Same process: New Gem → name it → Instructions field.',
+        machine_where_machine: 'Second Gem → name (Machine Mode or domain) → Instructions field.',
+        human_prompt_human: `I'm setting up a Human Mode Gem on Gemini — for work where I'm exploring, thinking through problems, or haven't fully formed the question yet.
+
+I'll describe my work. First, ask me one question to understand it better.
+
+Then write Gem Instructions (under 15 lines) that:
+- Set a collaborative, curious working tone
+- Tell the model to ask questions when my goal isn't clear
+- Give permission to push back or suggest a different approach
+- Define what "helpful" looks like for open-ended, exploratory work
+- Note what to avoid (being prescriptive before I've figured out what I want)
+
+—
+Note to the reader: Gem instructions for Human Mode describe a mindset, not a process. You're telling the model how to show up when you don't have all the answers yet.`,
+
+        human_prompt_machine: `Setting up Human Mode Gem on Gemini.
+
+Ask me 1 question about my work first.
+
+Output: Gem Instructions (<15 lines)
+- Collaborative tone
+- Ask questions when goal unclear
+- Push back / suggest alternatives
+- Definition of "helpful" for exploratory work
+- What to avoid
+
+Note: Human Mode Gem = mindset instructions. Not a process spec.`,
+
+        machine_prompt_human: `I'm setting up a Machine Mode Gem on Gemini — for structured, repeatable tasks where I know what I want.
+
+I'll describe my work. First, ask me one question: what task do I do repeatedly that always needs the same format?
+
+Then write Gem Instructions (under 15 lines) that cover:
+- My role and domain (1–2 lines)
+- Default output format (bullets / prose / table / etc.)
+- Default response length
+- What to skip (preamble, unsolicited suggestions, trailing summaries)
+- When to ask a clarifying question vs. when to just do it
+
+—
+Note to the reader: Machine Mode Gem instructions are a behavioural spec. Every line tells the model what to do and what not to do. Read them back and ask: is every line pulling its weight?`,
+
+        machine_prompt_machine: `Setting up Machine Mode Gem on Gemini.
+
+Ask me 1 question: what repeatable task always needs the same format?
+
+Output: Gem Instructions (<15 lines)
+- Role · domain
+- Default output format
+- Default length
+- What to skip
+- Ask vs. execute rule
+
+Note: Machine Mode = behavioural spec. Every line must earn its place.`,
+      },
+
+      tines: {
+        title: 'Custom Instructions on Tines Workbench',
+        concept_human: '<p>Tines Workbench has one global instruction set — set via the settings icon in the top right. Unlike other platforms, you can\'t create separate project contexts for Human Mode and Machine Mode. One set of instructions applies to everything.</p><p>The important caveat: changes here apply immediately to <em>all</em> existing conversations, not just new ones.</p><p>The recommended approach for this exercise: set Machine Mode instructions globally (most automation work is structured and benefits from precision), and use a short paste-in block at the start of any exploratory conversation to switch context to Human Mode.</p>',
+        concept_machine: '<p><strong>Settings (top right) → Custom Instructions.</strong> One global set. Applies to all existing conversations immediately.</p><p><strong>Recommended:</strong> set Machine Mode globally. Paste Human Mode block at conversation start for exploratory sessions.</p>',
+        human_where_human: 'There\'s no separate project for Human Mode in Tines. Instead, copy the Human Mode block below and paste it at the start of any exploratory conversation. It overrides the global instructions locally.',
+        human_where_machine: 'No separate project. Paste Human Mode block at conversation start to override globally.',
+        machine_where_human: 'Open Workbench and click the <strong>settings icon (top right)</strong>. Open Custom Instructions — this is where your Machine Mode setup goes, globally.',
+        machine_where_machine: 'Settings (top right) → Custom Instructions → paste Machine Mode instructions.',
+        human_prompt_human: `// Human Mode — paste this at the start of exploratory conversations in Tines Workbench.
+
+I'm switching to exploratory mode for this conversation. Ignore my global instructions for now — I'm thinking out loud.
+
+I haven't fully formed my question. Ask me one thing to understand what I'm working through, then help me explore it. Push back if I'm approaching it wrong. Ask questions. Help me think, not just produce.
+
+—
+Note to the reader: This is a context-override block. In Tines, you can't create two separate projects — so you manually signal the mode switch at the start of each conversation. It's less elegant, but it works. Label it clearly so you know what you're doing.`,
+
+        human_prompt_machine: `// Human Mode override. Paste at conversation start.
+Exploratory mode: ignore global instructions. Think-out-loud session.
+Ask me 1 question. Help me explore — push back, ask questions.
+
+Note: Tines has no separate projects. Mode switch = manual paste.`,
+
+        machine_prompt_human: `I'm setting up persistent instructions for Tines Workbench — my global Machine Mode setup.
+
+I\'ll describe my work. First, ask me one question: what automation or security task do I do most often, and what does a good output look like?
+
+Then write Custom Instructions (under 15 lines) that cover:
+- My role and the kind of work I do
+- My connected tools and integrations
+- Default output style (concise, structured, no unnecessary commentary)
+- What to skip (preamble, lengthy explanations unless asked)
+- What to prioritise when I give a vague instruction
+
+Remember: these apply to all my conversations immediately and globally. Keep them accurate and precise.
+
+—
+Note to the reader: In Tines, your one instruction set is your Machine Mode setup. It should be precise — because everything you do in Workbench will be shaped by it.`,
+
+        machine_prompt_machine: `Setting up Tines Workbench Custom Instructions.
+
+Ask me 1 question: what automation task do I do most, and what's a good output?
+
+Output: Custom Instructions (<15 lines)
+- Role · tools · integrations
+- Output style (concise, structured)
+- What to skip
+- Priority rule for vague inputs
+
+Note: Global + immediate. Machine Mode only — Human Mode is a manual paste override.`,
+      },
+
+      claudecode: {
+        title: 'CLAUDE.md for Claude Code',
+        concept_human: '<p>Claude Code doesn\'t have a visual settings panel — its persistent context lives in a file called <strong>CLAUDE.md</strong> in your project root. Every session, Claude Code reads this file before anything else. It\'s your instructions, version-controlled with the project, visible to everyone on the team.</p><p>For this exercise, you\'ll create two CLAUDE.md templates — one for Human Mode projects (exploratory, collaborative, research-heavy) and one for Machine Mode projects (structured output, precise conventions, no ambiguity). You\'ll use whichever fits the project you\'re working in.</p><p>The key discipline: keep CLAUDE.md under 40 lines. Longer files get read inconsistently. The constraint forces you to decide what actually matters.</p>',
+        concept_machine: '<p><strong>CLAUDE.md:</strong> project root. Read every session. Version-controlled. Shared with team.</p><p>Create two templates: Human Mode (exploratory) and Machine Mode (structured). Use whichever fits the project. Keep under 40 lines — longer = inconsistent weighting.</p>',
+        human_where_human: 'Create a file called <strong>CLAUDE.md</strong> in a project where you do more exploratory work — research, writing, planning. This template lives here. Copy the prompt below, paste it into a Claude Code session in that directory.',
+        human_where_machine: 'Create CLAUDE.md in an exploratory/research project. Paste prompt into Claude Code session in that directory.',
+        machine_where_human: 'Create a second <strong>CLAUDE.md</strong> in a project where you do structured, repeatable work — a codebase, an automation, a report pipeline. This is your Machine Mode template.',
+        machine_where_machine: 'Create CLAUDE.md in a structured/code project. Paste prompt into Claude Code session in that directory.',
+        human_prompt_human: `You're helping me write a CLAUDE.md for a Human Mode project — one I use for exploratory work, research, planning, and thinking through things I haven't resolved yet.
+
+Ask me one question about this project — what it is, what kind of work I do here, or what "helpful" looks like in an exploratory context.
+
+Then write a CLAUDE.md draft (under 25 lines) that covers:
+- What this project is and what kind of work happens here (2–3 lines)
+- Working style: collaborative, ask questions, push back when needed
+- What "done" looks like in exploratory work (rough drafts, structured thinking, identified questions — not polished final output)
+- What to avoid (being prescriptive, producing final output when I just want to think)
+
+—
+Note to the reader: A Human Mode CLAUDE.md describes how you want to work together on this project, not just what the project is. The tone is collaborative. The goal is often figuring out the question, not just answering it.`,
+
+        human_prompt_machine: `Writing CLAUDE.md for Human Mode project.
+
+Ask me 1 question: what kind of exploratory work happens here?
+
+Output: CLAUDE.md draft (<25 lines)
+- Project overview (2–3 lines)
+- Working style: collaborative · ask questions · push back
+- Definition of "done" for exploratory work
+- What to avoid
+
+Note: Human Mode CLAUDE.md = collaboration contract. Not a task spec.`,
+
+        machine_prompt_human: `You're helping me write a CLAUDE.md for a Machine Mode project — structured, repeatable work where consistency and precision matter.
+
+Ask me one question about this project — what it does, what it's built with, or what the most common task type is.
+
+Then write a CLAUDE.md draft (under 30 lines) that covers:
+- Project overview and stack (2–3 lines)
+- Conventions and patterns to follow
+- Files or areas not to modify without checking
+- Default output style: concise, structured, no unnecessary commentary
+- What "done" looks like — tests passing, format consistent, no loose ends
+
+—
+Note to the reader: A Machine Mode CLAUDE.md reads like a handover document. If a new engineer read it before their first session, would they know exactly how to work here? If yes — it's machine-mode instructions. Every line is a decision about what matters.`,
+
+        machine_prompt_machine: `Writing CLAUDE.md for Machine Mode project.
+
+Ask me 1 question: what's the project and what's the most common task?
+
+Output: CLAUDE.md draft (<30 lines)
+- Project overview + stack (2–3 lines)
+- Conventions + patterns
+- Files/areas out of bounds
+- Output style: concise · structured · no commentary
+- Definition of done
+
+Note: Test — would a new engineer know exactly how to work here after reading this?`,
+      },
+    };
+
+    function setMode(m) {
+      mode = m;
+      document.body.classList.toggle('machine', m === 'machine');
+      document.getElementById('btn-human').classList.toggle('active', m === 'human');
+      document.getElementById('btn-machine').classList.toggle('active', m === 'machine');
+      render();
+    }
+
+    function setPlatform(p, btn) {
+      platform = p;
+      document.querySelectorAll('.p-btn').forEach(function(b) { b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      render();
+    }
+
+    function render() {
+      var c = CONTENT[platform];
+      if (!c) return;
+
+      document.getElementById('concept-title').textContent = c.title;
+      document.getElementById('concept-body').innerHTML = c['concept_' + mode];
+
+      document.getElementById('human-where').innerHTML = c['human_where_' + mode];
+      document.getElementById('machine-where').innerHTML = c['machine_where_' + mode];
+
+      document.getElementById('human-prompt-box').textContent = c['human_prompt_' + mode];
+      document.getElementById('machine-prompt-box').textContent = c['machine_prompt_' + mode];
+
+      // Tines note
+      document.getElementById('tines-note').style.display = platform === 'tines' ? 'block' : 'none';
+    }
+
+    function copyPrompt(boxId, btnId) {
+      var text = document.getElementById(boxId).textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        var btn = document.getElementById(btnId);
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    // Read platform from URL param
+    var params = new URLSearchParams(window.location.search);
+    var urlPlatform = params.get('p');
+    if (urlPlatform && CONTENT[urlPlatform]) {
+      platform = urlPlatform;
+      document.querySelectorAll('.p-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.p === platform);
+      });
+    }
+
+    render();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practical Guide — Linguist</title>
+  <meta name="description" content="You've seen the two modes. Here's what to actually do with them. Think. Collab. Dispatch. Iterate.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+
+    /* ---- Header ---- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      text-decoration: none;
+    }
+    .site-header-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .site-header-link {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-muted);
+      text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-cta {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-accent);
+      text-decoration: none;
+      border: 1px solid var(--w-border);
+      padding: 0.4rem 1rem;
+      border-radius: 3px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .site-header-cta:hover {
+      border-color: var(--w-accent);
+      background: var(--w-accent-light);
+    }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+      .site-header-cta { display: none; }
+    }
+
+    /* ---- Page hero ---- */
+    .guide-hero {
+      padding: var(--space-2xl) 0 var(--space-xl);
+      border-bottom: 1px solid var(--w-border);
+    }
+    .guide-hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: normal;
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+    }
+    .guide-hero p {
+      color: var(--w-muted);
+      font-size: 1.05rem;
+      max-width: 52ch;
+    }
+
+    /* ---- Section layout ---- */
+    .guide-section {
+      padding: var(--space-2xl) 0;
+      border-bottom: 1px solid var(--w-border);
+    }
+    .guide-section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: var(--space-sm);
+    }
+
+    .guide-section h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 3vw, 1.9rem);
+      font-weight: normal;
+      margin-bottom: var(--space-sm);
+      line-height: 1.3;
+    }
+
+    .guide-section .section-intro {
+      color: var(--w-muted);
+      font-size: 1rem;
+      max-width: 56ch;
+      margin-bottom: var(--space-xl);
+    }
+
+    /* ---- Framework cards ---- */
+    .framework-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .framework-card {
+      background: var(--w-bg-card);
+      border: 1px solid var(--w-border);
+      border-radius: 4px;
+      padding: 1.5rem;
+    }
+
+    .framework-step {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 0.4rem;
+    }
+
+    .framework-title {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      color: var(--w-accent);
+      margin-bottom: 0.75rem;
+      font-weight: normal;
+    }
+
+    .framework-body {
+      font-size: 0.9rem;
+      color: var(--w-muted);
+      line-height: 1.65;
+    }
+
+    .framework-card .framework-note {
+      display: block;
+      margin-top: 0.75rem;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--w-faint);
+      font-style: italic;
+    }
+
+    /* ---- Pause callout ---- */
+    .pause-callout {
+      margin-top: 2rem;
+      border-top: 1px solid var(--w-border);
+      padding-top: 2rem;
+      text-align: center;
+    }
+
+    .pause-callout-word {
+      display: block;
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: normal;
+      font-style: italic;
+      color: var(--w-text);
+      margin-bottom: 0.75rem;
+    }
+
+    .pause-callout-body {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      color: var(--w-muted);
+      line-height: 1.75;
+      max-width: 50ch;
+      margin: 0 auto;
+    }
+
+    /* ---- Prompt pairs ---- */
+    .pairs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    .pair {
+      background: var(--w-bg-card);
+      border: 1px solid var(--w-border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .pair-label {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--w-border);
+      background: var(--w-bg);
+    }
+
+    .pair-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .pair-col {
+      padding: 1.25rem 1.5rem;
+    }
+
+    .pair-col--less {
+      border-right: 1px solid var(--w-border);
+      background: var(--w-bg);
+    }
+
+    .pair-col--more {
+      background: var(--c-bg);
+    }
+
+    .pair-col-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pair-col-label--less { color: var(--w-faint); }
+    .pair-col-label--more { color: var(--c-accent); font-family: var(--mono); }
+
+    .pair-text {
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+
+    .pair-col--less .pair-text {
+      font-family: var(--serif);
+      color: var(--w-muted);
+    }
+
+    .pair-col--more .pair-text {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--c-text);
+      line-height: 1.8;
+    }
+
+    .pair-caption {
+      padding: 0.85rem 1.5rem;
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-muted);
+      font-style: italic;
+    }
+
+    /* Multi-step pair variant */
+    .pair-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .pair-step {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--c-text);
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      border-radius: 3px;
+      padding: 0.5rem 0.75rem;
+      line-height: 1.5;
+    }
+    .pair-step-num {
+      color: var(--c-faint);
+      margin-right: 0.4rem;
+    }
+
+    /* ---- Principles ---- */
+    .principles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    .principle {
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--w-border);
+      border-radius: 4px;
+    }
+
+    .principle-number {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--w-faint);
+      margin-bottom: 0.4rem;
+    }
+
+    .principle-title {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      color: var(--w-text);
+      margin-bottom: 0.4rem;
+      font-weight: normal;
+    }
+
+    .principle-body {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-muted);
+      line-height: 1.6;
+    }
+
+    /* ---- Talk to it section ---- */
+    .talk-block {
+      background: var(--w-bg-card);
+      border: 1px solid var(--w-border);
+      border-left: 3px solid var(--w-accent);
+      padding: var(--space-lg) var(--space-xl);
+      max-width: 720px;
+    }
+
+    .talk-block p {
+      font-size: 1rem;
+      color: var(--w-muted);
+      line-height: 1.7;
+      margin-bottom: var(--space-sm);
+    }
+
+    .talk-block p:last-child { margin-bottom: 0; }
+
+    .talk-example {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--c-text);
+      background: var(--c-bg);
+      border: 1px solid var(--c-border);
+      border-radius: 3px;
+      padding: 0.75rem 1rem;
+      margin: var(--space-md) 0;
+      line-height: 1.7;
+    }
+
+    /* ---- CTA ---- */
+    .guide-cta {
+      text-align: center;
+      padding: var(--space-2xl) 0;
+    }
+
+    .guide-cta h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: normal;
+      margin-bottom: var(--space-sm);
+    }
+
+    .guide-cta p {
+      color: var(--w-muted);
+      max-width: 44ch;
+      margin: 0 auto var(--space-lg);
+    }
+
+    .guide-cta-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* ---- Footer ---- */
+    .site-footer {
+      padding: var(--space-xl) 0;
+      text-align: center;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-faint);
+      border-top: 1px solid var(--w-border);
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 700px) {
+      .framework-grid { grid-template-columns: 1fr 1fr; }
+      .pair-cols { grid-template-columns: 1fr; }
+      .pair-col--less { border-right: none; border-bottom: 1px solid var(--w-border); }
+      .principles-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .framework-grid { grid-template-columns: 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/manifesto" class="site-header-link">Full manifesto →</a>
+      <a href="/see" class="site-header-cta">Give it a go →</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Hero -->
+    <section class="guide-hero">
+      <div class="container">
+        <p class="section-label">Practical guide</p>
+        <h1>You've seen the two modes.<br>Here's what to do with them.</h1>
+        <p>The theory is simple. The practice takes a little more.</p>
+      </div>
+    </section>
+
+    <!-- Section 1: Think / Collab / Dispatch / Iterate -->
+    <section class="guide-section">
+      <div class="container">
+        <p class="section-label">The framework</p>
+        <h2>Think. Collab. Dispatch. Iterate.</h2>
+        <p class="section-intro">Four steps. Most people skip straight to the third one. That's why it's frustrating.</p>
+
+        <div class="framework-grid" style="grid-template-columns: repeat(2, 1fr);">
+
+          <div class="framework-card">
+            <p class="framework-step">Step 01</p>
+            <p class="framework-title">Think</p>
+            <p class="framework-body">Get your messy human thoughts together before you open the machine. Brain dump, voice memo, back of an envelope — anything. The machine is brilliant at structuring chaos. But it needs your chaos first.</p>
+            <span class="framework-note">Don't skip this. It's the one that changes the quality of everything after it.</span>
+          </div>
+
+          <div class="framework-card">
+            <p class="framework-step">Step 02</p>
+            <p class="framework-title">Collab</p>
+            <p class="framework-body">Use the machine to figure out what you actually want. Ask it questions. Ask it to ask <em>you</em> questions. Let it sharpen the brief before you write the brief. You don't have to know exactly what you want going in.</p>
+            <span class="framework-note">The most underused step. The one that makes Dispatch fast.</span>
+          </div>
+
+          <div class="framework-card">
+            <p class="framework-step">Step 03</p>
+            <p class="framework-title">Dispatch</p>
+            <p class="framework-body">Write a clean instruction and send it. You don't need to watch it work. Define the output, the format, the length, the audience — then walk away. The machine doesn't need supervision.</p>
+            <span class="framework-note">Dispatch and disappear. Check back when it's done.</span>
+          </div>
+
+          <div class="framework-card">
+            <p class="framework-step">Step 04</p>
+            <p class="framework-title">Iterate</p>
+            <p class="framework-body">One or two rounds, then stop. Quality degrades with over-iteration — every round takes you further from your original intent. Define what done looks like before you start, and stop when you're there.</p>
+            <span class="framework-note">Infinite iteration is a losing game. The first good version is usually the best.</span>
+          </div>
+
+        </div>
+
+        <div class="pause-callout">
+          <span class="pause-callout-word">Pause.</span>
+          <p class="pause-callout-body">The machine doesn't need breaks. You do. Walk, eat, talk to people. The best thinking happens away from the screen — that's where the real ideas come from. Take rest seriously. The work will be there when you get back. So will the machine.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 2: Prompt quality pairs -->
+    <section class="guide-section">
+      <div class="container">
+        <p class="section-label">Same task. Different input. Very different output.</p>
+        <h2>What good input<br>actually looks like.</h2>
+        <p class="section-intro">The better versions are still plain English — just specific. You don't need to write like a robot. You just need to stop being vague.</p>
+
+        <div class="pairs-list">
+
+          <!-- Pair 1 -->
+          <div class="pair">
+            <p class="pair-label">The vague ask</p>
+            <div class="pair-cols">
+              <div class="pair-col pair-col--less">
+                <p class="pair-col-label pair-col-label--less">Less effective</p>
+                <p class="pair-text">"Write me something about AI for my blog."</p>
+              </div>
+              <div class="pair-col pair-col--more">
+                <p class="pair-col-label pair-col-label--more">more effective</p>
+                <p class="pair-text">"Write a 350-word blog intro for small business owners who've never really used AI. Hook it with a specific scenario — someone trying to get ChatGPT to write their emails and feeling more confused than before. Conversational and honest, no jargon. End with a question that makes them think."</p>
+              </div>
+            </div>
+            <p class="pair-caption">Still plain English — just specific. The first version leaves every decision to the machine. The second one makes the decisions you can make, so the machine can focus on the ones it's good at.</p>
+          </div>
+
+          <!-- Pair 2 -->
+          <div class="pair">
+            <p class="pair-label">The apology reflex</p>
+            <div class="pair-cols">
+              <div class="pair-col pair-col--less">
+                <p class="pair-col-label pair-col-label--less">Less effective</p>
+                <p class="pair-text">"Hi! Hope you're having a good one 😊 So sorry to bother you — I know this is probably a silly question, but I was just wondering if you could maybe explain the difference between machine learning and AI? Only if you have time, absolutely no rush!"</p>
+              </div>
+              <div class="pair-col pair-col--more">
+                <p class="pair-col-label pair-col-label--more">more effective</p>
+                <p class="pair-text">"What's the difference between machine learning and AI? Keep it simple — I don't have a technical background. Two paragraphs."</p>
+              </div>
+            </div>
+            <p class="pair-caption">Nobody has ever hurt a chatbot's feelings. The greeting, the apology, the hedge — skip all of it. The question is the same. The output is the same. The only difference is the energy you spent getting there.</p>
+          </div>
+
+          <!-- Pair 3 -->
+          <div class="pair">
+            <p class="pair-label">Everything at once</p>
+            <div class="pair-cols">
+              <div class="pair-col pair-col--less">
+                <p class="pair-col-label pair-col-label--less">Less effective</p>
+                <p class="pair-text">"Can you write a follow-up email, summarise the meeting notes, create an action list with owners, suggest a subject line, and check if the tone is right for the situation?"</p>
+              </div>
+              <div class="pair-col pair-col--more">
+                <p class="pair-col-label pair-col-label--more">more effective — one at a time</p>
+                <div class="pair-steps">
+                  <div class="pair-step"><span class="pair-step-num">1.</span>summarise meeting notes in 5 bullets</div>
+                  <div class="pair-step"><span class="pair-step-num">2.</span>create action list with owners from those bullets</div>
+                  <div class="pair-step"><span class="pair-step-num">3.</span>write follow-up email based on action list</div>
+                  <div class="pair-step"><span class="pair-step-num">4.</span>suggest 3 subject line options</div>
+                </div>
+              </div>
+            </div>
+            <p class="pair-caption">Scope creep in the prompt equals scope creep in the output. One thing at a time produces better results and makes it easier to course-correct.</p>
+          </div>
+
+          <!-- Pair 4 -->
+          <div class="pair">
+            <p class="pair-label">No context vs. the right context</p>
+            <div class="pair-cols">
+              <div class="pair-col pair-col--less">
+                <p class="pair-col-label pair-col-label--less">Less effective</p>
+                <p class="pair-text">"Write a proposal."</p>
+              </div>
+              <div class="pair-col pair-col--more">
+                <p class="pair-col-label pair-col-label--more">more effective</p>
+                <p class="pair-text">"Write a one-page project proposal. It's for a Dublin restaurant — we're redesigning their online ordering system. Budget is around €12k, eight weeks. My company builds web apps for small businesses. Professional and direct, no waffle."</p>
+              </div>
+            </div>
+            <p class="pair-caption">Context is a precision tool — give it what it needs to do the job well, nothing more. The difference between "write a proposal" and this version isn't syntax. It's specificity.</p>
+          </div>
+
+          <!-- Pair 5 -->
+          <div class="pair">
+            <p class="pair-label">No role vs. giving it a role</p>
+            <div class="pair-cols">
+              <div class="pair-col pair-col--less">
+                <p class="pair-col-label pair-col-label--less">Less effective</p>
+                <p class="pair-text">"Give me feedback on this presentation deck."</p>
+              </div>
+              <div class="pair-col pair-col--more">
+                <p class="pair-col-label pair-col-label--more">more effective</p>
+                <p class="pair-text">"You're a senior consultant who's pitched to hundreds of executives. Look at this deck and tell me the top three things that'll lose a C-suite audience. Be direct — I can handle it. Worst issue first."</p>
+              </div>
+            </div>
+            <p class="pair-caption">"You are a..." is the single highest-leverage thing you can add to any prompt. It calibrates tone, assumptions, and quality all at once — and it takes five seconds.</p>
+          </div>
+
+          <!-- Pair 6 -->
+          <div class="pair">
+            <p class="pair-label">Endless iteration vs. defining done</p>
+            <div class="pair-cols">
+              <div class="pair-col pair-col--less">
+                <p class="pair-col-label pair-col-label--less">Less effective</p>
+                <p class="pair-text">"Make it better." → "More engaging?" → "Actually more formal." → "Try a completely different approach." → "I liked the first version, can you go back to something like that but with a different ending?"</p>
+              </div>
+              <div class="pair-col pair-col--more">
+                <p class="pair-col-label pair-col-label--more">more effective — define done first</p>
+                <p class="pair-text">"Write a product description for [X]. It's done when it's under 150 words, has one clear benefit per sentence, no superlatives, and ends with a specific call to action. Tell me when you think it's there."</p>
+              </div>
+            </div>
+            <p class="pair-caption">Define what done looks like before you start. The machine will keep going until you tell it to stop — "make it better" has no end state. "Done means X" does.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Principles -->
+    <section class="guide-section">
+      <div class="container">
+        <p class="section-label">Working with machines</p>
+        <h2>Eight things worth knowing.</h2>
+        <p class="section-intro">Not rules. Just patterns that consistently make things better.</p>
+
+        <div class="principles-grid">
+
+          <div class="principle">
+            <p class="principle-number">01</p>
+            <p class="principle-title">Skip the greeting.<br>Start with the task.</p>
+            <p class="principle-body">The preamble costs you energy and changes nothing. "Hi! Hope you're well!" to a language model is energy spent on something that cannot receive it. Start with what you need.</p>
+          </div>
+
+          <div class="principle">
+            <p class="principle-number">02</p>
+            <p class="principle-title">Give it a role<br>before you give it a task.</p>
+            <p class="principle-body">"You are a senior editor who has worked on 500 articles" changes the output more than almost anything else you can add. It calibrates tone, assumptions, and quality all at once.</p>
+          </div>
+
+          <div class="principle">
+            <p class="principle-number">03</p>
+            <p class="principle-title">One thing at a time.<br>Every time.</p>
+            <p class="principle-body">Scope creep in the prompt equals scope creep in the output. Ask for one thing, get a result, review it, then ask for the next. The quality of everything improves when you do this.</p>
+          </div>
+
+          <div class="principle">
+            <p class="principle-number">04</p>
+            <p class="principle-title">Context is a precision tool.<br>Use it like one.</p>
+            <p class="principle-body">Give it what it needs to do the job well — nothing more. Too little context produces vague output. Too much and it gets lost. Think: what does it actually need to know here?</p>
+          </div>
+
+          <div class="principle">
+            <p class="principle-number">05</p>
+            <p class="principle-title">Define done<br>before you start.</p>
+            <p class="principle-body">"Done means: under 200 words, one call to action, no jargon." Setting the success criteria upfront stops infinite iteration before it starts. The machine will keep going until you tell it to stop.</p>
+          </div>
+
+          <div class="principle">
+            <p class="principle-number">06</p>
+            <p class="principle-title">Done is done.<br>Stop at the first good version.</p>
+            <p class="principle-body">Quality degrades with over-iteration. Every round takes you further from your original intent. The first good output is usually the best. Recognise it and stop.</p>
+          </div>
+
+          <div class="principle">
+            <p class="principle-number">07</p>
+            <p class="principle-title">If it's going wrong,<br>start a new conversation.</p>
+            <p class="principle-body">Don't fight a bad thread. The machine carries its context forward — if it's going sideways, you're fighting that momentum with every message. A fresh conversation with a better brief is faster every time. Context creep is real.</p>
+          </div>
+
+          <div class="principle">
+            <p class="principle-number">08</p>
+            <p class="principle-title">Talk to it directly.<br>Ask it what it needs.</p>
+            <p class="principle-body">"What information would help you give me a better answer?" is a completely valid question. Ask it to ask you questions. Ask it to interview you. Use the machine to build the brief that you then give the machine. It works.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Talking to it -->
+    <section class="guide-section">
+      <div class="container">
+        <p class="section-label">One more thing</p>
+        <h2>Don't be afraid<br>to have a conversation with it.</h2>
+
+        <div class="talk-block">
+          <p>You don't have to arrive at the machine with a perfect brief. You can use the machine to <em>build</em> the brief. Ask it to ask you questions. Tell it what you're trying to do and ask what it needs to know. Let it interview you.</p>
+
+          <div class="talk-example">
+            "I'm trying to write a message to my team about a project delay. I'm not sure how to frame it. Ask me one question at a time to help me figure out what I actually want to say."
+          </div>
+
+          <p>That conversation produces a brief. The brief produces good output. The whole process takes less time than staring at a blank prompt wondering where to start.</p>
+
+          <div class="talk-example">
+            "What would help you give me better results on this kind of task consistently?"
+          </div>
+
+          <p>This is how you build a working pattern, not just a one-off interaction. The machine will tell you exactly what it needs. Listen to it. Save what works.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="guide-cta">
+      <div class="container">
+        <h2>See the difference<br>for yourself.</h2>
+        <p>Feels different when you try it. No login. No sign-up.</p>
+        <div class="guide-cta-links">
+          <a href="/see" class="btn btn-warm">Give it a go <span style="font-size:0.8em;opacity:0.65;">(2–3 min)</span></a>
+          <a href="/manifesto" class="btn btn-ghost">Read the full manifesto →</a>
+        </div>
+        <div style="margin-top:1.5rem;display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;">
+          <a href="/pdf" style="font-family:var(--sans);font-size:0.82rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Booklet →</a>
+          <a href="/handbook" style="font-family:var(--sans);font-size:0.82rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Handbook →</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

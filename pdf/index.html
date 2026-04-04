@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linguist Booklet — Eight Principles, One Framework</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+
+    :root {
+      --w-bg:      #FAF8F4;
+      --w-text:    #2A2420;
+      --w-muted:   #7A6E68;
+      --w-faint:   #B0A89E;
+      --w-accent:  #8C7355;
+      --w-border:  #E5DFD6;
+      --w-bg-card: #F2EDE6;
+      --c-bg:      #F0F4F8;
+      --c-text:    #263340;
+      --c-accent:  #4A7FA5;
+      --c-border:  #D8E2ED;
+      --serif: 'Newsreader', Georgia, serif;
+      --mono:  'JetBrains Mono', monospace;
+      --sans:  'Inter', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 18px; }
+
+    body {
+      font-family: var(--serif);
+      background: var(--w-bg);
+      color: var(--w-text);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Site nav — screen only */
+    .site-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 2rem;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.78rem;
+    }
+    .site-nav a { color: var(--w-muted); text-decoration: none; }
+    .site-nav a:hover { color: var(--w-text); }
+    .site-nav-links { display: flex; gap: 1.5rem; }
+
+    /* Print bar — screen only */
+    .print-bar {
+      background: var(--w-accent);
+      color: #fff;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .print-bar button {
+      background: #fff;
+      color: var(--w-accent);
+      border: none;
+      padding: 0.35rem 1rem;
+      border-radius: 3px;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .print-bar button:hover { background: #f5efe6; }
+
+    /* Document */
+    .doc {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+    }
+
+    .doc-cover {
+      padding-bottom: 3rem;
+      margin-bottom: 3rem;
+      border-bottom: 2px solid var(--w-border);
+    }
+
+    .doc-brand {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: 2.5rem;
+    }
+
+    .doc h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+
+    .doc-subtitle {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.05rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .doc-meta {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--w-faint);
+    }
+
+    .doc p {
+      margin-bottom: 1rem;
+      max-width: 65ch;
+    }
+
+    .doc strong { font-weight: 600; }
+    .doc em     { color: var(--w-muted); }
+
+    /* Sine divider */
+    .sine-divider {
+      margin: 2.5rem 0;
+      height: 28px;
+      overflow: hidden;
+      color: var(--w-accent);
+    }
+
+    .sine-divider svg { width: 100%; height: 100%; }
+
+    /* Pause note */
+    .pause-note {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-muted);
+      text-align: center;
+    }
+
+    .pause-note em {
+      font-family: var(--serif);
+      font-size: 0.95rem;
+      font-style: italic;
+      color: var(--w-text);
+      margin-right: 0.2rem;
+    }
+
+    /* Framework grid */
+    .framework-section {
+      margin: 2rem 0;
+      padding: 1.75rem;
+      background: var(--w-bg-card);
+      border: 1px solid var(--w-border);
+      border-radius: 4px;
+    }
+
+    .framework-section-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: 1rem;
+    }
+
+    .framework-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .framework-step {
+      padding: 1rem 1.1rem;
+      background: var(--w-bg);
+      border: 1px solid var(--w-border);
+      border-radius: 3px;
+    }
+
+    .framework-step-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--w-faint);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.2rem;
+    }
+
+    .framework-step-name {
+      font-family: var(--serif);
+      font-size: 1rem;
+      color: var(--w-accent);
+      margin-bottom: 0.3rem;
+    }
+
+    .framework-step-body {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-muted);
+      line-height: 1.55;
+    }
+
+    /* Principles */
+    .principle {
+      margin: 0;
+      padding: 1.5rem 0;
+      border-top: 1px solid var(--w-border);
+    }
+
+    .principle-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--w-faint);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.2rem;
+    }
+
+    .principle-title {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 0.6rem;
+      color: var(--w-text);
+    }
+
+    .principle-body {
+      font-family: var(--serif);
+      font-size: 0.95rem;
+      color: var(--w-muted);
+      line-height: 1.65;
+      margin-bottom: 0.75rem;
+      max-width: 65ch;
+    }
+
+    /* Pattern block */
+    .pattern {
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      background: var(--c-bg);
+      color: var(--c-text);
+      border: 1px solid var(--c-border);
+      border-left: 3px solid var(--c-accent);
+      padding: 1rem 1.2rem;
+      line-height: 1.85;
+    }
+
+    .pattern-label {
+      font-family: var(--mono);
+      font-size: 0.63rem;
+      color: var(--c-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.45rem;
+    }
+
+    /* Tips section */
+    .section-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .tip {
+      padding: 1rem 0;
+      border-top: 1px solid var(--w-border);
+    }
+
+    .tip-title {
+      font-family: var(--serif);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--w-text);
+      margin-bottom: 0.25rem;
+    }
+
+    .tip-body {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-muted);
+      line-height: 1.55;
+      margin-bottom: 0.4rem;
+    }
+
+    .tip-pattern {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--c-accent);
+      background: var(--c-bg);
+      border-left: 2px solid var(--c-border);
+      padding: 0.3rem 0.7rem;
+      line-height: 1.7;
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      color: var(--w-faint);
+    }
+
+    .doc-footer p + p { margin-top: 0.3rem; }
+
+    .doc-footer a {
+      color: var(--w-accent);
+      text-decoration: none;
+    }
+
+    .doc-footer a:hover { text-decoration: underline; }
+
+    /* =============================================
+       PRINT STYLES
+       ============================================= */
+    @media print {
+      @page {
+        size: A4;
+        margin: 18mm 18mm 20mm;
+      }
+
+      .print-bar { display: none; }
+      .site-nav { display: none; }
+
+      html { font-size: 10.5pt; }
+
+      body {
+        background: #fff;
+        color: #1a1a1a;
+      }
+
+      .doc {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      .doc-cover {
+        padding-bottom: 12mm;
+        margin-bottom: 12mm;
+        page-break-after: avoid;
+      }
+
+      .principle { page-break-inside: avoid; }
+      .pattern   { page-break-inside: avoid; }
+      .tip       { page-break-inside: avoid; }
+      .framework-section { page-break-inside: avoid; }
+
+      h2 { page-break-after: avoid; }
+      p  { orphans: 3; widows: 3; }
+
+      .sine-divider { margin: 5mm 0; }
+
+      .framework-step,
+      .framework-section,
+      .pattern,
+      .tip-pattern {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .doc-footer { page-break-before: avoid; }
+
+      a { color: inherit; text-decoration: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="/">Linguist</a>
+    <div class="site-nav-links">
+      <a href="/manifesto">Full manifesto →</a>
+      <a href="/guide">Practical guide →</a>
+      <a href="/see">Give it a go →</a>
+    </div>
+  </nav>
+
+  <div class="print-bar" id="print-bar">
+    <span>Save as PDF: File → Print → Save as PDF</span>
+    <button onclick="window.print()">Print / Save PDF</button>
+    <button onclick="document.getElementById('print-bar').style.display='none'" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);">Dismiss</button>
+  </div>
+
+  <div class="doc">
+
+    <!-- Cover -->
+    <div class="doc-cover">
+      <p class="doc-brand">Linguist · Vuelo Labs</p>
+      <h1>Linguist Booklet</h1>
+      <p class="doc-subtitle">Eight principles. One framework. Pin it up.</p>
+      <p class="doc-meta">linguist.vuelolabs.com · Think. Collab. Dispatch. Iterate.</p>
+    </div>
+
+    <!-- Framework grid -->
+    <div class="framework-section">
+      <p class="framework-section-label">The framework — Think · Collab · Dispatch · Iterate</p>
+      <div class="framework-grid">
+
+        <div class="framework-step">
+          <p class="framework-step-num">Step 01</p>
+          <p class="framework-step-name">Think</p>
+          <p class="framework-step-body">Get your messy human thoughts together before you touch the machine.</p>
+        </div>
+
+        <div class="framework-step">
+          <p class="framework-step-num">Step 02</p>
+          <p class="framework-step-name">Collab</p>
+          <p class="framework-step-body">Use the machine to figure out what you actually want — build the brief before you write the brief.</p>
+        </div>
+
+        <div class="framework-step">
+          <p class="framework-step-num">Step 03</p>
+          <p class="framework-step-name">Dispatch</p>
+          <p class="framework-step-body">Write a clean instruction, define the output and format, and walk away.</p>
+        </div>
+
+        <div class="framework-step">
+          <p class="framework-step-num">Step 04</p>
+          <p class="framework-step-name">Iterate</p>
+          <p class="framework-step-body">One or two rounds, then stop. The first good version is usually the best.</p>
+        </div>
+
+      </div>
+
+      <p class="pause-note"><em>Pause.</em> The machine doesn't need breaks. You do. Walk away. Come back sharp.</p>
+
+    </div>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 28" preserveAspectRatio="none" fill="none">
+        <path d="M0,14 C85,0 141,28 227,14 C312,0 368,28 454,14 C539,0 595,28 680,14"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <!-- Principles -->
+
+    <div class="principle">
+      <p class="principle-num">01</p>
+      <h2 class="principle-title">Skip the greeting. Start with the task.</h2>
+      <p class="principle-body">The preamble costs energy and changes nothing. The machine doesn't read your mood, doesn't appreciate warmth, and doesn't produce better work because you were polite.</p>
+      <div class="pattern">
+        <p class="pattern-label">Pattern</p>
+        <p>start: [the task]<br>
+        skip: greeting, apology, hedge, thank-you<br>
+        rule: if a human wouldn't need it to understand the question, remove it</p>
+      </div>
+    </div>
+
+    <div class="principle">
+      <p class="principle-num">02</p>
+      <h2 class="principle-title">Give it a role before you give it a task.</h2>
+      <p class="principle-body">"You are a senior editor…" calibrates tone, assumptions, and quality all at once. Without a role, the machine defaults to bland. With one, it has a perspective to speak from.</p>
+      <div class="pattern">
+        <p class="pattern-label">Pattern</p>
+        <p>role: [specific expert with relevant experience]<br>
+        task: [what you need]<br>
+        tone: [direct / honest / practical — be explicit]<br>
+        note: the more specific the role, the more specific the output</p>
+      </div>
+    </div>
+
+    <div class="principle">
+      <p class="principle-num">03</p>
+      <h2 class="principle-title">One thing at a time. Every time.</h2>
+      <p class="principle-body">Scope creep in the prompt equals scope creep in the output. Every extra task you add dilutes every other one — and you lose the ability to review anything properly.</p>
+      <div class="pattern">
+        <p class="pattern-label">Pattern</p>
+        <p>task: one thing<br>
+        review: before moving on<br>
+        next task: only after reviewing<br>
+        rule: if you wouldn't send step 1 to a colleague unread, don't use it as input for step 2</p>
+      </div>
+    </div>
+
+    <div class="principle">
+      <p class="principle-num">04</p>
+      <h2 class="principle-title">Context is a precision tool. Use it like one.</h2>
+      <p class="principle-body">Give it what it needs to do the job well. Nothing more. Too little context produces vague output; too much and it gets lost. Context is a targeted briefing, not a memory dump.</p>
+      <div class="pattern">
+        <p class="pattern-label">Pattern</p>
+        <p>context test: does removing this change the output? no → cut it<br>
+        include: audience, format, constraints, relevant specifics<br>
+        exclude: project history, background "just in case", emotional context<br>
+        rule: brief the machine like you'd brief a sharp contractor</p>
+      </div>
+    </div>
+
+    <div class="principle">
+      <p class="principle-num">05</p>
+      <h2 class="principle-title">Define done before you start.</h2>
+      <p class="principle-body">"Done means X" stops infinite iteration before it starts. When the machine knows the finish line, it runs toward it. When you know it, you stop when you're there.</p>
+      <div class="pattern">
+        <p class="pattern-label">Pattern</p>
+        <p>done criteria: [list what "done" looks like]<br>
+        format: [exact output format expected]<br>
+        length: [word / character / section count]<br>
+        check: "tell me when you think it meets all criteria"</p>
+      </div>
+    </div>
+
+    <div class="principle">
+      <p class="principle-num">06</p>
+      <h2 class="principle-title">Done is done. Stop at the first good version.</h2>
+      <p class="principle-body">Quality degrades with over-iteration. The first genuinely good output is almost always the best you'll get. Every round after that takes you further from your original intent.</p>
+      <div class="pattern">
+        <p class="pattern-label">Pattern</p>
+        <p>after first output: check against done criteria<br>
+        if passes: ship it<br>
+        if one specific thing is wrong: one targeted fix, then ship<br>
+        max iterations: 2 — rule: "could be better" ≠ "isn't good enough"</p>
+      </div>
+    </div>
+
+    <div class="principle">
+      <p class="principle-num">07</p>
+      <h2 class="principle-title">If it's going wrong, start a new conversation.</h2>
+      <p class="principle-body">Context creep is real. A fresh brief is faster than fighting a bad thread. The brief is the asset — not the thread. Leave the history behind, bring only your refined brief.</p>
+      <div class="pattern">
+        <p class="pattern-label">Pattern</p>
+        <p>signal to start fresh: same correction 2+ times in a row<br>
+        action: new conversation<br>
+        bring: refined brief + one note about what went wrong last time<br>
+        leave: all previous messages behind</p>
+      </div>
+    </div>
+
+    <div class="principle">
+      <p class="principle-num">08</p>
+      <h2 class="principle-title">Talk to it directly. Ask it what it needs.</h2>
+      <p class="principle-body">"What would help you give me a better answer?" is a completely valid question. You can ask it to ask you questions, to help build the brief you'll then give it.</p>
+      <div class="pattern">
+        <p class="pattern-label">Pattern</p>
+        <p>when stuck: "ask me one question at a time to help me figure out what I want"<br>
+        when improving: "what would help you give me better results on this consistently?"<br>
+        when briefing: "what do you need to know that I haven't told you?"</p>
+      </div>
+    </div>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 28" preserveAspectRatio="none" fill="none">
+        <path d="M0,14 C85,0 141,28 227,14 C312,0 368,28 454,14 C539,0 595,28 680,14"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <!-- Practical tips -->
+    <p class="section-label">Workflow habits</p>
+
+    <div class="tip">
+      <p class="tip-title">Use the machine to build the brief you'll give the machine.</p>
+      <p class="tip-body">Before you write a dispatch, have a Collab conversation first. Dump what you know and ask it to help you sharpen the ask.</p>
+      <p class="tip-pattern">collab first → dispatch second → never skip the middle step</p>
+    </div>
+
+    <div class="tip">
+      <p class="tip-title">New task, new conversation.</p>
+      <p class="tip-body">Don't carry context from one task into the next. Every task starts clean. Old threads are liabilities, not assets.</p>
+    </div>
+
+    <div class="tip">
+      <p class="tip-title">Give it a role — every time.</p>
+      <p class="tip-body">The single highest-leverage thing you can add to any prompt. "You are a…" — one sentence, completely different output.</p>
+      <p class="tip-pattern">role: [specific expert] — add before anything else</p>
+    </div>
+
+    <div class="tip">
+      <p class="tip-title">Define done before you start.</p>
+      <p class="tip-body">Write "done means X" into every dispatch. It stops the over-iteration spiral before it starts and gives you a clear exit point.</p>
+      <p class="tip-pattern">done when: [specific, testable criteria]</p>
+    </div>
+
+    <div class="tip">
+      <p class="tip-title">One task at a time.</p>
+      <p class="tip-body">Every extra task dilutes every other one. Resist the urge to bundle. Sequential is faster than it looks.</p>
+    </div>
+
+    <div class="tip">
+      <p class="tip-title">Write a context doc and paste it everywhere.</p>
+      <p class="tip-body">Build a short document: your role, your industry, your tone, your audience, your always/never rules. Paste it at the top of every new chat.</p>
+      <p class="tip-pattern">context_doc: role · industry · tone · audience · always · never</p>
+    </div>
+
+    <div class="tip">
+      <p class="tip-title">Stop iterating at the first good version.</p>
+      <p class="tip-body">When it's good, it's done. The feeling it could be 5% better isn't worth the 30% chance you make it worse.</p>
+    </div>
+
+    <div class="tip">
+      <p class="tip-title">Read the output before you send it.</p>
+      <p class="tip-body">Make it yours. The machine produced a draft. You produce the final thing. Always read before you forward, publish, or send.</p>
+    </div>
+
+    <div class="doc-footer">
+      <p>Linguist · Vuelo Labs · <a href="https://linguist.vuelolabs.com">linguist.vuelolabs.com</a></p>
+      <p>The why: <a href="/download">/download</a> · The full how: <a href="/handbook">/handbook</a> · <a href="/see">Give it a go →</a></p>
+    </div>
+
+  </div>
+
+</body>
+</html>

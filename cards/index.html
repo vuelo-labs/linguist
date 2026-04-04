@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Generator — Linguist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --w-bg:          #FAF8F4;
+      --w-bg-card:     #F2EDE6;
+      --w-border:      #E5DFD6;
+      --w-text:        #2A2420;
+      --w-muted:       #7A6E68;
+      --w-faint:       #B0A89E;
+      --w-accent:      #8C7355;
+      --w-accent-light:#F5EFE6;
+      --c-bg:          #F0F4F8;
+      --c-bg-card:     #FFFFFF;
+      --c-border:      #D8E2ED;
+      --c-text:        #263340;
+      --c-muted:       #5F7485;
+      --c-faint:       #9EB0C0;
+      --c-accent:      #4A7FA5;
+      --c-accent-light:#E5EFF7;
+      --serif: Georgia, 'Times New Roman', serif;
+      --mono:  'JetBrains Mono', 'Courier New', monospace;
+      --sans:  'Inter', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: var(--sans);
+      background: #1a1a1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* ---- UI shell ---- */
+    .ui {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .ui-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .ui-title {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #888;
+    }
+
+    .ui-title a { color: #888; text-decoration: none; }
+    .ui-title a:hover { color: #ccc; }
+
+    .ui-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: #ccc;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    button:hover { background: #333; border-color: #666; color: #fff; }
+
+    button.btn-primary {
+      background: var(--w-accent);
+      border-color: var(--w-accent);
+      color: #fff;
+    }
+
+    button.btn-primary:hover { background: #A08870; border-color: #A08870; }
+
+    button.btn-edit-active {
+      background: #1a2d3a;
+      border-color: var(--c-accent);
+      color: var(--c-accent);
+    }
+
+    button.btn-edit-active:hover { background: #1f3545; }
+
+    button.btn-danger {
+      background: #2d1515;
+      border-color: #5a2828;
+      color: #c88;
+    }
+
+    button.btn-danger:hover { background: #3d1a1a; border-color: #8a3a3a; color: #e99; }
+
+    .card-counter {
+      font-size: 0.8rem;
+      color: #666;
+      min-width: 5rem;
+      text-align: center;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .filter-btn.active {
+      background: var(--w-accent);
+      border-color: var(--w-accent);
+      color: #fff;
+    }
+
+    .filter-btn.filter-custom { border-color: var(--c-accent); color: var(--c-accent); }
+    .filter-btn.filter-custom.active { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
+    .filter-btn.filter-custom:hover { background: #1a2d3a; }
+
+    /* ---- Canvas area ---- */
+    .canvas-area {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    /* The 1080×1080 card, scaled down for preview */
+    .card-wrap {
+      flex-shrink: 0;
+    }
+
+    .card-scale {
+      transform-origin: top left;
+    }
+
+    /* ---- THE CARD — exactly 1080×1080 ---- */
+    #card {
+      width: 1080px;
+      height: 1080px;
+      display: flex;
+      flex-direction: column;
+      font-family: var(--serif);
+      background: #fff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Top branding bar */
+    .card-brand {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 52px;
+      border-bottom: 1px solid #e8e4df;
+      background: var(--w-bg);
+      flex-shrink: 0;
+    }
+
+    .card-brand-name {
+      font-family: var(--sans);
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+    }
+
+    .card-brand-tagline {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--w-faint);
+      letter-spacing: 0.04em;
+    }
+
+    /* Main content area: two panels */
+    .card-panels {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .card-panel {
+      flex: 1;
+      padding: 52px 48px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .card-panel--warm {
+      background: var(--w-bg-card);
+      border-right: 1px solid #ddd8d0;
+    }
+
+    .card-panel--cool {
+      background: var(--c-bg);
+    }
+
+    .card-panel-label {
+      font-family: var(--sans);
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-panel-label--warm { color: var(--w-accent); }
+    .card-panel-label--cool { color: var(--c-accent); font-family: var(--mono); }
+
+    .card-label-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .card-label-dot--warm { background: var(--w-accent); }
+    .card-label-dot--cool { background: var(--c-accent); }
+
+    .card-text {
+      font-size: 26px;
+      line-height: 1.6;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+    .card-text--warm {
+      font-family: var(--serif);
+      color: var(--w-text);
+    }
+
+    .card-text--cool {
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--c-text);
+      white-space: pre-line;
+      line-height: 1.85;
+    }
+
+    .card-wave {
+      margin-top: 28px;
+      height: 28px;
+      overflow: hidden;
+    }
+
+    .card-wave svg { width: 100%; height: 100%; }
+
+    /* Bottom caption bar */
+    .card-caption {
+      height: 88px;
+      display: flex;
+      align-items: center;
+      padding: 0 52px;
+      border-top: 1px solid #e8e4df;
+      background: var(--w-bg);
+      flex-shrink: 0;
+    }
+
+    .card-caption p {
+      font-family: var(--sans);
+      font-size: 18px;
+      color: var(--w-muted);
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    /* ---- Meta sidebar ---- */
+    .meta-panel {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .meta-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 0.4rem;
+      margin-top: 1.25rem;
+    }
+
+    .meta-label:first-child { margin-top: 0; }
+
+    .meta-value {
+      font-size: 0.85rem;
+      color: #aaa;
+      line-height: 1.5;
+    }
+
+    .meta-value.mono { font-family: var(--mono); font-size: 0.78rem; color: #9EB0C0; }
+
+    .meta-type {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      border: 1px solid #444;
+      color: #888;
+    }
+
+    .export-note {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 1.5rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Edit mode ---- */
+    #meta-view.hidden { display: none; }
+    #meta-edit { display: none; }
+    #meta-edit.active { display: block; }
+
+    .edit-textarea {
+      width: 100%;
+      background: #222;
+      border: 1px solid #3a3a3a;
+      border-radius: 3px;
+      color: #ccc;
+      font-size: 0.83rem;
+      line-height: 1.55;
+      padding: 0.5rem 0.65rem;
+      resize: vertical;
+      font-family: var(--sans);
+      display: block;
+    }
+
+    .edit-textarea.mono { font-family: var(--mono); font-size: 0.76rem; color: #9EB0C0; }
+
+    .edit-textarea:focus {
+      outline: none;
+      border-color: var(--w-accent);
+      background: #262626;
+    }
+
+    .edit-select {
+      width: 100%;
+      background: #222;
+      border: 1px solid #3a3a3a;
+      border-radius: 3px;
+      color: #ccc;
+      font-size: 0.83rem;
+      padding: 0.45rem 0.65rem;
+      font-family: var(--sans);
+      cursor: pointer;
+      display: block;
+    }
+
+    .edit-select:focus { outline: none; border-color: var(--w-accent); }
+
+    .edit-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .edit-hint {
+      font-size: 0.72rem;
+      color: #444;
+      margin-top: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Card grid thumbnail strip ---- */
+    .card-strip {
+      margin-top: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .strip-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 3px;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: #555;
+      transition: border-color 0.1s;
+      font-family: var(--sans);
+    }
+
+    .strip-thumb:hover { border-color: #666; color: #999; }
+    .strip-thumb.active { border-color: var(--w-accent); color: var(--w-accent); }
+    .strip-thumb.custom { border-color: #2a3a48; color: var(--c-accent); }
+    .strip-thumb.custom:hover { border-color: var(--c-accent); }
+    .strip-thumb.custom.active { border-color: var(--c-accent); background: #1a2a38; }
+  </style>
+</head>
+<body>
+
+<div class="ui">
+
+  <div class="ui-header">
+    <div class="ui-title">
+      <a href="/">Linguist</a> · Card Generator
+    </div>
+    <div class="ui-controls">
+      <button onclick="prevCard()">← Prev</button>
+      <span class="card-counter" id="card-counter">1 / 40</span>
+      <button onclick="nextCard()">Next →</button>
+      <button id="btn-edit" onclick="toggleEdit()">Edit Card</button>
+      <button onclick="newCard()">New Card</button>
+      <button class="btn-primary" onclick="exportCard()">Export PNG</button>
+    </div>
+  </div>
+
+  <div class="filter-row" id="filter-row">
+    <button class="filter-btn active" data-filter="all" data-label="All" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" data-filter="human_to_machine" data-label="Human → Machine" onclick="setFilter('human_to_machine', this)">Human → Machine</button>
+    <button class="filter-btn" data-filter="machine_to_human" data-label="Machine → Human" onclick="setFilter('machine_to_human', this)">Machine → Human</button>
+    <button class="filter-btn" data-filter="same_intent" data-label="Same Intent" onclick="setFilter('same_intent', this)">Same Intent</button>
+    <button class="filter-btn" data-filter="practical_tip" data-label="Practical Tips" onclick="setFilter('practical_tip', this)">Practical Tips</button>
+    <button class="filter-btn filter-custom" data-filter="custom" data-label="Custom" onclick="setFilter('custom', this)" style="display:none">Custom</button>
+  </div>
+
+  <div class="canvas-area">
+
+    <!-- Card preview -->
+    <div class="card-wrap">
+      <div class="card-scale" id="card-scale">
+
+        <!-- THE CARD — 1080×1080 -->
+        <div id="card">
+
+          <div class="card-brand">
+            <span class="card-brand-name">Linguist</span>
+            <span class="card-brand-tagline">Learn to speak human and machine.</span>
+          </div>
+
+          <div class="card-panels">
+
+            <div class="card-panel card-panel--warm">
+              <div>
+                <div class="card-panel-label card-panel-label--warm">
+                  <span class="card-label-dot card-label-dot--warm"></span>
+                  Human mode
+                </div>
+                <p class="card-text card-text--warm" id="card-human-text"></p>
+              </div>
+              <div class="card-wave" aria-hidden="true">
+                <svg viewBox="0 0 460 28" preserveAspectRatio="none" fill="none">
+                  <path d="M0,14 C57,0 95,28 152,14 C209,0 247,28 304,14 C361,0 399,28 460,14"
+                        stroke="#8C7355" stroke-width="2" opacity="0.3"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="card-panel card-panel--cool">
+              <div>
+                <div class="card-panel-label card-panel-label--cool">
+                  <span class="card-label-dot card-label-dot--cool"></span>
+                  machine mode
+                </div>
+                <p class="card-text card-text--cool" id="card-cool-text"></p>
+              </div>
+              <div class="card-wave" aria-hidden="true">
+                <svg viewBox="0 0 460 28" preserveAspectRatio="none" fill="none">
+                  <line x1="0" y1="14" x2="460" y2="14" stroke="#4A7FA5" stroke-width="2" opacity="0.3"/>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card-caption">
+            <p id="card-caption-text"></p>
+          </div>
+
+        </div>
+        <!-- end #card -->
+
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="meta-panel">
+
+      <!-- View mode -->
+      <div id="meta-view">
+        <p class="meta-label">Card</p>
+        <p class="meta-value" id="meta-id">#1</p>
+
+        <p class="meta-label">Type</p>
+        <span class="meta-type" id="meta-type">—</span>
+
+        <p class="meta-label">Human text</p>
+        <p class="meta-value" id="meta-human"></p>
+
+        <p class="meta-label">Machine text</p>
+        <p class="meta-value mono" id="meta-machine"></p>
+
+        <p class="meta-label">Caption</p>
+        <p class="meta-value" id="meta-caption"></p>
+
+        <p class="export-note">
+          <strong>E</strong> — export PNG &nbsp;·&nbsp; <strong>N</strong> — new card<br>
+          <strong>← →</strong> — navigate &nbsp;·&nbsp; strip below to jump
+        </p>
+      </div>
+
+      <!-- Edit mode -->
+      <div id="meta-edit">
+        <p class="meta-label" style="margin-top:0">Type</p>
+        <select id="edit-type" class="edit-select">
+          <option value="human_to_machine">Human → Machine</option>
+          <option value="machine_to_human">Machine → Human</option>
+          <option value="same_intent">Same Intent</option>
+          <option value="practical_tip">Practical Tip</option>
+          <option value="custom">Custom</option>
+        </select>
+
+        <p class="meta-label">Human text</p>
+        <textarea id="edit-human" class="edit-textarea" rows="5" placeholder="Human-side text (warm, serif)…"></textarea>
+
+        <p class="meta-label">Machine text</p>
+        <textarea id="edit-machine" class="edit-textarea mono" rows="5" placeholder="Machine-side text (cool, mono)…"></textarea>
+
+        <p class="meta-label">Caption</p>
+        <textarea id="edit-caption" class="edit-textarea" rows="2" placeholder="Bottom insight…"></textarea>
+
+        <div class="edit-actions">
+          <button class="btn-primary" onclick="saveEdits()">Save</button>
+          <button onclick="discardEdits()">Discard</button>
+          <button class="btn-danger" id="btn-delete" onclick="deleteCard()" style="display:none">Delete</button>
+        </div>
+
+        <p class="edit-hint">
+          Card previews update as you type.<br>
+          Saved to your browser. <strong>Esc</strong> to discard.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Thumbnail strip -->
+  <div class="card-strip" id="card-strip"></div>
+
+</div>
+
+<script src="content.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+
+  // ==========================================
+  // PERSISTED STATE
+  // ==========================================
+  let edits = {};
+  let customCards = [];
+  try {
+    edits = JSON.parse(localStorage.getItem('linguist-edits') || '{}');
+    customCards = JSON.parse(localStorage.getItem('linguist-custom') || '[]');
+  } catch(e) {}
+
+  function saveEditsToStorage() {
+    localStorage.setItem('linguist-edits', JSON.stringify(edits));
+  }
+
+  function saveCustomToStorage() {
+    localStorage.setItem('linguist-custom', JSON.stringify(customCards));
+  }
+
+  // ==========================================
+  // DATA HELPERS
+  // ==========================================
+  function getAllCards() {
+    const builtIn = CARDS.map(c => {
+      const override = edits[String(c.id)];
+      return override ? { ...c, ...override } : c;
+    });
+    return [...builtIn, ...customCards];
+  }
+
+  function applyFilter(type) {
+    const all = getAllCards();
+    if (type === 'all') return all;
+    if (type === 'custom') return all.filter(c => c.custom || edits[String(c.id)]);
+    return all.filter(c => c.type === type);
+  }
+
+  // ==========================================
+  // RUNTIME STATE
+  // ==========================================
+  let currentFilter = 'all';
+  let currentIndex = 0;
+  let editMode = false;
+  let filtered = applyFilter('all');
+
+  // ==========================================
+  // SCALE
+  // ==========================================
+  function scaleCard() {
+    const wrap = document.querySelector('.card-wrap');
+    const scale = document.getElementById('card-scale');
+    const available = wrap.parentElement.clientWidth - 320;
+    const maxW = Math.min(available, 580);
+    const ratio = maxW / 1080;
+    scale.style.transform = `scale(${ratio})`;
+    scale.style.width = '1080px';
+    scale.style.height = '1080px';
+    wrap.style.width = Math.round(1080 * ratio) + 'px';
+    wrap.style.height = Math.round(1080 * ratio) + 'px';
+  }
+
+  window.addEventListener('resize', scaleCard);
+
+  // ==========================================
+  // RENDER
+  // ==========================================
+  function render(card) {
+    if (!card) return;
+
+    document.getElementById('card-human-text').textContent = card.human || '';
+    document.getElementById('card-cool-text').textContent = card.machine || '';
+    document.getElementById('card-caption-text').textContent = card.caption || '';
+
+    document.getElementById('meta-id').textContent = '#' + card.id;
+    document.getElementById('meta-type').textContent = formatType(card.type);
+    document.getElementById('meta-human').textContent = card.human || '';
+    document.getElementById('meta-machine').textContent = card.machine || '';
+    document.getElementById('meta-caption').textContent = card.caption || '';
+
+    document.getElementById('card-counter').textContent = (currentIndex + 1) + ' / ' + filtered.length;
+
+    document.querySelectorAll('.strip-thumb').forEach((el, i) => {
+      el.classList.toggle('active', i === currentIndex);
+    });
+
+    updateFilterCounts();
+  }
+
+  function formatType(type) {
+    if (!type) return 'custom';
+    return type
+      .replace('human_to_machine', 'human → machine')
+      .replace('machine_to_human', 'machine → human')
+      .replace(/_/g, ' ');
+  }
+
+  function updateFilterCounts() {
+    const all = getAllCards();
+    const counts = {
+      all: all.length,
+      human_to_machine: all.filter(c => c.type === 'human_to_machine').length,
+      machine_to_human: all.filter(c => c.type === 'machine_to_human').length,
+      same_intent:       all.filter(c => c.type === 'same_intent').length,
+      practical_tip:     all.filter(c => c.type === 'practical_tip').length,
+      custom:            all.filter(c => c.custom || edits[String(c.id)]).length,
+    };
+
+    document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+      const type = btn.dataset.filter;
+      const count = counts[type] ?? 0;
+      const label = btn.dataset.label || type;
+
+      if (type === 'custom') {
+        btn.style.display = count > 0 ? '' : 'none';
+      }
+
+      btn.textContent = count > 0 ? `${label} (${count})` : label;
+    });
+  }
+
+  // ==========================================
+  // NAVIGATION
+  // ==========================================
+  function prevCard() {
+    if (editMode) return;
+    currentIndex = (currentIndex - 1 + filtered.length) % filtered.length;
+    render(filtered[currentIndex]);
+  }
+
+  function nextCard() {
+    if (editMode) return;
+    currentIndex = (currentIndex + 1) % filtered.length;
+    render(filtered[currentIndex]);
+  }
+
+  function setFilter(type, btn) {
+    if (editMode) exitEditMode(true);
+    currentFilter = type;
+    filtered = applyFilter(type);
+    currentIndex = 0;
+
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    buildStrip();
+    if (filtered.length > 0) render(filtered[0]);
+  }
+
+  // ==========================================
+  // STRIP
+  // ==========================================
+  function buildStrip() {
+    const strip = document.getElementById('card-strip');
+    strip.innerHTML = '';
+    filtered.forEach((card, i) => {
+      const el = document.createElement('button');
+      const isCustom = card.custom || edits[String(card.id)];
+      el.className = 'strip-thumb' + (i === currentIndex ? ' active' : '') + (isCustom ? ' custom' : '');
+      el.textContent = card.custom ? '★' : card.id;
+      el.title = card.caption || card.human || 'Custom card';
+      el.onclick = () => {
+        if (editMode) exitEditMode(true);
+        currentIndex = i;
+        render(filtered[i]);
+      };
+      strip.appendChild(el);
+    });
+  }
+
+  // ==========================================
+  // EDIT MODE
+  // ==========================================
+  function toggleEdit() {
+    if (editMode) exitEditMode(true);
+    else enterEditMode();
+  }
+
+  function enterEditMode() {
+    editMode = true;
+    const card = filtered[currentIndex];
+
+    document.getElementById('meta-view').classList.add('hidden');
+    document.getElementById('meta-edit').classList.add('active');
+    document.getElementById('btn-edit').classList.add('btn-edit-active');
+    document.getElementById('btn-edit').textContent = 'Cancel Edit';
+
+    // Delete / revert button
+    const deleteBtn = document.getElementById('btn-delete');
+    if (card.custom) {
+      deleteBtn.textContent = 'Delete Card';
+      deleteBtn.style.display = '';
+    } else if (edits[String(card.id)]) {
+      deleteBtn.textContent = 'Revert to Original';
+      deleteBtn.style.display = '';
+    } else {
+      deleteBtn.style.display = 'none';
+    }
+
+    populateEditFields(card);
+    document.getElementById('edit-human').focus();
+  }
+
+  function populateEditFields(card) {
+    document.getElementById('edit-type').value = card.type || 'custom';
+    document.getElementById('edit-human').value = card.human || '';
+    document.getElementById('edit-machine').value = card.machine || '';
+    document.getElementById('edit-caption').value = card.caption || '';
+  }
+
+  function exitEditMode(revert) {
+    editMode = false;
+    document.getElementById('meta-view').classList.remove('hidden');
+    document.getElementById('meta-edit').classList.remove('active');
+    document.getElementById('btn-edit').classList.remove('btn-edit-active');
+    document.getElementById('btn-edit').textContent = 'Edit Card';
+
+    if (revert && filtered[currentIndex]) {
+      render(filtered[currentIndex]);
+    }
+  }
+
+  function saveEdits() {
+    const card = filtered[currentIndex];
+    const newData = {
+      type:    document.getElementById('edit-type').value,
+      human:   document.getElementById('edit-human').value,
+      machine: document.getElementById('edit-machine').value,
+      caption: document.getElementById('edit-caption').value,
+    };
+
+    if (card.custom) {
+      const idx = customCards.findIndex(c => c.id === card.id);
+      if (idx !== -1) customCards[idx] = { ...customCards[idx], ...newData };
+      saveCustomToStorage();
+    } else {
+      edits[String(card.id)] = newData;
+      saveEditsToStorage();
+    }
+
+    filtered = applyFilter(currentFilter);
+    exitEditMode(false);
+    buildStrip();
+    render(filtered[currentIndex]);
+  }
+
+  function discardEdits() {
+    exitEditMode(true);
+  }
+
+  function deleteCard() {
+    const card = filtered[currentIndex];
+
+    if (card.custom) {
+      if (!confirm('Delete this custom card?')) return;
+      customCards = customCards.filter(c => c.id !== card.id);
+      saveCustomToStorage();
+    } else {
+      if (!confirm('Revert this card to its original content?')) return;
+      delete edits[String(card.id)];
+      saveEditsToStorage();
+    }
+
+    filtered = applyFilter(currentFilter);
+    currentIndex = Math.max(0, Math.min(currentIndex, filtered.length - 1));
+    exitEditMode(false);
+    buildStrip();
+    if (filtered.length > 0) render(filtered[currentIndex]);
+  }
+
+  // Live preview while typing
+  function updatePreview() {
+    document.getElementById('card-human-text').textContent   = document.getElementById('edit-human').value;
+    document.getElementById('card-cool-text').textContent    = document.getElementById('edit-machine').value;
+    document.getElementById('card-caption-text').textContent = document.getElementById('edit-caption').value;
+  }
+
+  // ==========================================
+  // NEW CARD
+  // ==========================================
+  function newCard() {
+    if (editMode) exitEditMode(true);
+
+    const card = {
+      id: 'custom-' + Date.now(),
+      type: 'custom',
+      human: '',
+      machine: '',
+      caption: '',
+      custom: true,
+    };
+
+    customCards.push(card);
+    saveCustomToStorage();
+
+    // Switch to All so the new card is visible
+    currentFilter = 'all';
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.filter === 'all');
+    });
+
+    filtered = applyFilter('all');
+    currentIndex = filtered.length - 1;
+    buildStrip();
+    render(filtered[currentIndex]);
+    enterEditMode();
+  }
+
+  // ==========================================
+  // EXPORT
+  // ==========================================
+  function exportCard() {
+    const cardEl = document.getElementById('card');
+    const currentCard = filtered[currentIndex];
+
+    const scale = document.getElementById('card-scale');
+    const prevTransform = scale.style.transform;
+    scale.style.transform = 'none';
+
+    html2canvas(cardEl, {
+      scale: 1,
+      useCORS: true,
+      width: 1080,
+      height: 1080,
+      backgroundColor: null,
+    }).then(canvas => {
+      scale.style.transform = prevTransform;
+      const idStr = String(currentCard.id);
+      const fileId = idStr.startsWith('custom-')
+        ? 'custom-' + idStr.slice(7, 13)
+        : idStr.padStart(2, '0');
+      const link = document.createElement('a');
+      link.download = `linguist-card-${fileId}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }).catch(() => {
+      scale.style.transform = prevTransform;
+      alert('Export failed. Try opening this page directly in a browser (not via file://).');
+    });
+  }
+
+  // ==========================================
+  // KEYBOARD
+  // ==========================================
+  document.addEventListener('keydown', e => {
+    if (editMode) {
+      if (e.key === 'Escape') exitEditMode(true);
+      return;
+    }
+    if (e.key === 'ArrowLeft')           prevCard();
+    if (e.key === 'ArrowRight')          nextCard();
+    if (e.key === 'e' || e.key === 'E')  exportCard();
+    if (e.key === 'n' || e.key === 'N')  newCard();
+  });
+
+  // ==========================================
+  // INIT
+  // ==========================================
+  document.getElementById('edit-human').addEventListener('input', updatePreview);
+  document.getElementById('edit-machine').addEventListener('input', updatePreview);
+  document.getElementById('edit-caption').addEventListener('input', updatePreview);
+
+  scaleCard();
+  buildStrip();
+  render(filtered[0]);
+
+</script>
+</body>
+</html>

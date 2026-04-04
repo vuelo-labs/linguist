@@ -1,0 +1,184 @@
+/* ============================================================
+   LINGUIST — Global Styles
+   Two palettes: Warm (human mode) · Cool (machine mode)
+   ============================================================ */
+
+/* ---- Custom properties ---- */
+:root {
+  /* Warm palette */
+  --w-bg:           #FAF8F4;
+  --w-bg-card:      #F2EDE6;
+  --w-bg-input:     #FDFBF8;
+  --w-border:       #E5DFD6;
+  --w-border-focus: #8C7355;
+  --w-text:         #2A2420;
+  --w-muted:        #7A6E68;
+  --w-faint:        #B0A89E;
+  --w-accent:       #8C7355;
+  --w-accent-soft:  #A08870;
+  --w-accent-light: #F5EFE6;
+
+  /* Cool palette */
+  --c-bg:           #F0F4F8;
+  --c-bg-card:      #FFFFFF;
+  --c-bg-inner:     #F8FAFC;
+  --c-border:       #D8E2ED;
+  --c-text:         #263340;
+  --c-muted:        #5F7485;
+  --c-faint:        #9EB0C0;
+  --c-accent:       #4A7FA5;
+  --c-accent-soft:  #6B9BBF;
+  --c-accent-light: #E5EFF7;
+
+  /* Typography */
+  --serif:  'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono:   'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+  --sans:   'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Spacing */
+  --space-xs:  0.25rem;
+  --space-sm:  0.5rem;
+  --space-md:  1rem;
+  --space-lg:  2rem;
+  --space-xl:  4rem;
+  --space-2xl: 8rem;
+
+  /* Layout */
+  --max-width: 760px;
+  --max-width-wide: 1100px;
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--serif);
+  background: var(--w-bg);
+  color: var(--w-text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Typography ---- */
+h1, h2, h3 {
+  font-family: var(--serif);
+  line-height: 1.25;
+  font-weight: normal;
+}
+
+h1 { font-size: clamp(2rem, 5vw, 3.25rem); }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); }
+h3 { font-size: clamp(1.1rem, 2vw, 1.4rem); }
+
+p { max-width: 65ch; }
+
+a {
+  color: var(--w-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover { color: var(--w-accent-soft); }
+
+/* ---- Layout ---- */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container--wide {
+  max-width: var(--max-width-wide);
+}
+
+/* ---- Sine wave divider ---- */
+.sine-divider {
+  width: 100%;
+  height: 40px;
+  color: var(--w-accent);
+  margin: var(--space-xl) 0;
+  overflow: hidden;
+}
+
+.sine-divider img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- Utility ---- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.text-muted { color: var(--w-muted); }
+.text-mono  { font-family: var(--mono); font-size: 0.9em; }
+
+/* ---- Warm mode overrides (default) ---- */
+.mode-warm {
+  background: var(--w-bg);
+  color: var(--w-text);
+}
+
+/* ---- Cool mode overrides ---- */
+.mode-cool {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--mono);
+}
+
+.mode-cool a { color: var(--c-accent); }
+.mode-cool a:hover { color: var(--c-accent-soft); }
+.mode-cool .sine-divider { color: var(--c-accent); }
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.75rem;
+  border: none;
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-warm {
+  background: var(--w-accent);
+  color: #fff;
+}
+.btn-warm:hover { background: var(--w-accent-soft); color: #fff; }
+
+.btn-cool {
+  background: var(--c-accent);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+}
+.btn-cool:hover { background: var(--c-accent-soft); color: #fff; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--w-border);
+  color: var(--w-muted);
+}
+.btn-ghost:hover { border-color: var(--w-accent); color: var(--w-accent); }
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  html { font-size: 16px; }
+  .container { padding: 0 var(--space-md); }
+}

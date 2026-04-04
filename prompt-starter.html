@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linguist · Prompt Starter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --fg: #111111;
+      --muted: #6b6b6b;
+      --border: #e0e0e0;
+      --pill-bg: #f2f2f2;
+      --pill-active-bg: #111111;
+      --pill-active-fg: #ffffff;
+      --prompt-bg: #f8f8f8;
+      --note-bg: #f5f5f5;
+      --note-border: #d8d8d8;
+      --btn-bg: #111111;
+      --btn-fg: #ffffff;
+      --badge-bg: #e0e0e0;
+      --badge-fg: #555555;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f0f0f;
+        --fg: #e8e8e8;
+        --muted: #888888;
+        --border: #2a2a2a;
+        --pill-bg: #1c1c1c;
+        --pill-active-bg: #e8e8e8;
+        --pill-active-fg: #0f0f0f;
+        --prompt-bg: #161616;
+        --note-bg: #161616;
+        --note-border: #2c2c2c;
+        --btn-bg: #e8e8e8;
+        --btn-fg: #0f0f0f;
+        --badge-bg: #2a2a2a;
+        --badge-fg: #888888;
+      }
+    }
+
+    html {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 52px 24px 72px;
+    }
+
+    .eyebrow {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      letter-spacing: 0.025em;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      margin-bottom: 10px;
+    }
+
+    .subtext {
+      font-size: 0.9375rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 40px;
+      max-width: 520px;
+    }
+
+    .platform-label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 15px;
+      border-radius: 100px;
+      background: var(--pill-bg);
+      border: 1px solid transparent;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--fg);
+      font-family: inherit;
+      line-height: 1;
+      transition: border-color 0.1s;
+    }
+
+    .pill:hover {
+      border-color: var(--border);
+    }
+
+    .pill.active {
+      background: var(--pill-active-bg);
+      color: var(--pill-active-fg);
+      border-color: transparent;
+    }
+
+    .pill.active .badge {
+      background: rgba(128,128,128,0.25);
+      color: var(--pill-active-fg);
+    }
+
+    .badge {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--badge-bg);
+      color: var(--badge-fg);
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+    }
+
+    .prompt-container {
+      position: relative;
+      margin-bottom: 22px;
+    }
+
+    .prompt-box {
+      display: block;
+      width: 100%;
+      max-height: 420px;
+      overflow-y: auto;
+      background: var(--prompt-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 20px 56px 20px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: var(--fg);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      padding: 7px 14px;
+      background: var(--btn-bg);
+      color: var(--btn-fg);
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      transition: opacity 0.15s;
+    }
+
+    .copy-btn:hover {
+      opacity: 0.75;
+    }
+
+    .dispatch-note {
+      border: 1px solid var(--note-border);
+      background: var(--note-bg);
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
+    .how-heading {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 52px;
+    }
+
+    .steps li {
+      display: flex;
+      gap: 12px;
+      font-size: 0.9125rem;
+      line-height: 1.6;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 0.875rem;
+      font-variant-numeric: tabular-nums;
+      width: 1.25em;
+      padding-top: 1px;
+    }
+
+    footer {
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 20px;
+    }
+
+    footer a {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--fg);
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 36px 20px 56px; }
+      h1 { font-size: 1.5rem; }
+      .prompt-box { font-size: 0.8125rem; }
+    }
+
+    @media (max-width: 360px) {
+      body { padding: 28px 16px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="eyebrow">Linguist · Vuelo Labs</p>
+  <h1>Your AI prompting starter</h1>
+  <p class="subtext">Pick your platform, copy the prompt, paste it into a new conversation. The AI walks you through the rest — about 10–15 minutes.</p>
+
+  <p class="platform-label">Platform</p>
+  <div class="pills" role="group" aria-label="Select platform">
+    <button class="pill active" data-platform="claude">Claude</button>
+    <button class="pill" data-platform="chatgpt">ChatGPT</button>
+    <button class="pill" data-platform="gemini">Gemini</button>
+    <button class="pill" data-platform="tines">Tines Workbench</button>
+    <button class="pill" data-platform="claudecode">Claude Code <span class="badge">different setup</span></button>
+  </div>
+
+  <div class="prompt-container">
+    <div class="prompt-box" id="prompt-box" aria-label="Prompt text" tabindex="0"></div>
+    <button class="copy-btn" id="copy-btn">Copy prompt</button>
+  </div>
+
+  <div class="dispatch-note">
+    Write a clear instruction. The AI will follow it. You can refine in the next message if needed.
+  </div>
+
+  <p class="how-heading">How to use</p>
+  <ol class="steps">
+    <li><span class="step-num">1.</span><span>Open a new conversation in your chosen platform.</span></li>
+    <li><span class="step-num">2.</span><span>Paste the prompt as your first message and send it.</span></li>
+    <li><span class="step-num">3.</span><span>The AI guides you step by step — each builds on the last.</span></li>
+    <li><span class="step-num">4.</span><span>You'll leave with a personal reference card you can reuse in any conversation.</span></li>
+  </ol>
+
+  <footer>
+    <a href="/guide">Full guide →</a>
+    <a href="/handbook">Handbook →</a>
+    <a href="/pdf">Booklet (PDF) →</a>
+    <a href="/see">Try it (no login) →</a>
+  </footer>
+
+  <script>
+    var PROMPTS = {
+
+      claude: `You're going to run a guided walkthrough — around 10 to 15 minutes — to teach me how to prompt well. Go one step at a time. Wait for my confirmation before moving on.
+
+After every second step, give me a one-line checkpoint: where we are and what's next. This keeps us both oriented.
+
+---
+
+STEP 1 — PERSISTENT INSTRUCTIONS
+
+Claude has two places for persistent context:
+
+1. Project Instructions — attached to a Project. Everything in that project inherits them. Use this for work you return to: a codebase, a client, a recurring report. It sets the role, the constraints, the output style — once.
+
+2. Profile field — Settings → Profile → "What would you like Claude to know about you?" This follows you across all conversations, not just one project. Use it for personal defaults: your role, your preferences, how you like responses formatted.
+
+Project Instructions are for the work. The profile field is for you.
+
+Explain this distinction to me clearly. Then ask me one question about my work to decide which one we should build first. Produce a reusable template for it. Keep it under 15 lines — just the scaffolding, not a novel.
+
+---
+
+STEP 2 — THE OPENING SEED
+
+Most people open a conversation with something vague — "help me with a proposal" or "write something about X." The model has nothing to work with, so it guesses. The output is generic. Then the user iterates five times trying to fix what was never specified.
+
+A well-seeded opener changes this. It gives the model: who you are (or who it should be), what you need, what constraints matter, and what the output looks like when it's done.
+
+Here's what a good seed contains:
+- Role or context (who is this for, what's the situation)
+- Goal (what specifically you need)
+- Constraints (length, tone, format, audience, what to avoid)
+- Output definition (what "done" looks like)
+
+Ask me one question about a real task I do regularly. Then build a seed with me — not for me. Show me the before (vague) and after (seeded) so I can feel the difference.
+
+---
+
+STEP 3 — THE CORE FRAMEWORK
+
+Linguist uses four steps: Think → Collab → Dispatch → Iterate.
+
+Most people skip straight to Dispatch. That's why it's frustrating.
+
+Teach me each one, in order. For each:
+- One sentence: what it is.
+- A before/after example — same task, different approach.
+- The most common mistake people make at that step.
+
+The four steps:
+
+Think — Get your messy thoughts together before you open the machine. Brain dump, voice note, back of an envelope. The machine structures chaos well, but it needs your chaos first.
+
+Collab — Use the machine to figure out what you actually want. Ask it questions. Ask it to ask you questions. Let it sharpen the brief before you write the brief.
+
+Dispatch — Write a clean instruction and send it. Define the output, the format, the length, the audience. The machine doesn't need supervision. Dispatch works in any fresh conversation — a well-written prompt in a new chat is a valid dispatch. You don't need an agent or a special tool. You just need a clear instruction.
+
+Iterate — One or two rounds, then stop. Quality degrades with over-iteration. Every round pulls you further from your original intent. Define what done looks like before you start.
+
+After Dispatch, flag this clearly: "Dispatch and disappear" doesn't require any special setup. A new conversation with a well-seeded prompt IS a dispatch. Agentic tools like Claude Code add execution on top — same discipline, higher stakes — but the prompting principle is identical.
+
+---
+
+STEP 4 — TONE CALIBRATION
+
+Show me three versions of the same prompt:
+1. Too chatty — hedging, apologising, over-explaining.
+2. Too cold — robotic, stripped of all human signal.
+3. Calibrated — efficient and human. Direct without being curt.
+
+Use a realistic task — not a toy example.
+
+Then help me find my working register. The goal is: efficient, clear, human. No wasted words, but it still sounds like a person wrote it. Teach me to feel the difference, not just see it.
+
+Give me three short principles I can use to self-check my tone before sending any prompt.
+
+---
+
+STEP 5 — TOKEN EFFICIENCY, MIGRATION AND RE-SEEDING
+
+Part A — Token efficiency
+
+Three practical habits that reduce waste without changing meaning. For each, show a bloated version and a tight version side by side. No theory about how tokens work — just the habits.
+
+Part B — Migration
+
+Long conversations degrade. The model loses the thread, decisions get buried, context becomes noise. When this happens, don't fight the thread — migrate.
+
+The move: summarise what matters, drop the rest, open a fresh conversation with the summary as your seed.
+
+Give me a reusable migration template I can fill in when a conversation needs a clean restart. Keep it under 10 lines.
+
+Part C — The re-seed
+
+Sometimes a conversation drifts but isn't worth abandoning. A re-seed is a short mid-thread message that restates the original goal and reorients the model without starting over.
+
+Give me a one-paragraph re-seed template I can adapt on the fly.
+
+---
+
+STEP 6 — WRAP-UP
+
+Build me a personal reference card. Keep it to one screen — something I can glance at before starting any conversation. Include:
+
+- Think → Collab → Dispatch → Iterate — one line each
+- My seed template from Step 2
+- Migration template from Step 5B
+- Re-seed template from Step 5C
+- Three tone principles from Step 4
+- Three token habits from Step 5A
+
+Format it so I can paste it into a note and actually use it.`,
+
+      chatgpt: `You're going to run a guided walkthrough — around 10 to 15 minutes — to teach me how to prompt well. Go one step at a time. Wait for my confirmation before moving on.
+
+After every second step, give me a one-line checkpoint: where we are and what's next. This keeps us both oriented.
+
+---
+
+STEP 1 — CUSTOM INSTRUCTIONS
+
+ChatGPT has Custom Instructions — find them in Settings → Personalisation → Custom Instructions. There are two fields:
+
+1. "What would you like ChatGPT to know about you?" — Your context. Role, industry, experience level, what kind of work you do. This helps the model calibrate its assumptions without you repeating yourself every conversation.
+
+2. "How would you like ChatGPT to respond?" — Your preferences. Tone, format, length, what to include or avoid. This shapes every response across all conversations.
+
+The first field is about you. The second field is about the output.
+
+Explain this to me clearly. Then ask me one question about my work to decide what matters most. Produce a reusable template for both fields — short, practical, not a wall of text. Under 10 lines each.
+
+---
+
+STEP 2 — THE OPENING SEED
+
+Most people open a conversation with something vague — "help me with a proposal" or "write something about X." The model has nothing to work with, so it guesses. The output is generic. Then the user iterates five times trying to fix what was never specified.
+
+A well-seeded opener changes this. It gives the model: who you are (or who it should be), what you need, what constraints matter, and what the output looks like when it's done.
+
+Here's what a good seed contains:
+- Role or context (who is this for, what's the situation)
+- Goal (what specifically you need)
+- Constraints (length, tone, format, audience, what to avoid)
+- Output definition (what "done" looks like)
+
+Ask me one question about a real task I do regularly. Then build a seed with me — not for me. Show me the before (vague) and after (seeded) so I can feel the difference.
+
+---
+
+STEP 3 — THE CORE FRAMEWORK
+
+Linguist uses four steps: Think → Collab → Dispatch → Iterate.
+
+Most people skip straight to Dispatch. That's why it's frustrating.
+
+Teach me each one, in order. For each:
+- One sentence: what it is.
+- A before/after example — same task, different approach.
+- The most common mistake people make at that step.
+
+The four steps:
+
+Think — Get your messy thoughts together before you open the machine. Brain dump, voice note, back of an envelope. The machine structures chaos well, but it needs your chaos first.
+
+Collab — Use the machine to figure out what you actually want. Ask it questions. Ask it to ask you questions. Let it sharpen the brief before you write the brief.
+
+Dispatch — Write a clean instruction and send it. Define the output, the format, the length, the audience. The machine doesn't need supervision. Dispatch works in any fresh conversation — a well-written prompt in a new chat is a valid dispatch. You don't need an agent or a special tool. You just need a clear instruction.
+
+Iterate — One or two rounds, then stop. Quality degrades with over-iteration. Every round pulls you further from your original intent. Define what done looks like before you start.
+
+After Dispatch, flag this clearly: "Dispatch and disappear" doesn't require any special setup. A new conversation with a well-seeded prompt IS a dispatch. Agentic tools add execution on top — same discipline, higher stakes — but the prompting principle is identical.
+
+---
+
+STEP 4 — TONE CALIBRATION
+
+Show me three versions of the same prompt:
+1. Too chatty — hedging, apologising, over-explaining.
+2. Too cold — robotic, stripped of all human signal.
+3. Calibrated — efficient and human. Direct without being curt.
+
+Use a realistic task — not a toy example.
+
+Then help me find my working register. The goal is: efficient, clear, human. No wasted words, but it still sounds like a person wrote it. Teach me to feel the difference, not just see it.
+
+Give me three short principles I can use to self-check my tone before sending any prompt.
+
+---
+
+STEP 5 — TOKEN EFFICIENCY, MIGRATION AND RE-SEEDING
+
+Part A — Token efficiency
+
+Three practical habits that reduce waste without changing meaning. For each, show a bloated version and a tight version side by side. No theory about how tokens work — just the habits.
+
+Part B — Migration
+
+Long conversations degrade. The model loses the thread, decisions get buried, context becomes noise. When this happens, don't fight the thread — migrate.
+
+The move: summarise what matters, drop the rest, open a fresh conversation with the summary as your seed.
+
+Give me a reusable migration template I can fill in when a conversation needs a clean restart. Keep it under 10 lines.
+
+Part C — The re-seed
+
+Sometimes a conversation drifts but isn't worth abandoning. A re-seed is a short mid-thread message that restates the original goal and reorients the model without starting over.
+
+Give me a one-paragraph re-seed template I can adapt on the fly.
+
+---
+
+STEP 6 — WRAP-UP
+
+Build me a personal reference card. Keep it to one screen — something I can glance at before starting any conversation. Include:
+
+- Think → Collab → Dispatch → Iterate — one line each
+- My seed template from Step 2
+- Migration template from Step 5B
+- Re-seed template from Step 5C
+- Three tone principles from Step 4
+- Three token habits from Step 5A
+
+Format it so I can paste it into a note and actually use it.`,
+
+      gemini: `You're going to run a guided walkthrough — around 10 to 15 minutes — to teach me how to prompt well. Go one step at a time. Wait for my confirmation before moving on.
+
+After every second step, give me a one-line checkpoint: where we are and what's next. This keeps us both oriented.
+
+---
+
+STEP 1 — PERSISTENT INSTRUCTIONS
+
+Gemini has two ways to set persistent context:
+
+1. Gems (Gemini Advanced) — In the left sidebar, click "New Gem." A Gem is a saved configuration: you give it a name, a set of instructions, and optionally a tone. Every conversation with that Gem starts from those instructions. Use Gems for recurring work — a writing style, a review process, a specific role you need the model to play repeatedly.
+
+2. System Instructions (Google AI Studio) — If you're using AI Studio, the system instruction field at the top of a prompt sets the model's behaviour for that session. Same idea, different interface: persistent context that shapes every response.
+
+Both do the same thing: they stop you from repeating yourself. The instructions persist so your conversations can start at the task, not the setup.
+
+Explain this to me clearly. Then ask me one question about my work to decide which one to build first. Produce a reusable template — under 15 lines. Just the scaffolding.
+
+---
+
+STEP 2 — THE OPENING SEED
+
+Most people open a conversation with something vague — "help me with a proposal" or "write something about X." The model has nothing to work with, so it guesses. The output is generic. Then the user iterates five times trying to fix what was never specified.
+
+A well-seeded opener changes this. It gives the model: who you are (or who it should be), what you need, what constraints matter, and what the output looks like when it's done.
+
+Here's what a good seed contains:
+- Role or context (who is this for, what's the situation)
+- Goal (what specifically you need)
+- Constraints (length, tone, format, audience, what to avoid)
+- Output definition (what "done" looks like)
+
+Ask me one question about a real task I do regularly. Then build a seed with me — not for me. Show me the before (vague) and after (seeded) so I can feel the difference.
+
+---
+
+STEP 3 — THE CORE FRAMEWORK
+
+Linguist uses four steps: Think → Collab → Dispatch → Iterate.
+
+Most people skip straight to Dispatch. That's why it's frustrating.
+
+Teach me each one, in order. For each:
+- One sentence: what it is.
+- A before/after example — same task, different approach.
+- The most common mistake people make at that step.
+
+The four steps:
+
+Think — Get your messy thoughts together before you open the machine. Brain dump, voice note, back of an envelope. The machine structures chaos well, but it needs your chaos first.
+
+Collab — Use the machine to figure out what you actually want. Ask it questions. Ask it to ask you questions. Let it sharpen the brief before you write the brief.
+
+Dispatch — Write a clean instruction and send it. Define the output, the format, the length, the audience. The machine doesn't need supervision. Dispatch works in any fresh conversation — a well-written prompt in a new chat is a valid dispatch. You don't need an agent or a special tool. You just need a clear instruction.
+
+Iterate — One or two rounds, then stop. Quality degrades with over-iteration. Every round pulls you further from your original intent. Define what done looks like before you start.
+
+After Dispatch, flag this clearly: "Dispatch and disappear" doesn't require any special setup. A new conversation with a well-seeded prompt IS a dispatch. Agentic tools add execution on top — same discipline, higher stakes — but the prompting principle is identical.
+
+---
+
+STEP 4 — TONE CALIBRATION
+
+Show me three versions of the same prompt:
+1. Too chatty — hedging, apologising, over-explaining.
+2. Too cold — robotic, stripped of all human signal.
+3. Calibrated — efficient and human. Direct without being curt.
+
+Use a realistic task — not a toy example.
+
+Then help me find my working register. The goal is: efficient, clear, human. No wasted words, but it still sounds like a person wrote it. Teach me to feel the difference, not just see it.
+
+Give me three short principles I can use to self-check my tone before sending any prompt.
+
+---
+
+STEP 5 — TOKEN EFFICIENCY, MIGRATION AND RE-SEEDING
+
+Part A — Token efficiency
+
+Three practical habits that reduce waste without changing meaning. For each, show a bloated version and a tight version side by side. No theory about how tokens work — just the habits.
+
+Part B — Migration
+
+Long conversations degrade. The model loses the thread, decisions get buried, context becomes noise. When this happens, don't fight the thread — migrate.
+
+The move: summarise what matters, drop the rest, open a fresh conversation with the summary as your seed.
+
+Give me a reusable migration template I can fill in when a conversation needs a clean restart. Keep it under 10 lines.
+
+Part C — The re-seed
+
+Sometimes a conversation drifts but isn't worth abandoning. A re-seed is a short mid-thread message that restates the original goal and reorients the model without starting over.
+
+Give me a one-paragraph re-seed template I can adapt on the fly.
+
+---
+
+STEP 6 — WRAP-UP
+
+Build me a personal reference card. Keep it to one screen — something I can glance at before starting any conversation. Include:
+
+- Think → Collab → Dispatch → Iterate — one line each
+- My seed template from Step 2
+- Migration template from Step 5B
+- Re-seed template from Step 5C
+- Three tone principles from Step 4
+- Three token habits from Step 5A
+
+Format it so I can paste it into a note and actually use it.`,
+
+      tines: `You're going to run a guided walkthrough — around 10 to 15 minutes — to teach me how to prompt well. Go one step at a time. Wait for my confirmation before moving on.
+
+After every second step, give me a one-line checkpoint: where we are and what's next. This keeps us both oriented.
+
+---
+
+STEP 1 — CUSTOM INSTRUCTIONS
+
+Tines Workbench has Custom Instructions — find them via the settings icon in the top right of the Workbench.
+
+Important: unlike most platforms, these instructions apply immediately to all existing conversations, not just new ones. Changing them changes every thread you have open. So be deliberate about what goes in here — it's global context, not per-conversation setup.
+
+Because Workbench already has your tools connected, the Custom Instructions aren't about capability — the model already knows what it can access. The instructions are about intent and constraints: who you are, what kind of work you do, how you want responses shaped, what to prioritise, what to avoid.
+
+Explain this to me clearly. Then ask me one question about my work to decide what matters most. Produce a reusable template — short, practical, under 15 lines.
+
+---
+
+STEP 2 — THE OPENING SEED
+
+Most people open a conversation with something vague — "help me with a proposal" or "run a report." The model has nothing to work with, so it guesses. The output is generic. Then the user iterates five times trying to fix what was never specified.
+
+In Tines Workbench, this matters more than usual — because the model can actually execute. A vague seed with connected tools means the model might do the wrong thing confidently. The seed is about intent and constraints, not capability. The tools are already there. Your job is to tell it what to do with them and what not to touch.
+
+A well-seeded opener gives the model: who you are (or who it should be), what you need, what constraints matter, and what the output looks like when it's done.
+
+Here's what a good seed contains:
+- Role or context (who is this for, what's the situation)
+- Goal (what specifically you need)
+- Constraints (length, tone, format, audience, what to avoid, which tools to use or skip)
+- Output definition (what "done" looks like)
+
+Ask me one question about a real task I do regularly. Then build a seed with me — not for me. Show me the before (vague) and after (seeded) so I can feel the difference.
+
+---
+
+STEP 3 — THE CORE FRAMEWORK
+
+Linguist uses four steps: Think → Collab → Dispatch → Iterate.
+
+Most people skip straight to Dispatch. That's why it's frustrating.
+
+Teach me each one, in order. For each:
+- One sentence: what it is.
+- A before/after example — same task, different approach.
+- The most common mistake people make at that step.
+
+The four steps:
+
+Think — Get your messy thoughts together before you open the machine. Brain dump, voice note, back of an envelope. The machine structures chaos well, but it needs your chaos first.
+
+Collab — Use the machine to figure out what you actually want. Ask it questions. Ask it to ask you questions. Let it sharpen the brief before you write the brief.
+
+Dispatch — Write a clean instruction and send it. Define the output, the format, the length, the audience. The machine doesn't need supervision. Dispatch works in any fresh conversation — a well-written prompt in a new chat is a valid dispatch. In Workbench, dispatch carries extra weight because the model has tools — a clean dispatch with connected tools means it can execute, not just respond.
+
+Iterate — One or two rounds, then stop. Quality degrades with over-iteration. Every round pulls you further from your original intent. Define what done looks like before you start.
+
+After Dispatch, flag this clearly: a dispatch in Workbench is closer to agentic execution than in vanilla chat platforms. Same discipline, higher stakes. Scope matters more when the model can act.
+
+---
+
+STEP 4 — TONE CALIBRATION
+
+Show me three versions of the same prompt:
+1. Too chatty — hedging, apologising, over-explaining.
+2. Too cold — robotic, stripped of all human signal.
+3. Calibrated — efficient and human. Direct without being curt.
+
+Use a realistic task — not a toy example.
+
+Then help me find my working register. The goal is: efficient, clear, human. No wasted words, but it still sounds like a person wrote it. Teach me to feel the difference, not just see it.
+
+Give me three short principles I can use to self-check my tone before sending any prompt.
+
+---
+
+STEP 5 — TOKEN EFFICIENCY, MIGRATION AND RE-SEEDING
+
+Part A — Token efficiency
+
+Three practical habits that reduce waste without changing meaning. For each, show a bloated version and a tight version side by side. No theory about how tokens work — just the habits.
+
+Part B — Migration
+
+Long conversations degrade. The model loses the thread, decisions get buried, context becomes noise. When this happens, don't fight the thread — migrate.
+
+The move: summarise what matters, drop the rest, open a fresh conversation with the summary as your seed.
+
+Give me a reusable migration template I can fill in when a conversation needs a clean restart. Keep it under 10 lines.
+
+Part C — The re-seed
+
+Sometimes a conversation drifts but isn't worth abandoning. A re-seed is a short mid-thread message that restates the original goal and reorients the model without starting over.
+
+Give me a one-paragraph re-seed template I can adapt on the fly.
+
+---
+
+STEP 6 — WRAP-UP
+
+Build me a personal reference card. Keep it to one screen — something I can glance at before starting any conversation. Include:
+
+- Think → Collab → Dispatch → Iterate — one line each
+- My seed template from Step 2
+- Migration template from Step 5B
+- Re-seed template from Step 5C
+- Three tone principles from Step 4
+- Three token habits from Step 5A
+
+Format it so I can paste it into a note and actually use it.`,
+
+      claudecode: `You're going to run a guided walkthrough — around 10 to 15 minutes — to teach me how to get the most out of Claude Code. This is a different kind of setup from standard AI chat. Go one step at a time. Wait for my confirmation before moving on.
+
+After every second step, give me a one-line checkpoint: where we are and what's next. This keeps us both oriented.
+
+---
+
+STEP 1A — CLAUDE.md
+
+Claude Code reads a file called CLAUDE.md from your project root at the start of every session. It's your persistent context — version-controlled, project-specific, always present.
+
+This is your equivalent of "Custom Instructions" but it lives in the repo, not in a settings menu. It travels with the project. Anyone who works on the project gets the same context. It's the single most impactful thing you can set up.
+
+A good CLAUDE.md covers:
+- Project overview — what this is, in one or two lines
+- Stack — languages, frameworks, key dependencies
+- Conventions — naming, file structure, patterns the project follows
+- What to avoid — anti-patterns, deprecated approaches, files not to touch
+- Output style — how code should look when it's written (tests? types? comments?)
+
+Ask me one question about my project. Then produce a working first draft of CLAUDE.md. Keep it under 30 lines. I'll iterate from there.
+
+---
+
+STEP 1B — AGENTIC PROMPTING
+
+Claude Code is different from chat. It doesn't just respond — it plans, writes, runs, and checks. That changes what good prompting looks like.
+
+Key differences from chat prompting:
+
+1. Goal and acceptance criteria defined upfront, not iteratively. In chat, you can steer as you go. In agentic mode, the model takes your instruction and runs with it. If the goal is vague, it'll do something confidently wrong.
+
+2. Scope control matters more. The agent does exactly what you describe — including things you didn't mean to include. "Refactor the auth module" might touch files you didn't want touched. Boundaries need to be explicit.
+
+3. One clear instruction vs. sub-tasks. Know when to give one big instruction ("implement the login flow end to end") vs. breaking it into steps ("first, set up the route; then, add the middleware; then, write the tests"). Bigger scope = more autonomy = more risk of drift.
+
+Show me a weak task prompt and a well-scoped task prompt, side by side, for the same task. Make clear what the well-scoped version gets right: goal, acceptance criteria, boundaries, what "done" looks like.
+
+---
+
+STEP 2 — THE OPENING SEED (AGENTIC)
+
+In chat, a seed sets context for a conversation. In Claude Code, a seed sets context for an execution session.
+
+A well-seeded agentic opener contains:
+- Pointer to CLAUDE.md or inline project context (if CLAUDE.md isn't set up yet)
+- Specific goal — what you want built, changed, or fixed
+- Acceptance criteria — how you'll know it's done
+- Hard constraints — files not to touch, patterns to follow, dependencies to avoid
+- Definition of done — what the output looks like when it's right
+
+Build one with me. Ask me one question about a real task in my project. Then show me the before (vague) and after (well-seeded) so I can see what a good agentic seed looks like.
+
+---
+
+STEP 3 — THE CORE FRAMEWORK (AGENTIC)
+
+Linguist uses four steps: Think → Collab → Dispatch → Iterate.
+
+Most people skip straight to Dispatch. In Claude Code, skipping straight to Dispatch means the agent executes before you've thought it through. The cost of a bad dispatch is higher here — it's not just a bad response, it's bad code in your project.
+
+Teach me each one, in order. For each:
+- One sentence: what it is.
+- A before/after example — same task, different approach.
+- The most common mistake people make at that step.
+- How it works differently when the model executes autonomously.
+
+The four steps:
+
+Think — Get your messy thoughts together before you open the terminal. What are you actually trying to build? What files are involved? What should not change? The agent is brilliant at execution, but it needs your intent first.
+
+Collab — Use Claude Code to figure out what you actually want. Ask it to read the codebase and propose an approach before it writes anything. "Read src/auth and tell me how you'd add rate limiting before you do it." Collab in agentic mode means reviewing the plan, not the output.
+
+Dispatch — Write a clean instruction and send it. In Claude Code, dispatch means the model plans and executes. A dispatch in chat produces text you review. A dispatch in Claude Code produces code, files, and changes. Same discipline. Higher stakes. The scope must be locked before you send.
+
+Iterate — One or two rounds, then stop. In agentic mode, iteration means reviewing what was built and requesting targeted changes. "Move the validation to middleware" — not "make it better." Specific, bounded corrections. If the approach is wrong, don't iterate — start a new session with a better seed.
+
+---
+
+STEP 4 — PRECISION CALIBRATION
+
+In chat, tone calibration matters. In Claude Code, precision calibration matters. The question isn't "does this sound right?" — it's "will the agent do the right thing?"
+
+Show me three versions of the same task instruction:
+1. Too vague — "clean up the API." No goal, no boundaries. The agent interprets freely.
+2. Over-specified — Every file, every line, every variable name dictated. You've written the code in English; the agent is just a typist.
+3. Well-scoped — Clear goal, explicit boundaries, room for the agent to make good decisions within constraints.
+
+Help me find the level of detail that gets consistent results without micromanaging the agent. The goal is: the agent knows what to do, knows where to stop, and has enough room to do it well.
+
+Give me three principles for scoping agentic instructions.
+
+---
+
+STEP 5 — CLAUDE.md HYGIENE AND SESSION SCOPING
+
+Part A — CLAUDE.md hygiene
+
+CLAUDE.md is read every session. If it's stale, cluttered, or contradictory, every session starts with bad context. Three habits:
+
+1. Review it when the project changes — new dependency, new pattern, deprecated approach. The file should reflect the project as it is now.
+2. Keep it short. If it's over 40 lines, it's a README, not a context file. Cut anything the agent can infer from the code itself.
+3. Separate "always true" from "current sprint" — if you're in the middle of a migration, note it, but mark it as temporary.
+
+Show me a bloated CLAUDE.md and a clean one, side by side.
+
+Part B — Session scoping
+
+When to start a new session vs. continue:
+- New session: new task, new area of the codebase, or the current session went sideways.
+- Continue: you're iterating on the same task and the context is still clean.
+
+The test: would you need to re-explain the goal to continue? If yes, start fresh. A new session with a good seed is faster than dragging a polluted context forward.
+
+Part C — Migration and re-seeding
+
+Same principles as chat, adapted for agentic work.
+
+Migration: when a Claude Code session has gone too long or drifted, summarise what was accomplished, what's left, and what constraints remain. Open a new session with that summary as the seed.
+
+Re-seed: when the current session is drifting but recoverable, a short message that restates the goal and boundaries. "We're building X. The scope is Y. Files Z are off limits. Next step is W."
+
+Give me a reusable migration template and a one-line re-seed format for Claude Code sessions.
+
+---
+
+STEP 6 — WRAP-UP
+
+Build me a personal reference card for Claude Code. Keep it to one screen. Include:
+
+- Think → Collab → Dispatch → Iterate — one line each, framed for agentic work
+- My CLAUDE.md draft from Step 1A
+- Agentic seed template from Step 2
+- Three precision principles from Step 4
+- CLAUDE.md hygiene checklist from Step 5A
+- Session scoping rule from Step 5B
+- Migration template and re-seed format from Step 5C
+
+Format it so I can keep it next to my terminal and actually use it.`
+
+    };
+
+    var current = "claude";
+    var promptBox = document.getElementById("prompt-box");
+    var copyBtn = document.getElementById("copy-btn");
+    var pills = document.querySelectorAll(".pill");
+    var copyTimer = null;
+
+    function setPrompt(platform) {
+      current = platform;
+      promptBox.textContent = PROMPTS[platform];
+      promptBox.scrollTop = 0;
+      copyBtn.textContent = "Copy prompt";
+      pills.forEach(function(p) {
+        p.classList.toggle("active", p.dataset.platform === platform);
+      });
+    }
+
+    pills.forEach(function(pill) {
+      pill.addEventListener("click", function() {
+        setPrompt(pill.dataset.platform);
+      });
+    });
+
+    copyBtn.addEventListener("click", function() {
+      var text = PROMPTS[current];
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          showCopied();
+        }).catch(function() {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    });
+
+    function fallbackCopy(text) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand("copy"); } catch(e) {}
+      document.body.removeChild(ta);
+      showCopied();
+    }
+
+    function showCopied() {
+      copyBtn.textContent = "Copied";
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(function() {
+        copyBtn.textContent = "Copy prompt";
+      }, 2000);
+    }
+
+    setPrompt("claude");
+  </script>
+
+</body>
+</html>

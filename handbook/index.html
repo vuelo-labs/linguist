@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linguist Handbook — How to work with machines</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+
+    :root {
+      --w-bg:      #FAF8F4;
+      --w-text:    #2A2420;
+      --w-muted:   #7A6E68;
+      --w-faint:   #B0A89E;
+      --w-accent:  #8C7355;
+      --w-border:  #E5DFD6;
+      --w-bg-card: #F2EDE6;
+      --c-bg:      #F0F4F8;
+      --c-text:    #263340;
+      --c-accent:  #4A7FA5;
+      --c-border:  #D8E2ED;
+      --serif: 'Newsreader', Georgia, serif;
+      --mono:  'JetBrains Mono', monospace;
+      --sans:  'Inter', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 18px; }
+
+    body {
+      font-family: var(--serif);
+      background: var(--w-bg);
+      color: var(--w-text);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Site nav — screen only */
+    .site-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 2rem;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.78rem;
+    }
+    .site-nav a { color: var(--w-muted); text-decoration: none; }
+    .site-nav a:hover { color: var(--w-text); }
+    .site-nav-links { display: flex; gap: 1.5rem; }
+
+    /* Print bar — screen only */
+    .print-bar {
+      background: var(--w-accent);
+      color: #fff;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .print-bar button {
+      background: #fff;
+      color: var(--w-accent);
+      border: none;
+      padding: 0.35rem 1rem;
+      border-radius: 3px;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .print-bar button:hover { background: #f5efe6; }
+
+    /* Document */
+    .doc {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+    }
+
+    .doc-cover {
+      padding-bottom: 3rem;
+      margin-bottom: 3rem;
+      border-bottom: 2px solid var(--w-border);
+    }
+
+    .doc-brand {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: 2.5rem;
+    }
+
+    .doc h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+
+    .doc-subtitle {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.05rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .doc-meta {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--w-faint);
+    }
+
+    /* Body type */
+    .doc p {
+      margin-bottom: 1.1rem;
+      max-width: 65ch;
+    }
+
+    .doc strong { font-weight: 600; }
+    .doc em     { color: var(--w-muted); }
+
+    /* Part headers */
+    .part-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--c-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+    }
+
+    .doc h2 {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      color: var(--w-text);
+    }
+
+    .doc h3 {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-top: 1.75rem;
+      margin-bottom: 0.5rem;
+      color: var(--w-text);
+    }
+
+    /* Section container */
+    .part {
+      margin: 0;
+      padding-top: 0.5rem;
+    }
+
+    /* Machine-style block for techniques / examples */
+    .machine-version {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      background: var(--c-bg);
+      color: var(--c-text);
+      border: 1px solid var(--c-border);
+      border-left: 3px solid var(--c-accent);
+      padding: 1.25rem 1.4rem;
+      margin: 1.75rem 0;
+      line-height: 1.9;
+    }
+
+    .machine-version-label {
+      font-family: var(--mono);
+      font-size: 0.67rem;
+      color: var(--c-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.6rem;
+    }
+
+    /* Pull quote */
+    .doc blockquote {
+      margin: 2rem auto;
+      padding: 1.5rem 0;
+      text-align: center;
+      max-width: 38ch;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--w-text);
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .doc blockquote::before,
+    .doc blockquote::after {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 2px;
+      background: var(--w-accent);
+      margin: 0 auto;
+      opacity: 0.5;
+    }
+
+    .doc blockquote::before { margin-bottom: 1rem; }
+    .doc blockquote::after  { margin-top: 1rem; }
+
+    /* Pause section */
+    .pause-section {
+      margin: 2rem 0;
+      padding: 2rem 0;
+      border-top: 1px solid var(--w-border);
+      border-bottom: 1px solid var(--w-border);
+    }
+
+    .pause-heading {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: normal;
+      font-style: italic;
+      color: var(--w-text);
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .pause-section p { max-width: 55ch; }
+
+    /* Sine divider */
+    .sine-divider {
+      margin: 2.5rem 0;
+      height: 28px;
+      overflow: hidden;
+      color: var(--w-accent);
+    }
+
+    .sine-divider svg { width: 100%; height: 100%; }
+
+    /* Principle row — Part 5 */
+    .principle-row {
+      margin: 2rem 0;
+      padding-top: 1.75rem;
+      border-top: 1px solid var(--w-border);
+    }
+
+    .principle-row:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .principle-row-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--w-faint);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.2rem;
+    }
+
+    .principle-row-title {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: var(--w-accent);
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      color: var(--w-faint);
+    }
+
+    .doc-footer p + p { margin-top: 0.3rem; }
+
+    .doc-footer a {
+      color: var(--w-accent);
+      text-decoration: none;
+    }
+
+    .doc-footer a:hover { text-decoration: underline; }
+
+    /* =============================================
+       PRINT STYLES
+       ============================================= */
+    @media print {
+      @page {
+        size: A4;
+        margin: 18mm 18mm 20mm;
+      }
+
+      .print-bar { display: none; }
+      .site-nav { display: none; }
+
+      html { font-size: 10.5pt; }
+
+      body {
+        background: #fff;
+        color: #1a1a1a;
+      }
+
+      .doc {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      .doc-cover {
+        padding-bottom: 14mm;
+        margin-bottom: 14mm;
+        page-break-after: avoid;
+      }
+
+      .part { page-break-before: always; }
+      .part:first-of-type { page-break-before: avoid; }
+
+      .machine-version { page-break-inside: avoid; }
+      .principle-row   { page-break-inside: avoid; }
+
+      h2 { page-break-after: avoid; }
+      h3 { page-break-after: avoid; }
+      p  { orphans: 3; widows: 3; }
+
+      .sine-divider { margin: 6mm 0; }
+
+      .machine-version {
+        background: #f0f4f8 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .doc-footer { page-break-before: avoid; }
+
+      a { color: inherit; text-decoration: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="/">Linguist</a>
+    <div class="site-nav-links">
+      <a href="/manifesto">Full manifesto →</a>
+      <a href="/guide">Practical guide →</a>
+      <a href="/see">Give it a go →</a>
+    </div>
+  </nav>
+
+  <div class="print-bar" id="print-bar">
+    <span>Save as PDF: File → Print → Save as PDF</span>
+    <button onclick="window.print()">Print / Save PDF</button>
+    <button onclick="document.getElementById('print-bar').style.display='none'" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);">Dismiss</button>
+  </div>
+
+  <div class="doc">
+
+    <!-- Cover -->
+    <div class="doc-cover">
+      <p class="doc-brand">Linguist · Vuelo Labs</p>
+      <h1>Linguist Handbook</h1>
+      <p class="doc-subtitle">How to work with machines without losing your mind or your standards.</p>
+      <p class="doc-meta">linguist.vuelolabs.com · Think. Collab. Dispatch. Iterate.</p>
+    </div>
+
+    <!-- Introduction -->
+    <p>This is the third layer. The manifesto told you why — why this costs you something, why the mode distinction matters, why your brain isn't broken for struggling with it. The booklet gave you the eight things: the principles, one sentence each, with a pattern to take away. This goes into the how. In enough detail that you can build real working patterns from it, not just understand the logic in the abstract.</p>
+
+    <p>You don't need to have read the other two. But if you have, this goes further. The goal isn't to give you more to remember. It's to give you enough depth that the things you do remember actually stick — because they're rooted in something, not floating.</p>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 28" preserveAspectRatio="none" fill="none">
+        <path d="M0,14 C85,0 141,28 227,14 C312,0 368,28 454,14 C539,0 595,28 680,14"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <!-- Part 1 -->
+    <div class="part">
+      <p class="part-label">Part 1 · Think</p>
+      <h2>Before you open the machine.</h2>
+
+      <p>This is the most important step and the most skipped one. Not because people are lazy. Because it doesn't feel like work. Sitting with your thoughts, jotting things down, talking to yourself — none of it produces the visible forward motion that opening a chat window and typing does. But this is the step that determines everything that comes after it.</p>
+
+      <p>When you skip Think and go straight to the machine, you're asking it to do two jobs at once: help you figure out what you want, and deliver what you want. That's a reasonable ask — but it's slower than it looks, because the machine can't distinguish between your half-formed idea and your actual intent. It'll execute on whatever you gave it. So if you gave it a vague mess, it'll produce a clean version of a vague mess. That's usually not what you needed.</p>
+
+      <h3>What "thinking before you prompt" actually means</h3>
+
+      <p>It doesn't mean having a fully formed brief. It means knowing enough to have a useful first exchange. What is the actual problem? What would the output be used for? Who's it for? What would a bad version look like — not in quality terms, but in the wrong-direction sense? You don't need answers to all of these before you start. You need to have asked them.</p>
+
+      <p>The simplest version of this is a brain dump — getting the mess out of your head and somewhere visible before you try to shape it into an ask. It doesn't have to be structured. A voice memo while you walk. A paragraph of stream-of-consciousness in a notes app. The back of an envelope. The format doesn't matter. The act of externalising your thoughts does, because it separates the generating from the organising, and it gives you something concrete to work with instead of trying to think and prompt simultaneously.</p>
+
+      <h3>Three ways to do it well</h3>
+
+      <p><strong>Voice memo.</strong> Talk through the problem out loud like you're explaining it to a colleague. Say what you're trying to do, what you already know, what you're not sure about. Don't edit. Don't correct yourself. Three minutes of rough talking out loud almost always reveals something you didn't know you knew — a constraint you'd forgotten, a thing you actually care about, a version of the problem that's more specific than the one you started with. Transcribe it later or just use it as a reference. The act of speaking is the work.</p>
+
+      <p><strong>Brain dump in the chat itself.</strong> There's a version of the Think step that happens in the machine — you write everything you know about the situation in no particular order, label it "this is a brain dump, not a brief," and ask the machine to tell you what it heard and what's missing. This is a valid approach. It puts the organising work on the machine rather than you, and it surfaces gaps immediately. The key is labelling it correctly — the machine needs to know you're not dispatching, you're clearing your head.</p>
+
+      <p><strong>Rubber duck variation.</strong> Write the problem out as if you're explaining it to someone who knows nothing about it. No acronyms, no assumed context, no "you know the thing I mean." This forced clarity almost always reveals where the genuine ambiguity is. Often just writing the explanation is enough — you find the answer, or you find the right question, before you've even got to the machine.</p>
+
+      <h3>How to know when you're ready</h3>
+
+      <p>You're ready to move from Think to Collab when you can answer: "What am I actually trying to produce, and why does it matter?" Not perfectly. Not in a clean sentence. But well enough that you can say it out loud without trailing off. That's the signal. If you still can't say what you're making and why, you haven't thought long enough.</p>
+    </div>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 28" preserveAspectRatio="none" fill="none">
+        <path d="M0,14 C85,0 141,28 227,14 C312,0 368,28 454,14 C539,0 595,28 680,14"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <!-- Part 2 -->
+    <div class="part">
+      <p class="part-label">Part 2 · Collab</p>
+      <h2>Use the machine to figure out what you want.</h2>
+
+      <p>Collab is the step between your messy thinking and your clean dispatch. Its job is to build the brief — not execute it. Most people skip it entirely and go from "vague idea" to "full instruction," which is why the output so often misses. A few minutes in Collab mode produces a dispatch that's five times more useful. It's not a detour. It's the fastest route.</p>
+
+      <p>The mindset is different here. You're not telling the machine what to do. You're in a back-and-forth. You're exploring. It's allowed to be messy. The machine's job in Collab isn't to produce the thing — it's to help you get clear enough to instruct it properly when you're ready.</p>
+
+      <h3>The "ask me one question at a time" technique</h3>
+
+      <p>This is the most underrated single technique in this entire handbook. When you're not sure what you want — when you have a rough idea but can't quite articulate it — say so, and ask the machine to interview you. Not "ask me questions." One question at a time. This matters. If you ask for a list of questions, you get a list to fill out. If you ask for one question, you get a conversation. Conversations produce better briefs than questionnaires.</p>
+
+      <div class="machine-version">
+        <p class="machine-version-label">Example conversation fragment</p>
+        <p>You: I need to write something to my team about a project delay. I'm not sure how to frame it. Ask me one question at a time to help me figure out what I actually want to say.<br><br>
+        Machine: How delayed are we talking — a few days, a couple of weeks, or is this indefinite?<br><br>
+        You: About three weeks. We know the new date.<br><br>
+        Machine: And do you know why it happened — something you could have anticipated, or genuinely external?<br><br>
+        You: Mostly external. A supplier issue. But I should have flagged it a week earlier than I did.<br><br>
+        Machine: That's useful context. Do you want to address that directly in the message, or keep the focus on what's happening now and next steps?</p>
+      </div>
+
+      <p>Three questions in and there's a brief. The machine now knows the delay duration, the cause, the honest complication, and what the writer wants to emphasise. A Dispatch built from this exchange will be considerably better than one built from "write me an email about a project delay."</p>
+
+      <h3>The context document</h3>
+
+      <p>The single most leveraged investment you can make in your day-to-day use of AI tools is a context document — a short, always-available reference that tells the machine who you are, how you communicate, and what you care about. You write it once. You paste it at the top of every new conversation. It replaces ten minutes of re-establishing context with thirty seconds of copy-paste.</p>
+
+      <p>What goes in it: your role and what you actually do day to day. Your industry and the audience you typically write for or speak to. Your tone preferences — formal, direct, conversational, technical. Things you always want in your outputs. Things you never want. Any standing constraints that apply to most of your work. Keep it under 200 words. If it's longer, it's become a document about you rather than a useful briefing tool.</p>
+
+      <div class="machine-version">
+        <p class="machine-version-label">Example context document</p>
+        <p>role: Head of Product at a B2B SaaS company, ~60 person team<br>
+        audience: mostly engineers, PMs, and senior stakeholders<br>
+        tone: direct, no fluff, plain language — assume technical literacy<br>
+        always: give me options when you're not sure which direction I want<br>
+        never: bullet-point everything — use prose unless I ask for lists<br>
+        avoid: corporate buzzwords, passive voice, "it's important to note that"<br>
+        format default: short paragraphs, no headers unless doc is long</p>
+      </div>
+
+      <p>Once this exists, you stop repeating yourself across sessions. The machine knows your defaults. You only need to specify what's different about this particular task.</p>
+
+      <h3>How to know when you have a brief worth dispatching</h3>
+
+      <p>A brief worth dispatching answers four questions clearly: What is the output? Who is it for? What should it include or avoid? What does done look like? You don't need an elaborate document. You need those four things. If you can't answer all four, you haven't finished Collab yet. Keep going — one more question, one more exchange — until you can.</p>
+    </div>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 28" preserveAspectRatio="none" fill="none">
+        <path d="M0,14 C85,0 141,28 227,14 C312,0 368,28 454,14 C539,0 595,28 680,14"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <!-- Part 3 -->
+    <div class="part">
+      <p class="part-label">Part 3 · Dispatch</p>
+      <h2>Write a clean instruction.</h2>
+
+      <p>Dispatch is the moment you stop exploring and start executing. You've thought. You've collaborated. Now you write the cleanest version of what you want and you send it. This is the step most people spend all their time on — but if Think and Collab went well, Dispatch is actually fast. The work was in the preparation.</p>
+
+      <p>A good dispatch has four elements. None of them are complicated. All of them pull their weight.</p>
+
+      <h3>The four elements</h3>
+
+      <p><strong>Objective.</strong> What are you making? Be specific. "A follow-up email" is not specific enough. "A follow-up email to a senior stakeholder confirming next steps after a go/no-go meeting" is. The objective tells the machine what kind of output to produce, not just the category of thing.</p>
+
+      <p><strong>Context.</strong> What does it need to know to do this well? Apply the load-bearing test: if removing this piece of context wouldn't change the output, cut it. You want the minimum set of information that produces the maximum quality output. Background that's interesting but not directly relevant to this task is noise. Noise degrades output.</p>
+
+      <p><strong>Role.</strong> Who is it speaking as, or speaking to? This is covered in Principle 02, but it belongs in every dispatch: a one-sentence role calibration before the task. It changes the register, the depth, the assumed audience, and the standards the machine holds itself to. It is the highest-return single addition to any prompt.</p>
+
+      <p><strong>Constraints.</strong> What are the hard edges? Format, length, tone, things to include, things to avoid. The constraint that matters most: "done when X." Define the finish line explicitly. Without it, the machine has no basis for stopping, and you have no basis for knowing you've arrived.</p>
+
+      <h3>The load-bearing test</h3>
+
+      <p>Read your dispatch before you send it. For every piece of context, ask: if I removed this, would the output be meaningfully worse? If the honest answer is no — cut it. This sounds obvious. It isn't. Most people over-brief because context feels safe, like more information equals more insurance. It doesn't. The machine weights everything you give it. Too much context means it's trying to incorporate things that don't matter, and the output reflects that.</p>
+
+      <p>The right amount of context is the minimum that makes the task possible at the quality you want. That's it.</p>
+
+      <h3>Before and after</h3>
+
+      <div class="machine-version">
+        <p class="machine-version-label">Before — first instinct, unsharpened</p>
+        <p>Write me a one-pager about our new onboarding process for the team.</p>
+      </div>
+
+      <div class="machine-version">
+        <p class="machine-version-label">After — dispatched properly</p>
+        <p>role: You are a clear, practical internal communications writer.<br><br>
+        task: Write a one-page internal doc introducing a new employee onboarding process.<br><br>
+        context:<br>
+        — audience: current employees, manager level and above<br>
+        — change: moving from ad hoc onboarding to a structured 30-day programme<br>
+        — tone: direct and practical, not corporate — we're a 45-person company<br>
+        — key change that needs emphasis: new buddy system in week one<br><br>
+        format: short intro (2–3 sentences), then three sections with plain-language headers<br>
+        length: under 400 words<br>
+        done when: someone can read it in two minutes and know exactly what's changed and why</p>
+      </div>
+
+      <p>Both prompts ask for the same thing. The second one gets a usable first draft. The first one gets something that needs three rounds of correction before it's close to right.</p>
+
+      <h3>Tone and format — why they matter more than most people think</h3>
+
+      <p>The machine's default register is slightly formal, slightly hedged, and slightly verbose. That's the middle of the road calibrated to offend nobody. It is almost never the right register for your specific work. So specify it. Not "professional" — everyone thinks their work is professional. "Direct, no hedging, plain language, two-syllable words where possible." That kind of specific. The more precisely you describe the tone, the less editing you do after.</p>
+
+      <p>Format instructions are equally underused. If you want paragraphs, say so. If you want bullet points, say so. If you want a specific number of sections, name them. The machine will invent structure if you don't give it one — and its invented structure is rarely yours.</p>
+    </div>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 28" preserveAspectRatio="none" fill="none">
+        <path d="M0,14 C85,0 141,28 227,14 C312,0 368,28 454,14 C539,0 595,28 680,14"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <!-- Part 4 -->
+    <div class="part">
+      <p class="part-label">Part 4 · Iterate</p>
+      <h2>One or two rounds, then stop.</h2>
+
+      <p>Iteration is where most quality gets lost. Not because people iterate badly — but because they iterate too much. Each round takes the output one step further from the original dispatch, one step further from your actual intent, and one step closer to the averaged middle of everything you've asked for so far. The machine doesn't hold your original intent in reserve. It learns from every correction. Enough corrections and it can't find its way back to what was good about the first version.</p>
+
+      <h3>What good iteration looks like</h3>
+
+      <p>Good iteration is targeted and specific. Not "make it better" — there's no useful information in that instruction. Not "more engaging" — engaging to whom, in what context, by what measure? Good feedback names the specific thing that isn't working and what it should do instead. "The second paragraph buries the main point — move it to the top and cut the setup." "The tone is too formal for this audience — write it like a colleague, not a consultant." Specific problem, specific fix. One thing at a time.</p>
+
+      <p>When you give targeted feedback, you get a targeted change. When you give vague feedback, you get a vague interpretation of a vague direction, applied to an output you already had mixed feelings about. That's how you end up at round five still not happy with it.</p>
+
+      <h3>The over-iteration spiral</h3>
+
+      <p>It goes like this. First output is pretty good — maybe 85% of the way there. You ask for a tweak. Second output is 87%. You ask for another tweak. Third output is 82% — slightly worse, but in a different way. You ask it to go back to something more like the first version. The machine produces a blend of the first and third. You're now at 80% of the original's quality, and you've spent four rounds getting there. The time cost is real. The quality cost is real. And you can't actually go back.</p>
+
+      <p>The antidote is the rule: max two rounds of iteration, then ship or start fresh. If after two targeted rounds the output still doesn't pass your done criteria, the brief wasn't right — not the iteration. Start a new conversation with what you've learned.</p>
+
+      <h3>How to recognise the first good version</h3>
+
+      <p>The first good version reads as if a competent person wrote it for the right audience with a clear purpose. It passes your done criteria. It doesn't have an obvious flaw that would make you uncomfortable sending it. It might not be perfect — but the things you'd want to change are preferences, not problems. That's the signal. Preferences don't justify another round. Problems do, once, specifically.</p>
+
+      <blockquote>Stop when it's good. Not when it's perfect.</blockquote>
+
+      <h3>When to start a new conversation instead</h3>
+
+      <p>Start fresh if you've made the same correction twice and it isn't sticking. Start fresh if the output has drifted so far from your intent that you'd have to explain the entire task again to get back. Start fresh if you realise the brief was wrong in a fundamental way — not just a detail, but the framing. In all of these cases, the existing thread is a liability. The clean brief you write for the new conversation, informed by what you just learned, will produce a better result in one round than the existing thread would in five.</p>
+    </div>
+
+    <!-- Pause -->
+    <div class="pause-section">
+      <h3 class="pause-heading">Pause.</h3>
+      <p>The machine doesn't need breaks. You do. None of this — Think, Collab, Dispatch, Iterate — works well if you're running on empty. The best thinking happens on a walk, not at the screen. The sharpest dispatches get written after a night's sleep. Iteration decisions made when you're tired are how you end up at round six still not happy with it.</p>
+      <p>Take breaks. Eat. Sleep. Talk to people who aren't using AI to talk to you. When you're done for the day, try to actually be done — not "one more round." The machine will be there in the morning. The only thing that won't keep is your attention.</p>
+      <p>The machine is a supporting player in a much larger human conversation. Keep it that way.</p>
+    </div>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 28" preserveAspectRatio="none" fill="none">
+        <path d="M0,14 C85,0 141,28 227,14 C312,0 368,28 454,14 C539,0 595,28 680,14"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <!-- Part 5 -->
+    <div class="part">
+      <p class="part-label">Part 5 · The eight principles in practice</p>
+      <h2>Not restated. Applied.</h2>
+
+      <p>The booklet gave you the principles in compressed form. This section gives each of them a scenario — the moment it matters most — and what specifically to do when you're in it. No pattern blocks. Just the practice.</p>
+
+      <div class="principle-row">
+        <p class="principle-row-num">01</p>
+        <h3 class="principle-row-title">Skip the greeting. Start with the task.</h3>
+        <p>Where it matters most: high-frequency tasks. If you're using these tools many times a day, the energy saved by removing social preamble compounds over thousands of interactions. It doesn't feel like much on any given day — until you notice how much lighter the whole practice feels.</p>
+        <p>What to do specifically: before you hit send, read the first sentence of your prompt. If it contains "Hi," "Hope," "Sorry," "Just wanted to," or "I know you're probably busy" — delete it and start from the second sentence. The second sentence is almost always where the actual task begins. The first sentence almost never adds information.</p>
+        <p>The harder version of this isn't the words — it's the feeling. Some people feel rude going straight to the task. That feeling is real, but it's misplaced. The machine isn't receiving your tone. It's receiving your instructions. Saving your warmth for the people who can actually feel it is the point.</p>
+      </div>
+
+      <div class="principle-row">
+        <p class="principle-row-num">02</p>
+        <h3 class="principle-row-title">Give it a role before you give it a task.</h3>
+        <p>Where it matters most: any task where perspective is as important as accuracy. Writing, feedback, strategy, communications, analysis where you want an opinion rather than just facts. The role does something subtle: it gives the machine a reason to have a viewpoint, and a basis for telling you when something isn't working.</p>
+        <p>What to do specifically: add one sentence before your task. Not a paragraph — one sentence. "You are a no-nonsense B2B copywriter who has written for technical audiences for fifteen years." That's enough. The more specific the role, the more calibrated the output. Generic roles like "helpful assistant" are redundant — that's already the default. Specific roles like "a principal engineer reviewing a proposal" change the register immediately.</p>
+        <p>The version of this that unlocks the most value: pairing the role with an explicit permission to be direct. "You are [role]. Be honest with me — I can handle criticism." Without that, many outputs default to reassuring regardless of how good or bad the work is. The role sets the expertise; the permission removes the social hedging.</p>
+      </div>
+
+      <div class="principle-row">
+        <p class="principle-row-num">03</p>
+        <h3 class="principle-row-title">One thing at a time. Every time.</h3>
+        <p>Where it matters most: complex workflows that you're tempted to compress into one big prompt. The instinct makes sense — why not ask for all of it at once? The problem is that you lose reviewability at every step. If the summary is slightly off, and you use it to build the action list, and you use that to draft the email — you've stacked three tasks on a flawed foundation you didn't catch because you never reviewed the first step.</p>
+        <p>What to do specifically: look at your prompt and count the tasks. If there's more than one, split them. Dispatch the first. Review it properly — not a skim, an actual read — before you use it as input for the second. Each output is a decision point. If you'd send the first thing to a colleague without reading it, you're moving too fast.</p>
+        <p>The counterintuitive thing about working sequentially is that it's usually faster overall. A five-step workflow with review at each stage catches a bad direction at step one, before it's baked into everything downstream. The single-prompt version catches it at the end, when you've already committed five outputs to a wrong premise.</p>
+      </div>
+
+      <div class="principle-row">
+        <p class="principle-row-num">04</p>
+        <h3 class="principle-row-title">Context is a precision tool. Use it like one.</h3>
+        <p>Where it matters most: longer, more complex tasks where you have a lot of relevant background. The temptation is to include everything because "it might be relevant." Resist this. The machine has no way to know what's load-bearing and what's background noise, so it tries to incorporate everything — and the output reflects that with hedges, qualifications, and tangents you didn't ask for.</p>
+        <p>What to do specifically: before you paste context into a prompt, go through it line by line and ask the load-bearing question for each piece: would the output be meaningfully worse without this? If the answer is no, delete it. You want the minimum set that makes the task possible at the quality you need. Not comprehensive — minimum sufficient.</p>
+        <p>A related discipline: separate the context you always need (your context document) from the context that's specific to this task. The context document goes at the top of every new conversation. Task-specific context goes in the dispatch. Mixing the two produces prompts that are long and muddled. Keep them distinct.</p>
+      </div>
+
+      <div class="principle-row">
+        <p class="principle-row-num">05</p>
+        <h3 class="principle-row-title">Define done before you start.</h3>
+        <p>Where it matters most: iterative tasks — anything you might want to refine, like writing, design thinking, analysis. Without a done definition, "better" is infinite. You can always make something better by some measure. The question is whether that improvement is worth the round, and you can't answer that without a standard to measure against.</p>
+        <p>What to do specifically: write your done criteria into the dispatch itself. Not as an afterthought — as a required element. "Done when: under 300 words, active voice throughout, no jargon, ends with a clear next step." Now both you and the machine have a finish line. You use it to evaluate the first output. If it passes, you stop. If one thing fails, you name that thing and fix only that thing. That's the whole iteration process.</p>
+        <p>The mental shift this requires: stop thinking of done as "when it feels right" and start thinking of it as a checklist you write before you start. The checklist doesn't need to be long. It needs to be specific. Four criteria is enough for most tasks. The act of writing them forces you to be clear about what you actually want — which is good thinking, not just good prompting.</p>
+      </div>
+
+      <div class="principle-row">
+        <p class="principle-row-num">06</p>
+        <h3 class="principle-row-title">Done is done. Stop at the first good version.</h3>
+        <p>Where it matters most: creative and writing tasks, where there's no objective measure of quality and the temptation to improve indefinitely is highest. The machine will produce infinite versions. That doesn't mean infinite versions exist. It means the machine is trying to meet a moving target you haven't defined — and each version is an average of everything you've asked for so far, smoothed toward the middle.</p>
+        <p>What to do specifically: evaluate the first output against your done criteria before you decide to iterate. Not against a vague sense of "could be better" — against the list you wrote before you started. If it passes, ship it. If it doesn't, identify the specific failing and address only that. Resist the pull to improve things that aren't failing. Improvement is not free. It costs a round of iteration and moves the output further from what was originally good.</p>
+        <p>The useful framing: the first good version is not the ceiling. It's the exit point. Your done criteria was your definition of good enough — good enough for the actual purpose, in the actual context. Once you're there, you're done. Pushing past done doesn't produce better. It produces different. And different, at that point, is usually not better.</p>
+      </div>
+
+      <div class="principle-row">
+        <p class="principle-row-num">07</p>
+        <h3 class="principle-row-title">If it's going wrong, start a new conversation.</h3>
+        <p>Where it matters most: any task that's taken more than two correction rounds without converging. This is the signal. Two corrections and still not close means the thread has accumulated enough contradictory context that the machine is trying to satisfy too many competing instructions at once. That problem compounds with each additional message. The thread is not salvageable. The brief is.</p>
+        <p>What to do specifically: close the tab. Open a new conversation. Take the best brief you can construct from what you've learned — what the task actually requires, what went wrong in the last attempt, what you'd specify differently — and dispatch fresh. This almost always produces a better first output than the fifth attempt in the broken thread would have. The learning from the failed thread is the asset. The thread itself is not.</p>
+        <p>The emotional component is real: there's a sunk cost pull to the existing conversation. You put effort into it. You don't want to throw that away. But the effort produced information — you now know more about what the brief needs to say. Take that. Leave everything else. The new conversation will be faster because of it.</p>
+      </div>
+
+      <div class="principle-row">
+        <p class="principle-row-num">08</p>
+        <h3 class="principle-row-title">Talk to it directly. Ask it what it needs.</h3>
+        <p>Where it matters most: when you're stuck, when the output isn't working but you can't identify why, and when you're starting something new that you expect to do repeatedly. The machine is remarkably good at telling you what it needs to help you better — but only if you ask directly. Most people don't ask. They iterate instead, which is slower and produces worse information.</p>
+        <p>What to do specifically: when an output isn't working and you're not sure why, ask: "What information would help you give me a significantly better answer on this?" The machine will usually identify the gap — missing context, unclear objective, ambiguous constraints — faster than you'd find it by adjusting the prompt through trial and error. This one question can save a full round of iteration.</p>
+        <p>The version of this that builds long-term value: at the end of any task you'll repeat regularly, ask "what would make this type of task consistently better if I provided it from the start?" Save what it says. Incorporate it into your context document or your template for that task type. The machine is essentially telling you how to brief it better. That knowledge applies to every future version of the same kind of work. One conversation, lasting improvement.</p>
+      </div>
+    </div>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 28" preserveAspectRatio="none" fill="none">
+        <path d="M0,14 C85,0 141,28 227,14 C312,0 368,28 454,14 C539,0 595,28 680,14"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <!-- Closing -->
+    <h2>These aren't rules to follow. They're patterns to build.</h2>
+
+    <p>You won't use all of this at once. You shouldn't try to. Start with the one or two things that match whatever's frustrating you right now. The principle about starting fresh if it's going wrong. The technique of one question at a time. The habit of defining done before you dispatch. Any one of these, applied consistently, will change how the work feels.</p>
+
+    <p>The others will make sense when they make sense — when the situation arrives and you recognise it. That's how patterns actually settle into practice. Not by memorising them. By experiencing the scenario they describe, and having something ready when you do.</p>
+
+    <p>The goal was never to make you better at prompting. It was to make this less exhausting and more yours. Something you do deliberately, in a way that costs you less than it did before — and leaves more of you for the things that actually need you.</p>
+
+    <blockquote>The machine will wait. Go be human.</blockquote>
+
+    <div class="doc-footer">
+      <p>Linguist · Vuelo Labs · <a href="https://linguist.vuelolabs.com">linguist.vuelolabs.com</a></p>
+      <p>The why: <a href="/download">/download</a> · The desk reference: <a href="/pdf">/pdf</a> · <a href="/see">Give it a go →</a></p>
+    </div>
+
+  </div>
+
+</body>
+</html>

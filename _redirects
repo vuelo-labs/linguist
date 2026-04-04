@@ -1,0 +1,12 @@
+/experience/*  /see  301
+/experience    /see  301
+/see/*         /see/index.html  200
+/see           /see/index.html  200
+/cards         /cards/index.html  200
+/download      /download/index.html  200
+/manifesto     /manifesto/index.html  200
+/guide         /guide/index.html  200
+/pdf           /pdf/index.html  200
+/handbook      /handbook/index.html  200
+/course        /course/index.html    200
+/course/*      /course/index.html    200

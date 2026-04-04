@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linguist — You apologised to the chatbot, didn't you.</title>
+  <meta name="description" content="You apologised to the chatbot, didn't you. There are two modes — human and machine. Once you see the difference, you can't unsee it.">
+  <meta property="og:title" content="Linguist — You apologised to the chatbot, didn't you.">
+  <meta property="og:description" content="You apologised to the chatbot, didn't you. There are two modes — human and machine. Once you see the difference, you can't unsee it.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      text-decoration: none;
+    }
+    .site-header-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .site-header-link {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-muted);
+      text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-cta {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-accent);
+      text-decoration: none;
+      border: 1px solid var(--w-border);
+      padding: 0.4rem 1rem;
+      border-radius: 3px;
+      transition: border-color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .site-header-cta:hover {
+      border-color: var(--w-accent);
+      background: var(--w-accent-light);
+    }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+    }
+
+    /* ---- Hero ---- */
+    .hero {
+      padding: var(--space-2xl) 0;
+      max-width: 680px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: var(--space-md);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: normal;
+      line-height: 1.15;
+      margin-bottom: var(--space-lg);
+      color: var(--w-text);
+    }
+
+    .hero h1 em {
+      color: var(--w-accent);
+      font-style: italic;
+    }
+
+    .hero-body {
+      font-size: 1.1rem;
+      color: var(--w-muted);
+      line-height: 1.7;
+      margin-bottom: var(--space-lg);
+      max-width: 54ch;
+    }
+
+    .hero-body p { margin-bottom: var(--space-md); }
+    .hero-body p:last-child { margin-bottom: 0; }
+
+    .hero-body strong { color: var(--w-text); font-weight: normal; }
+
+    .hero-quote {
+      font-family: var(--serif);
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      font-style: italic;
+      color: var(--w-text);
+      line-height: 1.5;
+      border-left: 2px solid var(--w-accent);
+      padding-left: var(--space-lg);
+      margin: var(--space-xl) 0;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-top: var(--space-xl);
+    }
+
+    .hero-secondary-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .text-link {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-muted);
+      text-decoration: underline;
+      text-decoration-color: var(--w-border);
+      text-underline-offset: 3px;
+    }
+    .text-link:hover {
+      color: var(--w-text);
+      text-decoration-color: var(--w-muted);
+    }
+
+    /* ---- Divider ---- */
+    hr.rule {
+      border: none;
+      border-top: 1px solid var(--w-border);
+      margin: var(--space-2xl) 0;
+    }
+
+    /* ---- Two modes visual ---- */
+    .modes-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: var(--space-xl) 0;
+      max-width: 680px;
+    }
+
+    .mode-card {
+      padding: 1.5rem;
+      border-radius: 4px;
+    }
+
+    .mode-card--warm {
+      background: var(--w-bg-card);
+      border: 1px solid var(--w-border);
+    }
+
+    .mode-card--cool {
+      background: var(--c-bg);
+      border: 1px solid var(--c-border);
+    }
+
+    .mode-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .mode-label--warm { color: var(--w-accent); }
+    .mode-label--cool { color: var(--c-accent); font-family: var(--mono); }
+
+    .mode-text {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--w-muted);
+    }
+    .mode-card--cool .mode-text {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--c-text);
+      line-height: 1.8;
+    }
+
+    @media (max-width: 640px) {
+      .modes-row { grid-template-columns: 1fr; }
+    }
+
+    /* ---- Footer ---- */
+    .site-footer {
+      padding: var(--space-xl) 0;
+      text-align: center;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-faint);
+      border-top: 1px solid var(--w-border);
+    }
+
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/guide" class="site-header-link">Guide</a>
+      <a href="/manifesto" class="site-header-link">Manifesto</a>
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/see" class="site-header-cta">Give it a go →</a>
+    </div>
+  </header>
+
+  <main>
+
+    <section style="padding: 0; border-bottom: 1px solid var(--w-border);">
+      <div class="container">
+        <div class="hero">
+
+          <p class="hero-eyebrow">Linguist</p>
+
+          <h1>You apologised<br>to the chatbot,<br><em>didn't you.</em></h1>
+
+          <div class="hero-quote">
+            The skill isn't learning to prompt better.<br>
+            It's just noticing which mode you're in.<br>
+            Once you see it, you can't unsee it.
+          </div>
+
+          <div class="modes-row">
+            <div class="mode-card mode-card--warm">
+              <p class="mode-label mode-label--warm">Human mode</p>
+              <p class="mode-text">Warm. Circular. Takes the long way because the long way matters. This is where relationships live.</p>
+            </div>
+            <div class="mode-card mode-card--cool">
+              <p class="mode-label mode-label--cool">machine mode</p>
+              <p class="mode-text">task: defined<br>context: relevant only<br>output: specified<br>emotion: not required</p>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <a href="/see" class="btn btn-warm">Give it a go <span style="font-size:0.8em;opacity:0.65;">(2–3 min)</span></a>
+            <div class="hero-secondary-links">
+              <a href="/guide" class="text-link">Practical guide →</a>
+              <a href="/manifesto" class="text-link">Full manifesto →</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section style="border-top:1px solid var(--w-border);padding:2.5rem 0;">
+    <div class="container">
+      <p style="font-family:var(--sans);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--w-faint);margin-bottom:1.25rem;">Read &amp; download</p>
+      <div style="display:flex;flex-wrap:wrap;gap:1.5rem;">
+        <a href="/download" style="font-family:var(--sans);font-size:0.88rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Manifesto <span style="color:var(--w-faint);font-size:0.78rem;">— the why</span></a>
+        <a href="/pdf" style="font-family:var(--sans);font-size:0.88rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Booklet <span style="color:var(--w-faint);font-size:0.78rem;">— eight principles, one framework</span></a>
+        <a href="/handbook" style="font-family:var(--sans);font-size:0.88rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Handbook <span style="color:var(--w-faint);font-size:0.78rem;">— the full how</span></a>
+      </div>
+    </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00">Read on Medium</a></p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    const SUPABASE_URL      = 'https://odnzrykfmfgdfybnmcfd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kbnpyeWtmbWZnZGZ5Ym5tY2ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDUyNDQsImV4cCI6MjA4ODk4MTI0NH0.c17-eCaIsnBAD1csQBxqYpwe-u0fd2KaJtVuWH6AR1Y';
+
+    let _db = null;
+    function db() {
+      if (!_db) { _db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+      return _db;
+    }
+
+    function sessionId() {
+      let id = sessionStorage.getItem('lng_sid');
+      if (!id) { id = crypto.randomUUID(); sessionStorage.setItem('lng_sid', id); }
+      return id;
+    }
+
+    window.addEventListener('load', async () => {
+      try {
+        await db().from('page_views').insert({
+          session_id: sessionId(),
+          page: 'landing',
+          referrer: document.referrer || null,
+        });
+      } catch (e) {}
+    });
+
+  </script>
+
+</body>
+</html>

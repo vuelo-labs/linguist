@@ -1,0 +1,60 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/see"
+  to = "/see/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/see/*"
+  to = "/see/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/experience"
+  to = "/see"
+  status = 301
+
+[[redirects]]
+  from = "/experience/*"
+  to = "/see"
+  status = 301
+
+[[redirects]]
+  from = "/cards"
+  to = "/cards/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/download"
+  to = "/download/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/manifesto"
+  to = "/manifesto/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/guide"
+  to = "/guide/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/pdf"
+  to = "/pdf/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/handbook"
+  to = "/handbook/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

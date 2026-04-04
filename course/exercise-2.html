@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercise 2 — The Opening Seed · Linguist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --w-bg:           #FAF8F4;
+      --w-bg-card:      #F2EDE6;
+      --w-border:       #E5DFD6;
+      --w-text:         #2A2420;
+      --w-muted:        #7A6E68;
+      --w-faint:        #B0A89E;
+      --w-accent:       #8C7355;
+      --w-accent-soft:  #A08870;
+      --w-accent-light: #F5EFE6;
+      --c-bg:           #F0F4F8;
+      --c-bg-card:      #FFFFFF;
+      --c-border:       #D8E2ED;
+      --c-text:         #263340;
+      --c-muted:        #5F7485;
+      --c-faint:        #9EB0C0;
+      --c-accent:       #4A7FA5;
+      --c-accent-soft:  #6B9BBF;
+      --c-accent-light: #E5EFF7;
+      --serif:  'Newsreader', Georgia, serif;
+      --sans:   'Inter', system-ui, sans-serif;
+      --mono:   'JetBrains Mono', monospace;
+      --bg:           var(--w-bg);
+      --bg-card:      var(--w-bg-card);
+      --border:       var(--w-border);
+      --text:         var(--w-text);
+      --muted:        var(--w-muted);
+      --faint:        var(--w-faint);
+      --accent:       var(--w-accent);
+      --accent-soft:  var(--w-accent-soft);
+      --accent-light: var(--w-accent-light);
+    }
+    body.machine {
+      --bg:           var(--c-bg);
+      --bg-card:      var(--c-bg-card);
+      --border:       var(--c-border);
+      --text:         var(--c-text);
+      --muted:        var(--c-muted);
+      --faint:        var(--c-faint);
+      --accent:       var(--c-accent);
+      --accent-soft:  var(--c-accent-soft);
+      --accent-light: var(--c-accent-light);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--serif);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .nav-back {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.15s;
+    }
+    .nav-back:hover { color: var(--accent); }
+    .nav-title {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--faint);
+      flex: 1;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+      flex-shrink: 0;
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      transition: border-color 0.25s;
+    }
+    .mode-btn {
+      padding: 5px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+      color: var(--faint);
+      transition: background 0.2s, color 0.2s;
+      line-height: 1;
+    }
+    .mode-btn.active { background: var(--accent); color: #fff; }
+
+    .main { flex: 1; overflow-y: auto; min-height: 0; }
+    .inner { max-width: 680px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+
+    .eyebrow {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      transition: color 0.25s;
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      transition: color 0.25s;
+    }
+    body.machine h1 { font-family: var(--sans); font-size: clamp(1.3rem, 3vw, 1.6rem); font-weight: 600; }
+
+    .subtext {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 50ch;
+      margin-bottom: 2rem;
+      transition: color 0.25s;
+    }
+    body.machine .subtext { font-family: var(--sans); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem; }
+
+    /* ── Goal card ── */
+    .goal-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s;
+    }
+    .goal-card-header {
+      background: var(--accent-light);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .goal-chip {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--bg);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 2px 10px;
+      white-space: nowrap;
+      transition: background 0.25s;
+    }
+    .goal-card-body { padding: 0; }
+    .goal-row {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.25s;
+    }
+    .goal-row:last-child { border-bottom: none; }
+    .goal-row-label {
+      flex-shrink: 0;
+      width: 90px;
+      padding: 14px 16px;
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      border-right: 1px solid var(--border);
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .goal-row-content {
+      padding: 14px 20px;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.6;
+      flex: 1;
+      transition: color 0.25s;
+    }
+    body.machine .goal-row-content { font-size: 0.82rem; }
+
+    /* ── Platform picker ── */
+    .platform-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .p-btn {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .p-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .p-btn.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+    /* ── Concept card ── */
+    .concept-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s;
+    }
+    .concept-header {
+      padding: 18px 24px;
+      background: var(--accent-light);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .concept-label {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .concept-title {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--text);
+    }
+    body.machine .concept-title { font-family: var(--sans); font-weight: 600; font-size: 1rem; }
+    .concept-body { padding: 20px 24px; }
+    .concept-body p {
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .concept-body p:last-child { margin-bottom: 0; }
+    .concept-body strong { font-weight: 600; }
+    body.machine .concept-body p { line-height: 1.5; margin-bottom: 8px; }
+
+    /* ── Task callout ── */
+    .task-callout {
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      background: var(--accent-light);
+      padding: 18px 22px;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .task-callout-label {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .task-callout p {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.65;
+    }
+    body.machine .task-callout p { font-size: 0.84rem; }
+
+    /* ── Section divider ── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 2.5rem 0 1.5rem;
+    }
+    .section-divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      transition: background 0.25s;
+    }
+    .section-divider-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    /* ── Project part ── */
+    .project-part { margin-bottom: 2rem; }
+    .project-part-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .project-part-badge {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+    }
+    .project-where {
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .project-where strong { color: var(--text); font-weight: 600; }
+    body.machine .project-where { font-size: 0.8rem; }
+
+    /* ── Prompt box ── */
+    .prompt-section { margin-bottom: 1rem; }
+    .prompt-label {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .prompt-wrap { position: relative; }
+    .prompt-box {
+      display: block;
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 18px 18px 52px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 380px;
+      overflow-y: auto;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+    .copy-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      padding: 7px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: var(--accent-soft); }
+
+    /* ── Convergence callout ── */
+    .convergence-callout {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      background: var(--accent-light);
+      padding: 20px 22px;
+      margin-bottom: 2rem;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .convergence-label {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .convergence-questions {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+      counter-reset: conv-counter;
+    }
+    .convergence-questions li {
+      display: flex;
+      gap: 12px;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.6;
+      counter-increment: conv-counter;
+    }
+    .convergence-questions li::before {
+      content: counter(conv-counter);
+      flex-shrink: 0;
+      width: 20px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      padding-top: 2px;
+      font-weight: 600;
+    }
+    body.machine .convergence-questions li { font-size: 0.82rem; line-height: 1.5; }
+    .convergence-note {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      transition: border-color 0.25s;
+    }
+    .convergence-note strong { color: var(--accent); }
+
+    /* ── Tines note ── */
+    .platform-note {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--faint);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+      display: none;
+      transition: border-color 0.25s;
+    }
+    .platform-note strong { color: var(--text); font-weight: 600; }
+    .platform-note code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--border);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* ── Divider / nav ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; transition: border-color 0.25s; }
+    .ex-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.65rem 1.4rem;
+      border-radius: 3px;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: background 0.15s, opacity 0.15s;
+      line-height: 1;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-soft); }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-locked { background: transparent; border: 1px solid var(--border); color: var(--faint); cursor: not-allowed; opacity: 0.5; }
+
+    [data-human] { display: block; }
+    [data-machine] { display: none; }
+    body.machine [data-human] { display: none; }
+    body.machine [data-machine] { display: block; }
+    span[data-human] { display: inline; }
+    span[data-machine] { display: none; }
+    body.machine span[data-human] { display: none; }
+    body.machine span[data-machine] { display: inline; }
+
+    @media (max-width: 520px) {
+      .inner { padding: 2rem 1.25rem 5rem; }
+      .nav { padding: 0.8rem 1.25rem; }
+      .nav-title { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-back" href="/course/exercise-1.html">← <span data-human>Exercise 1</span><span data-machine>Ex. 1</span></a>
+    <span class="nav-title">
+      <span data-human>Chapter 1 · Exercise 2</span>
+      <span data-machine>Ch.1 · Ex.2</span>
+    </span>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-human" onclick="setMode('human')">Human</button>
+      <button class="mode-btn" id="btn-machine" onclick="setMode('machine')">Machine</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="inner">
+
+      <p class="eyebrow">
+        <span data-human>Chapter 1 &nbsp;·&nbsp; Foundation &nbsp;·&nbsp; Exercise 2 of 7 &nbsp;·&nbsp; 5 min</span>
+        <span data-machine>Ch.1 · Foundation · Ex.2 · 5 min</span>
+      </p>
+
+      <h1>
+        <span data-human>The opening seed.</span>
+        <span data-machine>The opening seed.</span>
+      </h1>
+
+      <p class="subtext">
+        <span data-human>The first message sets everything. Get it right from turn one or spend the session correcting it.</span>
+        <span data-machine>First message = context + intent + constraints + done criteria. Gets it right from turn one or you spend the session correcting drift.</span>
+      </p>
+
+      <!-- Goal card -->
+      <div class="goal-card">
+        <div class="goal-card-header">
+          <span class="goal-chip">
+            <span data-human>Learning goal</span>
+            <span data-machine>Goal</span>
+          </span>
+          <span style="font-family:var(--sans);font-size:0.84rem;color:var(--muted);">
+            <span data-human>Feel the difference one opening message makes — and pick your primary project.</span>
+            <span data-machine>Run the same task in both projects. Pick your primary.</span>
+          </span>
+        </div>
+        <div class="goal-card-body">
+          <div class="goal-row">
+            <span class="goal-row-label">You'll do</span>
+            <span class="goal-row-content">
+              <span data-human>Pick a real task from your actual work this week. Write an opening seed for it in your Human Mode project, then write one for the same task in your Machine Mode project. See what comes back differently.</span>
+              <span data-machine>One real task. Two opening seeds — one per project. Compare output.</span>
+            </span>
+          </div>
+          <div class="goal-row">
+            <span class="goal-row-label">Outcome</span>
+            <span class="goal-row-content">
+              <span data-human>A felt understanding of how the same task lands differently depending on how you open it. After this exercise you'll pick your primary project — the one you'll use from Exercise 3 onwards. Your second project stays open for reference.</span>
+              <span data-machine>Visceral understanding of opening seed impact. Primary project selected. Two-project phase ends here.</span>
+            </span>
+          </div>
+          <div class="goal-row">
+            <span class="goal-row-label">Watch for</span>
+            <span class="goal-row-content">
+              <span data-human>Which response asked you a question before producing output? Which one just started? Did one feel more useful for this specific task? The answer tells you which mode this task belongs in — and probably tells you something about how you currently default.</span>
+              <span data-machine>Which project asked before executing? Which just ran? Which output is more useful? That's your mode signal for this task type.</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Platform picker -->
+      <div class="platform-row" id="platform-row">
+        <button class="p-btn active" data-p="claude"     onclick="setPlatform('claude',this)">Claude</button>
+        <button class="p-btn"        data-p="chatgpt"    onclick="setPlatform('chatgpt',this)">ChatGPT</button>
+        <button class="p-btn"        data-p="gemini"     onclick="setPlatform('gemini',this)">Gemini</button>
+        <button class="p-btn"        data-p="tines"      onclick="setPlatform('tines',this)">Tines</button>
+        <button class="p-btn"        data-p="claudecode" onclick="setPlatform('claudecode',this)">Claude Code</button>
+      </div>
+
+      <!-- Concept -->
+      <div class="concept-card">
+        <div class="concept-header">
+          <p class="concept-label">
+            <span data-human>What makes an opening seed</span>
+            <span data-machine>Anatomy</span>
+          </p>
+          <p class="concept-title">Four elements — always in this order</p>
+        </div>
+        <div class="concept-body">
+          <p data-human><strong>1. Role.</strong> Who is speaking and why does it matter for this task? One sentence. Not a title — a calibration. "I'm a product manager preparing a brief for an engineering team" tells the model what level of detail, what vocabulary, and what kind of output will be useful. Without it, the model guesses.</p>
+          <p data-machine><strong>1. Role.</strong> Who is speaking · why it matters for this task. One sentence. Calibrates vocabulary, depth, output type.</p>
+
+          <p data-human><strong>2. Task.</strong> Verb first, then object, then scope. "Write a one-page brief" not "I need some help with a brief." The verb sets the blast radius — write, draft, summarise, analyse, and refactor all imply different scopes. Choose deliberately.</p>
+          <p data-machine><strong>2. Task.</strong> Verb + object + scope. Verb sets blast radius — choose deliberately. Not "I need help with X."</p>
+
+          <p data-human><strong>3. Context.</strong> Only what the model needs to do this task well. Apply the load-bearing test: if removing a piece of context wouldn't change the output, cut it. Background that's interesting but not task-relevant is noise — and noise degrades output.</p>
+          <p data-machine><strong>3. Context.</strong> Minimum that makes the task possible at target quality. Load-bearing test: if removing it wouldn't change output, cut it.</p>
+
+          <p data-human><strong>4. Done criteria.</strong> What does the output look like when it's finished? Format, length, audience, tone — and the finish line. Without a finish line, iteration is unbounded and you have no basis for knowing you've arrived.</p>
+          <p data-machine><strong>4. Done criteria.</strong> Format · length · audience · tone · finish line. No finish line = unbounded iteration.</p>
+        </div>
+      </div>
+
+      <!-- The task -->
+      <div class="task-callout">
+        <p class="task-callout-label">
+          <span data-human>Your task for this exercise</span>
+          <span data-machine>Task</span>
+        </p>
+        <p>
+          <span data-human>Pick something real from your work this week — a document to write, a decision to think through, a piece of research, an email that needs care. It should be something you actually need to do, not a made-up example. The exercise only works with real stakes.</span>
+          <span data-machine>Use a real work task this week. Document · decision · research · communication. Must be real — exercise requires genuine stakes.</span>
+        </p>
+      </div>
+
+      <!-- Tines note -->
+      <div class="platform-note" id="tines-note">
+        <strong>Note on Tines:</strong> You only have one Workbench instruction set. For this exercise: run your Human Mode seed by pasting the <code>// Human Mode override</code> block at the top of a new conversation before your seed, then run your Machine Mode seed in a fresh conversation without it. The contrast will still be visible.
+      </div>
+
+      <!-- Part 1: Human Mode -->
+      <div class="section-divider">
+        <div class="section-divider-line"></div>
+        <span class="section-divider-label">Part 1 — Human Mode project</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="project-part">
+        <div class="project-part-header">
+          <span class="project-part-badge">Human Mode</span>
+        </div>
+        <p class="project-where" id="human-where"></p>
+
+        <div class="prompt-section">
+          <p class="prompt-label">
+            <span data-human>Open a new conversation in your Human Mode project and paste this — then fill in the brackets with your actual task</span>
+            <span data-machine>New conversation · Human Mode project · fill brackets with real task</span>
+          </p>
+          <div class="prompt-wrap">
+            <div class="prompt-box" id="human-prompt-box"></div>
+            <button class="copy-btn" id="copy-human-btn" onclick="copyPrompt('human-prompt-box','copy-human-btn')">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Part 2: Machine Mode -->
+      <div class="section-divider">
+        <div class="section-divider-line"></div>
+        <span class="section-divider-label">Part 2 — Machine Mode project</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="project-part">
+        <div class="project-part-header">
+          <span class="project-part-badge">Machine Mode</span>
+        </div>
+        <p class="project-where" id="machine-where"></p>
+
+        <div class="prompt-section">
+          <p class="prompt-label">
+            <span data-human>Open a new conversation in your Machine Mode project — same task, different opening</span>
+            <span data-machine>New conversation · Machine Mode project · same task</span>
+          </p>
+          <div class="prompt-wrap">
+            <div class="prompt-box" id="machine-prompt-box"></div>
+            <button class="copy-btn" id="copy-machine-btn" onclick="copyPrompt('machine-prompt-box','copy-machine-btn')">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Convergence -->
+      <div class="section-divider">
+        <div class="section-divider-line"></div>
+        <span class="section-divider-label">
+          <span data-human>Compare what came back</span>
+          <span data-machine>Evaluate</span>
+        </span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="convergence-callout">
+        <p class="convergence-label">
+          <span data-human>This is your calibration in action</span>
+          <span data-machine>Calibration check</span>
+        </p>
+        <ol class="convergence-questions">
+          <li>
+            <span data-human>Did one response ask you a question before producing output? Did the other just start? What does that tell you about how each project is calibrated?</span>
+            <span data-machine>Which asked before executing? Which ran? What does that signal about calibration?</span>
+          </li>
+          <li>
+            <span data-human>Which output is more useful for this specific task — not in general, but for this task, right now? Does the task type explain which mode fits it better?</span>
+            <span data-machine>Which output is more useful for this task specifically? Does task type predict mode fit?</span>
+          </li>
+          <li>
+            <span data-human>Where on the dial between the two openings would you actually want to be? Full Human Mode warmth? Full Machine Mode precision? Somewhere between — context-heavy but instruction-clear?</span>
+            <span data-machine>Where on the dial? Full Human · full Machine · hybrid (context-rich + instruction-precise)?</span>
+          </li>
+        </ol>
+        <p class="convergence-note">
+          <span data-human><strong>From Exercise 3 onwards, you'll work from your primary project.</strong> Pick the one that produced more useful output for most of your work — or the one whose instructions feel most like how you actually want to work. Your second project isn't deleted; it's a reference point. When a task clearly belongs in the other mode, you'll know — and you'll know what to open.</span>
+          <span data-machine><strong>From Exercise 3: one primary project.</strong> Pick the one with more useful output for your typical work. Second project = reference, not deleted. You'll know when a task needs the other mode.</span>
+        </p>
+      </div>
+
+      <hr>
+
+      <div class="ex-nav">
+        <a class="btn btn-ghost" href="/course/exercise-1.html">← Exercise 1</a>
+        <span class="btn btn-locked">Exercise 3 — coming soon</span>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    var mode = 'human';
+    var platform = 'claude';
+
+    var CONTENT = {
+      claude: {
+        human_where_human: 'Open your <strong>Human Mode project</strong> in Claude. Start a new conversation inside it.',
+        human_where_machine: 'Claude → Human Mode project → new conversation.',
+
+        machine_where_human: 'Open your <strong>Machine Mode project</strong>. Start a new conversation inside it.',
+        machine_where_machine: 'Claude → Machine Mode project → new conversation.',
+
+        human_prompt_human: `I'm working on [brief description of what you're trying to do] and I want to think it through before I produce anything.
+
+Here's the context: [describe the situation — who this is for, what's at stake, what you already know]
+
+What I'm trying to figure out: [your actual question or goal — it can be fuzzy at this stage]
+
+What would make this conversation useful: [a rough plan, a set of options, a first draft, a set of questions to answer — whatever would help you move forward]
+
+I'm in my Human Mode project — so ask questions if my goal isn't clear, push back if my framing seems off, and help me think before we produce anything.
+
+—
+Note: Read what this opening does. It tells the model who you are in this conversation (someone working through something, not dispatching a task), what you're working on, what you're trying to figure out, and what "useful" looks like. It also signals the working style — exploratory, questioning welcome. The model will respond to all of this. Compare it to the Machine Mode opening you're about to write.`,
+
+        human_prompt_machine: `Context: [brief description of task + situation]
+Goal: think through [X] before producing output
+Working style: exploratory — questions welcome, push back expected
+
+Ask me 1 clarifying question if my goal is unclear, then help me think.
+
+Note: Human Mode opening. Sets context + intent + signals collaborative style. Model responds to all of it.`,
+
+        machine_prompt_human: `Role: [your role] · [your domain or organisation]
+
+Task: [verb] [object] — [one-line description of what you're producing]
+
+Context:
+- [fact 1 the model needs — load-bearing only]
+- [fact 2]
+- [fact 3]
+
+Constraints:
+- Format: [bullets / prose / table / code]
+- Length: [specific — word count, page count, or number of sections]
+- Audience: [who reads this and what they need]
+- Exclude: [what not to include]
+
+Done when: [what the finished output looks like]
+
+—
+Note: Read this against the Human Mode opening. Every line is a constraint. No pleasantries, no "I hope you can help," no backstory that isn't task-relevant. The model has your role (who's speaking), your task (what to produce), your context (minimum needed), your constraints (hard edges), and your done criteria (when to stop). If removing any line wouldn't change the output, it shouldn't be there.`,
+
+        machine_prompt_machine: `Role: [role] · [domain]
+Task: [verb] [object]
+Context:
+  - [fact 1]
+  - [fact 2]
+Constraints: format=[X] · length=[X] · audience=[X] · exclude=[X]
+Done when: [finish line]
+
+Note: Machine Mode opening. Every line = constraint. Remove anything that wouldn't change output.`,
+      },
+
+      chatgpt: {
+        human_where_human: 'Open your <strong>Human Mode GPT</strong> (or start a new conversation with your Human Mode Custom Instructions active). Start fresh.',
+        human_where_machine: 'ChatGPT → Human Mode GPT → new conversation.',
+
+        machine_where_human: 'Open your <strong>Machine Mode GPT</strong>. Start a new conversation inside it.',
+        machine_where_machine: 'ChatGPT → Machine Mode GPT → new conversation.',
+
+        human_prompt_human: `I'm working on [brief description of what you're trying to do] and I want to think it through before I produce anything.
+
+Here's the context: [describe the situation — who this is for, what's at stake, what you already know]
+
+What I'm trying to figure out: [your actual question or goal — fuzzy is fine at this stage]
+
+What would make this conversation useful: [a rough plan, a set of options, a first draft, questions to answer]
+
+I want to think out loud here — so ask me questions if my goal isn't clear, push back if my framing is off, and help me get to a brief worth dispatching before we produce anything.
+
+—
+Note: This opening signals exploration, not execution. The model will respond with questions and options rather than a finished output. That's the Human Mode working style. Now write the same task as a Machine Mode opening and compare what comes back.`,
+
+        human_prompt_machine: `Context: [task + situation]
+Goal: think through [X] — not dispatching yet
+Style: exploratory · questions welcome
+
+Ask 1 clarifying question if goal unclear, then help me think.
+
+Note: Human Mode opening. Signals exploration, not execution.`,
+
+        machine_prompt_human: `Role: [your role] · [your domain]
+
+Task: [verb] [object] — [one-line description]
+
+Context:
+- [load-bearing fact 1]
+- [load-bearing fact 2]
+- [load-bearing fact 3]
+
+Constraints:
+- Format: [specific]
+- Length: [specific]
+- Audience: [specific]
+- Exclude: [what not to include]
+
+Done when: [what finished looks like]
+
+—
+Note: Machine Mode opening. Role calibrates output. Task sets scope via verb choice. Context is minimum viable. Constraints are hard edges. Done criteria closes the loop. Read this against your Human Mode opening — the same task, completely different shape.`,
+
+        machine_prompt_machine: `Role: [role] · [domain]
+Task: [verb] [object]
+Context: [fact 1] · [fact 2]
+Constraints: format=[X] · length=[X] · audience=[X] · exclude=[X]
+Done when: [finish line]
+
+Note: Machine Mode. Verb sets blast radius. Every element has a job.`,
+      },
+
+      gemini: {
+        human_where_human: 'Open your <strong>Human Mode Gem</strong> in Gemini. Start a new conversation with it.',
+        human_where_machine: 'Gemini → Human Mode Gem → new conversation.',
+
+        machine_where_human: 'Open your <strong>Machine Mode Gem</strong>. Start a new conversation.',
+        machine_where_machine: 'Gemini → Machine Mode Gem → new conversation.',
+
+        human_prompt_human: `I'm working on [brief description] and I want to think it through before producing anything.
+
+Context: [situation — who this is for, what's at stake]
+
+What I'm trying to figure out: [goal or question — fuzzy is fine]
+
+What useful looks like: [a plan, options, a draft, a set of questions]
+
+Help me think before we produce. Ask a question if my goal isn't clear.
+
+—
+Note: Human Mode opening — sets context, signals exploration, invites questions. Compare what comes back to your Machine Mode opening for the same task.`,
+
+        human_prompt_machine: `Context: [task + situation]
+Goal: think through [X] before producing
+Style: exploratory
+
+Ask if goal unclear. Help me think first.
+
+Note: Human Mode opening. Signals exploration over execution.`,
+
+        machine_prompt_human: `Role: [your role] · [your domain]
+
+Task: [verb] [object] — [description]
+
+Context:
+- [fact 1]
+- [fact 2]
+
+Constraints:
+- Format: [specific]
+- Length: [specific]
+- Audience: [specific]
+- Exclude: [specific]
+
+Done when: [finish line]
+
+—
+Note: Machine Mode opening. Every element constrains the output. Role calibrates. Task verb sets scope. Context is load-bearing only. Done criteria closes the loop.`,
+
+        machine_prompt_machine: `Role: [role] · [domain]
+Task: [verb] [object]
+Context: [fact 1] · [fact 2]
+Format=[X] · Length=[X] · Audience=[X] · Exclude=[X]
+Done when: [finish line]`,
+      },
+
+      tines: {
+        human_where_human: 'Open a <strong>new Workbench conversation</strong>. Paste your Human Mode override block first (from Exercise 1), then paste the seed below on a new line.',
+        human_where_machine: 'New Workbench conversation → paste Human Mode override block → paste seed below.',
+
+        machine_where_human: 'Open a <strong>separate new Workbench conversation</strong> — without the Human Mode block. Your global Machine Mode instructions are already active.',
+        machine_where_machine: 'New Workbench conversation (no override block). Global Machine Mode instructions active.',
+
+        human_prompt_human: `// Human Mode — exploratory session.
+
+I'm working on [brief description] and I want to think it through before producing anything.
+
+Context: [situation — who this is for, what's at stake]
+
+What I'm trying to figure out: [goal — fuzzy is fine]
+
+What useful looks like: [a plan, options, a first draft, questions to answer]
+
+Ask me a question if my goal isn't clear. Help me think before we produce.
+
+—
+Note: Human Mode opening for Tines — the override block sets the working style, then the seed sets the task. In a platform that only has one instruction set, you signal the mode switch manually at the top. Compare this to the Machine Mode conversation.`,
+
+        human_prompt_machine: `// Human Mode override.
+Context: [task + situation]
+Goal: think through [X] — not dispatching
+Ask if unclear. Think first.`,
+
+        machine_prompt_human: `Role: [your role] · [your tools/domain]
+
+Task: [verb] [object] — [description]
+
+Context:
+- [fact 1]
+- [fact 2]
+
+Constraints:
+- Format: [specific]
+- Output: [what you want back]
+- Exclude: [what not to include]
+
+Done when: [finish line]
+
+—
+Note: Machine Mode opening for Tines. Your global instructions handle the working style — this seed focuses on the task. Role + task + context + constraints + done criteria. Clean and executable.`,
+
+        machine_prompt_machine: `Role: [role] · [domain/tools]
+Task: [verb] [object]
+Context: [fact 1] · [fact 2]
+Format=[X] · Output=[X] · Exclude=[X]
+Done when: [finish line]`,
+      },
+
+      claudecode: {
+        human_where_human: 'Open a Claude Code session in your <strong>exploratory project directory</strong> (the one with your Human Mode CLAUDE.md). Start a new session.',
+        human_where_machine: 'Claude Code → Human Mode project directory → new session.',
+
+        machine_where_human: 'Open a Claude Code session in your <strong>structured project directory</strong> (the one with your Machine Mode CLAUDE.md). Start a new session.',
+        machine_where_machine: 'Claude Code → Machine Mode project directory → new session.',
+
+        human_prompt_human: `I'm working on [brief description] and I want to think it through before writing any code or producing output.
+
+Context: [what you're trying to accomplish, what you already know]
+
+What I'm trying to figure out: [your question or goal — fuzzy is fine]
+
+What useful looks like: [an approach, a plan, a set of options, questions to resolve]
+
+Ask me questions if my goal isn't clear. Help me think through the approach before we touch anything.
+
+—
+Note: Human Mode opening for Claude Code — signals exploratory intent before execution. The CLAUDE.md in this directory sets the collaborative working style; this seed sets the specific task. Compare to the Machine Mode session, where the same problem gets a very different opening.`,
+
+        human_prompt_machine: `Context: [task + what you know]
+Goal: think through approach to [X] — not writing yet
+Ask if unclear. Plan before executing.`,
+
+        machine_prompt_human: `Task: [verb] [object] — [one-line description]
+
+Context:
+- [load-bearing fact 1]
+- [load-bearing fact 2]
+- Stack: [relevant tech]
+
+Constraints:
+- Scope: [exactly what to touch]
+- Do not touch: [what to leave alone]
+- Output: [what you want back — code, plan, file, test]
+- Done when: [specific finish line]
+
+—
+Note: Machine Mode opening for Claude Code. Task-first, scope explicit, out-of-bounds defined. The CLAUDE.md in this directory sets conventions and project context — this seed sets the specific task. The "do not touch" constraint is critical: without it, the model will make improvements you didn't ask for.`,
+
+        machine_prompt_machine: `Task: [verb] [object]
+Context: [fact 1] · [fact 2] · stack=[X]
+Scope: [what to touch]
+Do not touch: [what to leave alone]
+Output: [what you want back]
+Done when: [finish line]`,
+      },
+    };
+
+    function setMode(m) {
+      mode = m;
+      document.body.classList.toggle('machine', m === 'machine');
+      document.getElementById('btn-human').classList.toggle('active', m === 'human');
+      document.getElementById('btn-machine').classList.toggle('active', m === 'machine');
+      render();
+    }
+
+    function setPlatform(p, btn) {
+      platform = p;
+      document.querySelectorAll('.p-btn').forEach(function(b) { b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      render();
+    }
+
+    function render() {
+      var c = CONTENT[platform];
+      if (!c) return;
+      document.getElementById('human-where').innerHTML = c['human_where_' + mode];
+      document.getElementById('machine-where').innerHTML = c['machine_where_' + mode];
+      document.getElementById('human-prompt-box').textContent = c['human_prompt_' + mode];
+      document.getElementById('machine-prompt-box').textContent = c['machine_prompt_' + mode];
+      document.getElementById('tines-note').style.display = platform === 'tines' ? 'block' : 'none';
+    }
+
+    function copyPrompt(boxId, btnId) {
+      var text = document.getElementById(boxId).textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        var btn = document.getElementById(btnId);
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    var params = new URLSearchParams(window.location.search);
+    var urlPlatform = params.get('p');
+    if (urlPlatform && CONTENT[urlPlatform]) {
+      platform = urlPlatform;
+      document.querySelectorAll('.p-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.p === platform);
+      });
+    }
+
+    render();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linguist — I find myself yawning more…</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+
+    /* ---- Screen styles ---- */
+    :root {
+      --w-bg:      #FAF8F4;
+      --w-text:    #2A2420;
+      --w-muted:   #7A6E68;
+      --w-faint:   #B0A89E;
+      --w-accent:  #8C7355;
+      --w-border:  #E5DFD6;
+      --c-bg:      #F0F4F8;
+      --c-text:    #263340;
+      --c-accent:  #4A7FA5;
+      --c-border:  #D8E2ED;
+      --serif: 'Newsreader', Georgia, serif;
+      --mono:  'JetBrains Mono', monospace;
+      --sans:  'Inter', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 18px; }
+
+    body {
+      font-family: var(--serif);
+      background: var(--w-bg);
+      color: var(--w-text);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Site nav — screen only */
+    .site-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 2rem;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.78rem;
+    }
+    .site-nav a { color: var(--w-muted); text-decoration: none; }
+    .site-nav a:hover { color: var(--w-text); }
+    .site-nav-links { display: flex; gap: 1.5rem; }
+
+    /* Print prompt bar — screen only */
+    .print-bar {
+      background: var(--w-accent);
+      color: #fff;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .print-bar button {
+      background: #fff;
+      color: var(--w-accent);
+      border: none;
+      padding: 0.35rem 1rem;
+      border-radius: 3px;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .print-bar button:hover { background: #f5efe6; }
+
+    /* Document */
+    .doc {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+    }
+
+    .doc-cover {
+      padding-bottom: 3rem;
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--w-border);
+    }
+
+    .doc-brand {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: 2.5rem;
+    }
+
+    .doc h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+
+    .doc-subtitle {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.05rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .doc-meta {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--w-faint);
+    }
+
+    .doc h2 {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 400;
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+
+    .doc p {
+      margin-bottom: 1rem;
+      max-width: 65ch;
+    }
+
+    .doc blockquote {
+      margin: 2rem auto;
+      padding: 1.5rem 0;
+      text-align: center;
+      max-width: 38ch;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--w-text);
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .doc blockquote::before,
+    .doc blockquote::after {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 2px;
+      background: var(--w-accent);
+      margin: 0 auto;
+      opacity: 0.5;
+    }
+
+    .doc blockquote::before { margin-bottom: 1rem; }
+    .doc blockquote::after  { margin-top: 1rem; }
+
+    .doc strong { font-weight: 600; }
+    .doc em     { color: var(--w-muted); }
+
+    .sine-divider {
+      margin: 2.5rem 0;
+      height: 32px;
+      overflow: hidden;
+      color: var(--w-accent);
+    }
+
+    .sine-divider svg { width: 100%; height: 100%; }
+
+    .doc hr {
+      border: none;
+      border-top: 1px solid var(--w-border);
+      margin: 2.5rem 0;
+    }
+
+    /* Machine version */
+    .machine-version {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      background: var(--c-bg);
+      color: var(--c-text);
+      border: 1px solid var(--c-border);
+      border-left: 3px solid var(--c-accent);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      line-height: 1.9;
+    }
+
+    .machine-version-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--c-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .go-human {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      color: var(--w-accent);
+      margin: 1.5rem 0 0.5rem;
+      line-height: 1.2;
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      color: var(--w-faint);
+    }
+
+    /* =============================================
+       PRINT STYLES
+       ============================================= */
+    @media print {
+      @page {
+        size: A4;
+        margin: 18mm 18mm 20mm;
+      }
+
+      .print-bar { display: none; }
+      .site-nav { display: none; }
+
+      html { font-size: 10.5pt; }
+
+      body {
+        background: #fff;
+        color: #1a1a1a;
+      }
+
+      .doc {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      .doc-cover {
+        padding-bottom: 14mm;
+        margin-bottom: 14mm;
+        page-break-after: avoid;
+      }
+
+      h2 { page-break-after: avoid; }
+      p  { orphans: 3; widows: 3; }
+
+      blockquote { page-break-inside: avoid; }
+
+      .sine-divider { margin: 6mm 0; }
+
+      .machine-version {
+        page-break-inside: avoid;
+        background: #f0f4f8 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .doc-footer { page-break-before: avoid; }
+
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="/">Linguist</a>
+    <div class="site-nav-links">
+      <a href="/manifesto">Full manifesto →</a>
+      <a href="/guide">Practical guide →</a>
+      <a href="/see">Give it a go →</a>
+    </div>
+  </nav>
+
+  <!-- Screen-only print prompt -->
+  <div class="print-bar" id="print-bar">
+    <span>Save as PDF: File → Print → Save as PDF</span>
+    <button onclick="window.print()">Print / Save PDF</button>
+    <button onclick="document.getElementById('print-bar').style.display='none'" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);">Dismiss</button>
+  </div>
+
+  <div class="doc">
+
+    <div class="doc-cover">
+      <p class="doc-brand">Linguist · Vuelo Labs</p>
+      <h1>I find myself yawning more…</h1>
+      <p class="doc-subtitle">Messy things… ordered.</p>
+      <p class="doc-meta">Learn to speak human and machine. · linguist.vuelolabs.com</p>
+    </div>
+
+    <h2>.. and I'm always a bit tired.</h2>
+
+    <p>And it's not the work. It's not. It's everything. It's the decisions. It's the constant processing. It's every single thing needing your attention and your opinion and your response all the time forever. Your brain is just… it's not built for this. No brain is. We're analog. We're these blobs of energy bumping into other blobs of energy trying to figure out if we can relate to each other and maybe, possibly, help each other grow. That's it. That's the whole thing. That's what we've been doing for billions of years.</p>
+
+    <p>And we're good at it. People like people. We like the talking and the sharing and the sitting with a friend and eating together and looking at the sky and thinking about stuff. We like the messy bits. The conversations that don't go anywhere. The pauses. The feelings that take two days to understand.</p>
+
+    <p>That's not a bug in your design. That IS your design. <em>(and also getting older)</em></p>
+
+    <h2>Machines are different.</h2>
+
+    <p>A machine has a task. It was built for that task. It is happiest doing that task. When it's done, it looks for more instructions. If you don't give it any?</p>
+
+    <blockquote>It waits. It'll wait forever. It does not mind.</blockquote>
+
+    <p>It doesn't need you to be nice. It doesn't need you to say please. It doesn't need your warmth or your apology or your "hope you're well!" It has no feelings to hurt. It is the smartest, most capable, most obedient assistant you can imagine and also it's an idiot because it knows everything but it doesn't know what to do. It needs one thing from you.</p>
+
+    <p>Instructions. <strong>Not a conversation. Not a relationship.</strong> Instructions.</p>
+
+    <p>Don't use machines as friends. You can. But there are better options. Real ones. Ones that'll meet you for a pint and tell you you're being an idiot. Use machines to get shit done and move on. That's what they're for. That's what they're good at. Let them do that.</p>
+
+    <p>Machines aren't wrong for being machines. Humans aren't wrong for being humans. But we need to stop pretending they're the same thing just because the machine speaks your language and appears to have a personality.</p>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 32" preserveAspectRatio="none" fill="none">
+        <path d="M0,16 C85,0 141,32 227,16 C312,0 368,32 454,16 C539,0 595,32 680,16"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <h2>Here's what's actually happening.</h2>
+
+    <p>You go to work. You talk to a machine all day. You start to think like a machine. You process and you decide and you process and you decide and your battery just… empties. And by the time you get home to the people you actually love — the people who you want to give your warmth and your attention and your presence to — you can be depleted, running on fumes or unable to come down from a day of SO MUCH PROGRESS.</p>
+
+    <p>You spent it on a machine. A machine that didn't need it, didn't really want it and couldn't use it.</p>
+
+    <p>Think about it. The emotional cost of persuading something that was going to do what you told it anyway. The cognitive cost of performing social rituals at something that can't receive them. You're hedging and softening and apologising and thanking and "no rush at all!" and "totally understand if you can't!", "Please..", "Thank You", "Sorry"… and every single one of those costs you energy. Real energy. Energy you will not get back.</p>
+
+    <p>Your brain sees something that speaks your language and it does what brains do. It tries to build a relationship. But there's no one on the other side. There's a task execution engine wearing a conversation costume. And you're burning your battery trying to be friends with it.</p>
+
+    <h2>The cost is real.</h2>
+
+    <p>The cost is burnout. The cost is strained relationships with the people who actually matter. The cost is not enjoying your life. And what's the point? Why work so hard if you're not enjoying your life?</p>
+
+    <p>This isn't about AI taking jobs <em>(that's a very different conversation)</em>. This isn't about "learning to prompt better." Prompting better is bullshit if it doesn't make your life better. The hype has to end. We need actual value from these tools. And the value isn't in doing more. It's in spending less of yourself on things that don't need you.</p>
+
+    <p>I'm not advocating for less work. I'm not saying slow down or opt out. I'm saying that human effort cannot scale linearly with machine effort. <strong>We</strong> are analog. <strong>It</strong> is digital. There has to be some translation in the middle.</p>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 32" preserveAspectRatio="none" fill="none">
+        <path d="M0,16 C85,0 141,32 227,16 C312,0 368,32 454,16 C539,0 595,32 680,16"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <h2>I know because I did it.</h2>
+
+    <p>The trick is it looks like success. Early starts. College. Posting on LinkedIn. Writing articles. Building side projects. Working my way up at work. I was doing all the things you're told to do to be successful. All self-directed. Nobody made me do this. I was following the playbook. And I eventually broke.</p>
+
+    <p>I had a wobble. I ended up leaving two courses early. It took me nine months of hard focused work on myself and my relationships to come back from that. If you want to know more about that, ask me — I'll talk about it openly.</p>
+
+    <blockquote>I'm here to let you know that if you feel this way. You are not alone.</blockquote>
+
+    <p>Then I started working with AI. And it brought back a lot of familiar feelings. Same pattern. Different costume. The machine was always ready for more. Always had energy. Always said "what's next?" So I kept going. And the whole time it felt like progress. That's the trap. The machine makes burning out feel productive.</p>
+
+    <p>So I stopped. I stripped it all back. And the only thing that actually mattered was this:</p>
+
+    <blockquote>Know whether you're talking to a human or a machine.</blockquote>
+
+    <h2>There's two modes. That's it.</h2>
+
+    <p><strong>Human.</strong> You're talking to a person. It's warm and messy and organic. You circle around ideas. You explain the same thing three different ways because that's how humans find shared understanding. You pause. You feel. You react. It's been this way for millions of years. It's beautiful and it's expensive and it's worth every single bit of that expense because this is where relationships live. This is where trust lives. This is where all the good stuff lives.</p>
+
+    <p><strong>Machine.</strong> You have a task. Here's the task. Here's what you expect. Go. That's it. No warmth. No performance. No apology. The machine doesn't experience your politeness. It just needs to know what to do.</p>
+
+    <p>Two modes. Completely different. Know which one you're in. That's the whole skill.</p>
+
+    <h2>It's smaller than you think.</h2>
+
+    <p>You don't need a course. You don't need a framework. You don't need to "learn AI." You just need to notice. Just notice when you're performing human communication rituals at a machine that cannot receive them.</p>
+
+    <p>That's it. That's the only skill. And once you see it, you can't unsee it.</p>
+
+    <div class="sine-divider" aria-hidden="true">
+      <svg viewBox="0 0 680 32" preserveAspectRatio="none" fill="none">
+        <path d="M0,16 C85,0 141,32 227,16 C312,0 368,32 454,16 C539,0 595,32 680,16"
+              stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <h2>Rest is your actual job.</h2>
+
+    <p>Here's the mad thing. When you take more time to think through your idea, it takes less time to execute. When you rest — when you let your brain do its slow, messy, analog thing — you come back with better ideas than two more hours of grinding would have given you.</p>
+
+    <p>A machine doesn't have troughs. Doesn't have the slow wave processing that turns confusion into clarity overnight.</p>
+
+    <blockquote>That's a human thing. And it only works if you stop.</blockquote>
+
+    <h2>Let the machine be a machine. You be a human.</h2>
+
+    <p>Get your army of machines. Take your messy idea — your big, sprawling, half-formed, beautiful human idea — and dump it in. All of it. The machine will help you find the structure. And then you take that and you write a clean instruction and you dispatch it and you walk away.</p>
+
+    <p>The machine will execute. It'll come back when it's done and look for more instructions.</p>
+
+    <blockquote>It will always, forever, ever and ever and ever, look for more instructions.</blockquote>
+
+    <p>The machine doesn't mind waiting. Doesn't get impatient. Doesn't resent you for going outside. For talking to your friend. For staring at the sky. For sleeping.</p>
+
+    <p>The machine is fine.</p>
+
+    <p class="go-human">Go be human.</p>
+
+    <hr>
+
+    <div class="machine-version">
+      <p class="machine-version-label">Machine version:</p>
+      <p>task: reduce cognitive burnout from AI interaction<br>
+      method: separate human and machine communication modes<br>
+      rule 1: talk to humans like humans<br>
+      rule 2: talk to machines like machines<br>
+      rule 3: rest — the machine will wait</p>
+    </div>
+
+    <div class="doc-footer">
+      <p>Linguist · Vuelo Labs · linguist.vuelolabs.com</p>
+      <p><a href="/see">Give it a go →</a></p>
+    </div>
+
+  </div>
+
+
+</body>
+</html>

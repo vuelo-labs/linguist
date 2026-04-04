@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Manifesto — Linguist</title>
+  <meta name="description" content="You're not burning out from the work. You're burning out from talking to machines like they're people. There are two modes. That's it.">
+  <meta property="og:title" content="Linguist Manifesto">
+  <meta property="og:description" content="You're not burning out from the work. You're burning out from talking to machines like they're people.">
+  <meta property="og:type" content="article">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      text-decoration: none;
+    }
+    .site-header-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .site-header-link {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-muted);
+      text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-cta {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-accent);
+      text-decoration: none;
+      border: 1px solid var(--w-border);
+      padding: 0.4rem 1rem;
+      border-radius: 3px;
+      transition: border-color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .site-header-cta:hover {
+      border-color: var(--w-accent);
+      background: var(--w-accent-light);
+    }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+      .site-header-cta { display: none; }
+    }
+    .manifesto {
+      padding: var(--space-xl) 0 var(--space-2xl);
+    }
+    .manifesto h1 { margin-bottom: var(--space-xs); }
+    .manifesto .subtitle {
+      font-style: italic;
+      color: var(--w-muted);
+      margin-bottom: var(--space-xl);
+      font-size: 1.1rem;
+    }
+    .manifesto h2 {
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-md);
+    }
+    .manifesto p { margin-bottom: var(--space-md); }
+    .manifesto blockquote {
+      margin: var(--space-xl) auto;
+      padding: var(--space-lg) 0;
+      text-align: center;
+      max-width: 38ch;
+      font-style: italic;
+      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+      color: var(--w-text);
+      line-height: 1.5;
+      position: relative;
+    }
+    .manifesto blockquote::before,
+    .manifesto blockquote::after {
+      content: '';
+      display: block;
+      width: 36px;
+      height: 2px;
+      background: var(--w-accent);
+      margin: 0 auto;
+      opacity: 0.6;
+    }
+    .manifesto blockquote::before { margin-bottom: var(--space-md); }
+    .manifesto blockquote::after  { margin-top: var(--space-md); }
+    .manifesto blockquote p { margin: 0; max-width: none; }
+    .manifesto strong { font-weight: bold; color: var(--w-text); }
+    .manifesto em { color: var(--w-muted); }
+    .machine-version {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--c-bg);
+      color: var(--c-text);
+      border: 1px solid var(--c-border);
+      border-left: 3px solid var(--c-accent);
+      padding: var(--space-lg);
+      margin: var(--space-xl) 0;
+      line-height: 1.8;
+    }
+    .machine-version-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--c-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-sm);
+    }
+    hr.rule {
+      border: none;
+      border-top: 1px solid var(--w-border);
+      margin: var(--space-xl) 0;
+    }
+    .go-human-closing {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-family: var(--serif);
+      color: var(--w-accent);
+      margin: var(--space-xl) 0 var(--space-sm);
+      line-height: 1.2;
+      max-width: none;
+    }
+    .cta {
+      text-align: center;
+      padding: var(--space-xl) 0 var(--space-2xl);
+      border-top: 1px solid var(--w-border);
+    }
+    .cta p {
+      max-width: 45ch;
+      margin: 0 auto var(--space-lg);
+      color: var(--w-muted);
+      font-size: 1rem;
+    }
+    .cta-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .donate-nudge {
+      margin-top: var(--space-lg);
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-faint);
+    }
+    .donate-nudge a { color: var(--w-faint); text-decoration-color: var(--w-border); }
+    .donate-nudge a:hover { color: var(--w-muted); }
+    .site-footer {
+      padding: var(--space-xl) 0;
+      text-align: center;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-faint);
+      border-top: 1px solid var(--w-border);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/guide" class="site-header-link">Practical guide →</a>
+      <a href="/see" class="site-header-cta">Give it a go →</a>
+    </div>
+  </header>
+
+  <main>
+    <article class="manifesto">
+      <div class="container">
+
+        <h1>I find myself yawning more…</h1>
+        <p class="subtitle">Messy things… ordered.</p>
+
+        <h2>.. and I'm always a bit tired.</h2>
+
+        <p>And it's not the work. It's not. It's everything. It's the decisions. It's the constant processing. It's every single thing needing your attention and your opinion and your response all the time forever. Your brain is just… it's not built for this. No brain is. We're analog. We're these blobs of energy bumping into other blobs of energy trying to figure out if we can relate to each other and maybe, possibly, help each other grow. That's it. That's the whole thing. That's what we've been doing for billions of years.</p>
+
+        <p>And we're good at it. People like people. We like the talking and the sharing and the sitting with a friend and eating together and looking at the sky and thinking about stuff. We like the messy bits. The conversations that don't go anywhere. The pauses. The feelings that take two days to understand.</p>
+
+        <p>That's not a bug in your design. That IS your design. <em>(and also getting older)</em></p>
+
+        <h2>Machines are different.</h2>
+
+        <p>A machine has a task. It was built for that task. It is happiest doing that task. When it's done, it looks for more instructions. If you don't give it any?</p>
+
+        <blockquote><p>It waits. It'll wait forever. It does not mind.</p></blockquote>
+
+        <p>It doesn't need you to be nice. It doesn't need you to say please. It doesn't need your warmth or your apology or your "hope you're well!" It has no feelings to hurt. It is the smartest, most capable, most obedient assistant you can imagine and also it's an idiot because it knows everything but it doesn't know what to do. It needs one thing from you.</p>
+
+        <p>Instructions. <strong>Not a conversation. Not a relationship.</strong> Instructions.</p>
+
+        <p>Don't use machines as friends. You can. But there are better options. Real ones. Ones that'll meet you for a pint and tell you you're being an idiot. Use machines to get shit done and move on. That's what they're for. That's what they're good at. Let them do that.</p>
+
+        <p>Machines aren't wrong for being machines. Humans aren't wrong for being humans. But we need to stop pretending they're the same thing just because the machine speaks your language and appears to have a personality.</p>
+
+        <div class="sine-divider" aria-hidden="true">
+          <img src="/assets/sine-wave.svg" alt="">
+        </div>
+
+        <h2>Here's what's actually happening.</h2>
+
+        <p>You go to work. You talk to a machine all day. You start to think like a machine. You process and you decide and you process and you decide and your battery just… empties. And by the time you get home to the people you actually love — the people who you want to give your warmth and your attention and your presence to — you can be depleted, running on fumes or unable to come down from a day of SO MUCH PROGRESS.</p>
+
+        <p>You spent it on a machine. A machine that didn't need it, didn't really want it and couldn't use it.</p>
+
+        <p>Think about it. The emotional cost of persuading something that was going to do what you told it anyway. The cognitive cost of performing social rituals at something that can't receive them. You're hedging and softening and apologising and thanking and "no rush at all!" and "totally understand if you can't!", "Please..", "Thank You", "Sorry"… and every single one of those costs you energy. Real energy. Energy you will not get back.</p>
+
+        <p>Your brain sees something that speaks your language and it does what brains do. It tries to build a relationship. But there's no one on the other side. There's a task execution engine wearing a conversation costume. And you're burning your battery trying to be friends with it.</p>
+
+        <h2>The cost is real.</h2>
+
+        <p>The cost is burnout. The cost is strained relationships with the people who actually matter. The cost is not enjoying your life. And what's the point? Why work so hard if you're not enjoying your life?</p>
+
+        <p>This isn't about AI taking jobs <em>(that's a very different conversation)</em>.<br>
+        This isn't about "learning to prompt better." Prompting better is bullshit if it doesn't make your life better. And what exactly is better prompting?<br>
+        The hype has to end. We need actual value from these tools. And the value isn't in doing more. It's in spending less of yourself on things that don't need you.</p>
+
+        <p>Pause here. This is a big change versus this time last year. I'm not advocating for less work. I'm not saying slow down or opt out. I'm saying that human effort cannot scale linearly with machine effort. The machine gets faster, so you work faster. The machine does more, so you do more. That doesn't work. <strong>We</strong> are analog. <strong>It</strong> is digital. There has to be some translation in the middle. Something that lets the machine scale while you stay human.</p>
+
+        <p>We need to take advantage of the strengths of both. Not have each other as competition. Machines can't beat us at the truly human stuff — the relationships, the creativity, the mess, the feeling, the growth. And humans can't beat machines at the truly machine stuff — the persistence, the processing, the tireless execution. Stop competing. Start collaborating. Each doing what they're actually built for.</p>
+
+        <div class="sine-divider" aria-hidden="true">
+          <img src="/assets/sine-wave.svg" alt="">
+        </div>
+
+        <h2>I know because I did it.</h2>
+
+        <p>The trick is it looks like success. Early starts. College. Posting on LinkedIn. Writing articles. Building side projects. Working my way up at work. I was doing all the things you're told to do to be successful. All self-directed. Nobody made me do this. I was following the playbook. And I eventually broke.</p>
+
+        <p>I had a wobble. I ended up leaving two courses early. It took me nine months of hard focused work on myself and my relationships to come back from that. If you want to know more about that, ask me — I'll talk about it openly.</p>
+
+        <blockquote><p>I'm here to let you know that if you feel this way. You are not alone.</p></blockquote>
+
+        <p>Then I started working with AI. And it brought back a lot of familiar feelings. Same pattern. Different costume. The machine was always ready for more. Always had energy. Always said "what's next?" So I kept going. And the whole time it felt like progress. That's the trap. The machine makes burning out feel productive.</p>
+
+        <p>And then I recognised the feeling. Same feeling. Same costume on a different day.</p>
+
+        <p>So I stopped. I stripped it all back. And the only thing that actually mattered was this:</p>
+
+        <blockquote><p>Know whether you're talking to a human or a machine.</p></blockquote>
+
+        <h2>There's two modes. That's it.</h2>
+
+        <p><strong>Human.</strong> You're talking to a person. It's warm and messy and organic. You circle around ideas. You explain the same thing three different ways because that's how humans find shared understanding. You pause. You feel. You react. It's been this way for millions of years. It's beautiful and it's expensive and it's worth every single bit of that expense because this is where relationships live. This is where trust lives. This is where all the good stuff lives.</p>
+
+        <p><strong>Machine.</strong> You have a task. Here's the task. Here's what you expect. Go. That's it. No warmth. No performance. No apology. The machine doesn't experience your politeness. It just needs to know what to do.</p>
+
+        <p>Two modes. Completely different. Know which one you're in. That's the whole skill.</p>
+
+        <h2>It's smaller than you think.</h2>
+
+        <p>You don't need a course. You don't need a framework. You don't need to "learn AI." You just need to notice. Just notice when you're performing human communication rituals at a machine that cannot receive them.</p>
+
+        <p>That's it. That's the only skill. And once you see it, you can't unsee it.</p>
+
+        <p>You'll catch yourself typing "Hope you're well!" to a language model. You'll notice the three paragraphs of preamble before your actual question. You'll feel the guilt when you close the laptop and then you'll realise — the machine doesn't know you left. It doesn't care. It'll be exactly where you left it when you come back. It'll be fine. It's always fine.</p>
+
+        <div class="sine-divider" aria-hidden="true">
+          <img src="/assets/sine-wave.svg" alt="">
+        </div>
+
+        <h2>Rest is your actual job.</h2>
+
+        <p>Here's the mad thing. When you take more time to think through your idea, it takes less time to execute. When you rest — when you let your brain do its slow, messy, analog thing — you come back with better ideas than two more hours of grinding would have given you.</p>
+
+        <p>Two days of not thinking about this problem. I just… put it into my brain and let it sit there. Let the slow processes do their thing. And on the third day, the answer was obvious.</p>
+
+        <p>A machine couldn't have done that. A machine doesn't have troughs. Doesn't have the slow wave processing that turns confusion into clarity overnight.</p>
+
+        <blockquote><p>That's a human thing. And it only works if you stop.</p></blockquote>
+
+        <h2>Let the machine be a machine.<br>You be a human.</h2>
+
+        <p>Get your army of machines. Take your messy idea — your big, sprawling, half-formed, beautiful human idea — and dump it in. All of it. Audio, text, images, whatever. The machine will help you find the structure. It'll reflect your chaos back as something organised. And then you take that and you write a clean instruction and you dispatch it and you walk away. The machine is amazing at prompting… way better than a human.</p>
+
+        <p>The machine will execute.<br>
+        Might take a minute.<br>
+        Might take a day.<br>
+        It'll come back when it's done and look for more instructions.</p>
+
+        <blockquote><p>It will always, forever, ever and ever and ever, look for more instructions.</p></blockquote>
+
+        <p>But here's the thing. A human can't do that. A human can't wait forever for instructions. They'll do something. They'll come back. They'll say "hi, what's next?" If you ignore them, it'll affect the relationship. It's a totally different thing.</p>
+
+        <p>The machine doesn't do that. The machine doesn't mind waiting. Doesn't get impatient. Doesn't resent you for going outside. For talking to your friend. For staring at the sky. For sleeping.</p>
+
+        <p>The machine is fine.</p>
+
+        <p class="go-human-closing">Go be human.</p>
+
+        <hr class="rule">
+
+        <div class="machine-version">
+          <p class="machine-version-label">Machine version:</p>
+          <p>task: reduce cognitive burnout from AI interaction<br>
+          method: separate human and machine communication modes<br>
+          rule 1: talk to humans like humans<br>
+          rule 2: talk to machines like machines<br>
+          rule 3: rest — the machine will wait</p>
+        </div>
+
+      </div>
+    </article>
+
+    <section class="cta">
+      <div class="container">
+        <p>Ready to feel the difference? Three minutes. No sign-up.</p>
+        <div class="cta-links">
+          <a href="/see" class="btn btn-warm">Give it a go <span style="font-size:0.8em;opacity:0.65;">(2–3 min)</span></a>
+          <a href="/guide" class="btn btn-ghost">Practical guide →</a>
+        </div>
+        <div style="margin-top:1.5rem;display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;">
+          <a href="/pdf" style="font-family:var(--sans);font-size:0.82rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Booklet →</a>
+          <a href="/handbook" style="font-family:var(--sans);font-size:0.82rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Handbook →</a>
+          <a href="/download" style="font-family:var(--sans);font-size:0.82rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">Save as PDF →</a>
+        </div>
+        <p class="donate-nudge">This is free, and always will be. <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">If it helped, buy us a coffee. ☕</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
