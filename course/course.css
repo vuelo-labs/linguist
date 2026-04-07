@@ -458,7 +458,13 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
 
 .module-pagination-next {
   text-align: right;
+  background: var(--w-text);
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  transition: opacity 0.15s;
 }
+
+.module-pagination-next:hover { opacity: 0.8; }
 
 .module-pagination-label {
   font-family: var(--sans);
@@ -468,6 +474,10 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
   color: var(--w-faint);
 }
 
+.module-pagination-next .module-pagination-label {
+  color: rgba(255, 255, 255, 0.45);
+}
+
 .module-pagination-title {
   font-family: var(--serif);
   font-size: 1.1rem;
@@ -475,9 +485,20 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
   line-height: 1.3;
 }
 
-.module-pagination-prev:hover .module-pagination-title,
-.module-pagination-next:hover .module-pagination-title {
+.module-pagination-next .module-pagination-title {
+  color: #fff;
+}
+
+.module-pagination-prev:hover .module-pagination-title {
   color: var(--w-accent-soft);
+}
+
+.module-pagination-next:hover .module-pagination-title {
+  color: #fff;
+}
+
+body.stage-advanced .module-pagination-next {
+  background: var(--c-text);
 }
 
 .module-pagination-spacer {
