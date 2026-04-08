@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-enabled">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Enabled User</span>
-    <span class="sep">›</span>
-    <span>E-05</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Enabled User</span>
+      <span class="sep">›</span>
+      <span>E-05</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,13 +51,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>E-04 covered what to do when a conversation has already gone wrong: stop patching, restate. E-05 is the earlier intervention — for tasks that have more than a couple of steps, how to catch a wrong direction before the AI has done any work, rather than after.</p>
-
-        <hr>
 
         <h2>The concept</h2>
 
@@ -64,8 +72,6 @@
         <p><strong>Message 2 (after reviewing the plan):</strong> Go ahead — or — Change step 3 to [adjustment], then proceed.</p>
 
         <p>The second message is short because the first one did the work. You are either confirming or making one targeted change. You are not rewriting everything mid-task.</p>
-
-        <hr>
 
         <h2>When to use this</h2>
 
@@ -89,8 +95,6 @@
           <li>Rewriting a sentence</li>
           <li>Answering a direct question</li>
         </ul>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -127,8 +131,6 @@
 
         <p>Compare the result to what you would have received if you had sent the full task directly without asking for the plan.</p>
 
-        <hr>
-
         <h2>Copy-Personalise-Use</h2>
 
         <p><strong>Message 1 starter</strong></p>
@@ -153,19 +155,13 @@
 
         <p><strong>Message 2:</strong> You will usually have one adjustment. Name the step by its number or a short description ("step 3", "the research step"), then describe the change. If the whole plan is wrong, that is a signal to restate the task more clearly with Message 1 — not to fix it step by step in Message 2.</p>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>The plan matches what you actually needed. Your adjustment in Message 2 is small — one line. The output that follows reflects that adjustment without you having to mention it again. You did not have to undo any work.</p>
 
-        <hr>
-
         <h2>If the plan is completely wrong</h2>
 
         <p>This usually means Message 1 did not give the AI enough information to propose a sensible approach. Go back to Message 1 and add context: who is the audience, what format does the output need to be in, what is the specific goal. The plan is the AI's translation of your brief — if the translation is wrong, the brief needs more in it.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

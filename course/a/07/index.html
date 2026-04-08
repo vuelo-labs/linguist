@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-07</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-07</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,8 +51,6 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>What you already know</h2>
 
         <p>In A-06, you learned to separate planning from execution — asking Claude Code to describe its approach before it acts. That module was about when Claude Code starts work. This one is about how it works once it does.</p>
@@ -48,8 +58,6 @@
         <p>When Claude Code takes on a task, it chooses from a set of tools: reading files, searching for patterns, running commands, or launching a separate session. Left to its own judgement, it will make a reasonable choice. But reasonable is not always the right choice for your task, and it is not always the cheapest one.</p>
 
         <p>Naming the tool in your message is how you close that gap.</p>
-
-        <hr>
 
         <h2>The tool hierarchy</h2>
 
@@ -68,8 +76,6 @@
         <p><code>Read / Glob / Grep → Bash → Agent</code></p>
 
         <p>The dedicated tools (Read, Glob, Grep) are in the same cost bracket: targeted, reviewable, predictable. Bash costs more because it runs shell execution. Agent costs the most because it opens a second full session with its own context window.</p>
-
-        <hr>
 
         <h2>The key technique: name the tool</h2>
 
@@ -110,13 +116,9 @@
 
         <p>Two bounded searches. Predictable scope. Source reliability visible.</p>
 
-        <hr>
-
         <h2>Cost warning</h2>
 
         <p>Each tool call costs tokens. Before running these exercises, check your session budget from A-01. Tool calls on large files or directories can add up quickly. The exercises below are designed to be targeted — follow the scope instructions and you will keep costs low.</p>
-
-        <hr>
 
         <h2>Exercise: Guided tool selection</h2>
 
@@ -156,8 +158,6 @@
 
         <p>After both, compare the token counts shown at the end of each response. The second version will typically be equal or cheaper, and the scope of the result will be more predictable.</p>
 
-        <hr>
-
         <h2>Copy, Personalise, Use</h2>
 
         <p>Use this starter whenever you want to guide Claude Code to a specific tool.</p>
@@ -175,15 +175,11 @@
           <li>"Report what you find before doing anything else" — keeps Claude Code from reading one file and immediately going to read three more. It forces a pause where you can see what was found and decide what to do next.</li>
         </ul>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>Claude Code uses the tool you named. The tool call appears in the output before you approve it — you can see that it is using Grep, not Agent, before anything happens. The result is scoped to what you asked for: matching lines from Grep, not a full file read; the specific file from Read, not a sweep of the folder.</p>
 
         <p>You are not guessing what Claude Code did. You can see it.</p>
-
-        <hr>
 
         <h2>Recovery path</h2>
 
@@ -194,8 +190,6 @@
         </blockquote>
 
         <p>The answer will tell you one of two things: either your instruction was ambiguous and the task description pulled Claude Code toward a different interpretation, or the task genuinely required the more expensive tool — Grep cannot do what you asked for, or Read would have missed something. Both answers are useful. The first tells you how to rewrite the message. The second tells you the task is bigger than you thought.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-enabled">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Enabled User</span>
-    <span class="sep">›</span>
-    <span>E-01</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Enabled User</span>
+      <span class="sep">›</span>
+      <span>E-01</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -44,13 +56,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>In B-10 you learned to tell the AI when to stop. The verb you use determines where it starts. One word sets the ceiling on everything that follows.</p>
-
-        <hr>
 
         <h2>The concept</h2>
 
@@ -61,8 +69,6 @@
         <p class="keynote">The difference is not the task. It is the first word.</p>
 
         <p>Some verbs have a clear ceiling — the AI does the thing you asked and stops. Others have no ceiling at all — the AI decides what "better" means, and then decides what counts as better, and then decides how far to go. When you use a risky verb, you are not asking for a result. You are delegating a judgement.</p>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -113,8 +119,6 @@
 
         <p>If nothing comes to mind, use the same piece of work from Part 1 and try two more verb swaps: once with "Fix" (minimal change), once with "Summarise" (condense, don't rewrite). See what each one does.</p>
 
-        <hr>
-
         <h2>Your verb reference</h2>
 
         <p>The full verb reference for this course is at:</p>
@@ -123,23 +127,37 @@
 
         <p>Keep it. You will use it in every module from here.</p>
 
-        <p>It covers seven safe verbs — Summarise, Explain, List, Fix, Draft, Rewrite, Compare — with worked examples and a "How to edit this" guide for each one. It also covers the risky verbs (Improve, Clean up, Make better, Enhance, Optimise) and what to use instead of each.</p>
+        <p>It covers seven safe verbs with worked examples and a "How to edit this" guide for each one. It also covers the risky verbs and what to use instead of each.</p>
+
+        <p><strong>Safe verbs:</strong></p>
+        <ul>
+          <li>Summarise</li>
+          <li>Explain</li>
+          <li>List</li>
+          <li>Fix</li>
+          <li>Draft</li>
+          <li>Rewrite</li>
+          <li>Compare</li>
+        </ul>
+
+        <p><strong>Verbs to use carefully:</strong></p>
+        <ul>
+          <li>Improve</li>
+          <li>Clean up</li>
+          <li>Make better</li>
+          <li>Enhance</li>
+          <li>Optimise</li>
+        </ul>
 
         <p>When you are not sure which verb to reach for, open that document first.</p>
-
-        <hr>
 
         <h2>What good looks like</h2>
 
         <p>The response does exactly what you asked and stops. You can see where the edge is — the AI stayed inside it.</p>
 
-        <hr>
-
         <h2>If you are not sure which verb to use</h2>
 
         <p>Open the verb reference and read the "What the AI will do" and "What the AI will not do" lines for the verbs you are considering. The one where "What the AI will not do" matches what you want left alone is the right verb. If none of the safe verbs fit your task precisely, pick the closest one and add a constraint: "and don't change anything else."</p>
-
-        <hr>
 
         <h2>Next</h2>
 

@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-03</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-03</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,8 +51,6 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>What you already know</h2>
 
         <p>In B-09 you set up persistent instructions inside a Claude.ai Project. Those instructions told the AI how to behave in every conversation you started in that project — your preferred length, your working style, what to skip.</p>
@@ -48,8 +58,6 @@
         <p>CLAUDE.md is the Claude Code equivalent. But instead of living in a platform's settings panel, it lives as a plain text file in your project folder. This means it travels with the project. Anyone who opens that project in Claude Code inherits the same instructions automatically.</p>
 
         <p>The connection between B-09 and CLAUDE.md is exact: same idea, different location. If you understood persistent instructions on Claude.ai, you already understand what CLAUDE.md does. This module is about where it lives, what goes in it, and how to write your first one.</p>
-
-        <hr>
 
         <h2>What CLAUDE.md is</h2>
 
@@ -60,8 +68,6 @@
         <p><strong>Project-level CLAUDE.md</strong> — a file in your project's root folder. Applies only to that project. The right place for project-specific rules: the tools your project uses, the file structure, the naming conventions, what to leave alone.</p>
 
         <p><strong>User-level CLAUDE.md</strong> — a file at <code>~/.claude/CLAUDE.md</code> on your computer. Applies to every project you open in Claude Code. The right place for personal preferences that should follow you everywhere: your preferred response style, your working habits, how you like feedback given.</p>
-
-        <hr>
 
         <h2>What belongs in CLAUDE.md</h2>
 
@@ -87,8 +93,6 @@
 
         <p><strong>What does not belong in CLAUDE.md:</strong><br>
         Task-specific context, notes about work in progress, or session state. CLAUDE.md is for standing rules, not for information that changes between tasks. Put that kind of context in your opening message for each session.</p>
-
-        <hr>
 
         <h2>Without / With</h2>
 
@@ -132,8 +136,6 @@
 
         <p>Because it is in the user-level file, these rules apply to every project the editor opens in Claude Code.</p>
 
-        <hr>
-
         <h2>The exercise: write your first CLAUDE.md</h2>
 
         <p>This takes about ten minutes. You will write a minimal CLAUDE.md, start a Claude Code session with it active, and observe its effect.</p>
@@ -159,8 +161,6 @@
         <h3>Step 4: Iterate</h3>
 
         <p>Your first CLAUDE.md will be incomplete. That is expected. Add rules as you notice patterns — each time you find yourself saying the same thing to Claude Code that you have said before, consider whether it belongs in CLAUDE.md.</p>
-
-        <hr>
 
         <h2>Copy, Personalise, Use</h2>
 
@@ -193,8 +193,6 @@
           <li>[Output preferences]: These are your most personal rules. Most people want shorter responses and cleaner formatting than the defaults. State specifically what you want.</li>
           <li>[Something to avoid]: The most useful rules are often negative constraints. What does Claude Code add that you consistently remove?</li>
         </ul>
-
-        <hr>
 
         <h2>Next</h2>
 

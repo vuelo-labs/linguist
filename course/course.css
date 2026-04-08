@@ -148,15 +148,22 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
 .module-nav-bar {
   background: var(--w-bg-card);
   border-bottom: 1px solid var(--w-border);
-  padding: 0.6rem 2rem;
+  padding: 0.55rem 2rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   font-family: var(--sans);
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--w-faint);
+}
+
+.module-nav-crumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .module-nav-bar a {
@@ -168,6 +175,61 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
 
 .module-nav-bar .sep {
   color: var(--w-faint);
+}
+
+/* Right-side actions in nav bar */
+.module-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.module-nav-top-link {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: var(--w-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.module-nav-top-link:hover { color: var(--w-accent); }
+
+.module-nav-top-sep {
+  color: var(--w-border);
+}
+
+.module-already-done {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--w-faint);
+  background: none;
+  border: 1px solid var(--w-border);
+  border-radius: 3px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.module-already-done:hover {
+  border-color: var(--w-accent);
+  color: var(--w-accent);
+}
+
+.module-already-done.is-done {
+  color: var(--w-accent);
+  border-color: var(--w-accent);
+  opacity: 0.55;
+  cursor: default;
+}
+
+@media (max-width: 560px) {
+  .module-nav-actions { display: none; }
 }
 
 /* ---- Page layout ---- */
@@ -221,7 +283,7 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 500;
   color: var(--w-text);
-  margin-top: 2.5rem;
+  margin-top: 3.5rem;
   margin-bottom: var(--space-md);
   line-height: 1.3;
 }
@@ -475,7 +537,7 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
 }
 
 .module-pagination-next .module-pagination-label {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .module-pagination-title {
@@ -748,4 +810,231 @@ body.stage-advanced .module-pagination-next {
     flex-direction: column;
     gap: 0.25rem;
   }
+}
+
+/* ============================================================
+   PROFILE SYSTEM
+   Applies to course index and module pages when profile.js
+   is loaded in <head>. Profiles: newrole | professional | maker
+   ============================================================ */
+
+/* Hide all profile-specific blocks by default */
+[data-profile] { display: none; }
+
+/* Show block when its profile is active */
+html.profile-newrole     [data-profile~="newrole"]       { display: block; }
+html.profile-professional [data-profile~="professional"]  { display: block; }
+html.profile-maker        [data-profile~="maker"]         { display: block; }
+
+/* Exercise sets: show default, swap when profile has a variant */
+.exercise-set > .exercise          { display: none; }
+.exercise-set > .exercise--default { display: block; }
+
+/* When a profile-specific variant exists in this set, show it and hide default */
+html.profile-newrole .exercise-set:has(.exercise--newrole) > .exercise--default      { display: none; }
+html.profile-professional .exercise-set:has(.exercise--professional) > .exercise--default { display: none; }
+html.profile-maker .exercise-set:has(.exercise--maker) > .exercise--default          { display: none; }
+
+html.profile-newrole     .exercise-set > .exercise--newrole     { display: block; }
+html.profile-professional .exercise-set > .exercise--professional { display: block; }
+html.profile-maker        .exercise-set > .exercise--maker        { display: block; }
+
+/* Profile context note — small callout that appears above module intro */
+.profile-context {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--w-muted);
+  background: var(--w-bg-card);
+  border-left: 3px solid var(--w-accent);
+  padding: 0.75rem 1rem;
+  border-radius: 0 3px 3px 0;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+/* Profile recommendation block on course index */
+.profile-rec {
+  display: none;
+  background: var(--w-bg-card);
+  border: 1px solid var(--w-border);
+  border-radius: 6px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 2rem;
+  max-width: 680px;
+}
+
+html[class*="profile-"] .profile-rec { display: block; }
+
+.profile-rec-eyebrow {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--w-faint);
+  margin-bottom: 0.5rem;
+}
+
+.profile-rec-headline {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  color: var(--w-text);
+  margin-bottom: 0.6rem;
+  font-weight: normal;
+}
+
+.profile-rec-body {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--w-muted);
+  line-height: 1.65;
+  margin-bottom: 1rem;
+  max-width: 56ch;
+}
+
+.profile-rec-cta {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--w-bg);
+  background: var(--w-text);
+  padding: 0.5rem 1.1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.profile-rec-cta:hover { opacity: 0.8; }
+
+.profile-rec-change {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--w-faint);
+  text-decoration: none;
+  margin-left: 1rem;
+  vertical-align: middle;
+}
+
+.profile-rec-change:hover { color: var(--w-muted); }
+
+/* ============================================================
+   PROGRESS — completion indicators & stage-end prompt
+   ============================================================ */
+
+/* Checkmark on completed module cards */
+.module-card--complete {
+  position: relative;
+}
+
+.module-card--complete::after {
+  content: '✓';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--w-accent);
+  font-family: var(--sans);
+  opacity: 0.7;
+}
+
+/* Stage-end prompt */
+.stage-complete-prompt {
+  display: none; /* shown by progress.js */
+  margin-top: 3rem;
+  padding: 1.75rem;
+  background: var(--w-bg-card);
+  border: 1px solid var(--w-border);
+  border-radius: 6px;
+  max-width: 520px;
+}
+
+.stage-complete-prompt-label {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--w-accent);
+  margin-bottom: 0.5rem;
+}
+
+.stage-complete-prompt-heading {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: normal;
+  color: var(--w-text);
+  margin-bottom: 0.4rem;
+}
+
+.stage-complete-prompt-body {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--w-muted);
+  line-height: 1.65;
+  margin-bottom: 1.1rem;
+  max-width: 46ch;
+}
+
+.stage-complete-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.65rem;
+}
+
+.stage-complete-form input[type="email"] {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--w-border);
+  border-radius: 4px;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  background: var(--w-bg-input);
+  color: var(--w-text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.stage-complete-form input[type="email"]:focus {
+  border-color: var(--w-border-focus);
+}
+
+.stage-complete-form button {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--w-bg);
+  background: var(--w-text);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.stage-complete-form button:hover { opacity: 0.75; }
+
+.stage-complete-skip {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--w-faint);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--w-border);
+}
+
+.stage-complete-skip:hover { color: var(--w-muted); }
+
+.stage-complete-saved {
+  display: none;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--w-accent);
+  font-style: italic;
 }

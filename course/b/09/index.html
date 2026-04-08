@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-beginner">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Beginner</span>
-    <span class="sep">›</span>
-    <span>B-09</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Beginner</span>
+      <span class="sep">›</span>
+      <span>B-09</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,13 +51,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>You have been explaining your situation at the start of every conversation. There is a way to say it once. This module shows you how.</p>
-
-        <hr>
 
         <h2>What is happening</h2>
 
@@ -56,8 +64,6 @@
         <p>Think of it like telling a new colleague on their first day: "Here's how I like to communicate. Short emails. No jargon. If you are not sure what I mean, ask." You say it once. After that, it applies.</p>
 
         <p>This module focuses on one set of instructions to start with: what you might call Machine Mode defaults. These are practical preferences about how the AI communicates with you — not what it works on, but how it works. The goal is to cut out the parts that waste your time.</p>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -97,8 +103,6 @@
 
         <p><em>Persistent instruction setup for Tines will be added once updated UI details are confirmed. Check with your workspace administrator for where to configure standing AI instructions.</em></p>
 
-        <hr>
-
         <h2>COPY — PERSONALISE — USE</h2>
 
         <p>Here is the Machine Mode persistent instruction template:</p>
@@ -129,15 +133,11 @@
 
         <p>You can also remove lines. If you do not mind the AI suggesting next steps, delete that line. These instructions are yours to shape.</p>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>After setting up the instructions, start a new conversation inside your project (or using your Gem or Custom Instructions) and send a simple task. The response should get straight to the point, without any "Great question!" or "Happy to help!" opening, and without a closing summary you did not ask for.</p>
 
         <p>If the response still has preamble, check that you are in a new conversation — persistent instructions only apply to conversations started after they are saved. Old conversations are not affected.</p>
-
-        <hr>
 
         <h2>If this did not work</h2>
 
@@ -146,8 +146,6 @@
         <p>If you saved the instructions and the AI's behaviour did not change, make sure you are starting the conversation inside the project (for Claude) or using the correct Gem (for Gemini). For ChatGPT, Custom Instructions apply globally, so any new conversation should use them.</p>
 
         <p>If you want to try Human Mode instructions as well — warmer, more conversational, less structured — that is a good next step. Set up a second project or Gem with different preferences. Switch between them depending on what kind of task you are doing.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

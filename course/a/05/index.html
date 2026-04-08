@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-05</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-05</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,8 +51,6 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>What compaction is</h2>
 
         <p>When a Claude Code session gets long, Claude Code automatically summarises the earlier parts of the conversation to make room for new content. This summary replaces the original messages — some details may not survive.</p>
@@ -48,8 +58,6 @@
         <p>This process is called compaction. You do not trigger it and you do not control when it happens. It fires when the conversation reaches a certain length. Once it fires, the original messages are gone from the active context. What remains is the summary that was generated from them.</p>
 
         <p>Most AI users do not know this happens. Knowing it — and knowing what survives and what does not — is one of the things that separates an advanced practitioner from a capable beginner.</p>
-
-        <hr>
 
         <h2>What compaction preserves</h2>
 
@@ -66,8 +74,6 @@
           <li>The confirmed next step</li>
         </ul>
 
-        <hr>
-
         <h2>What compaction loses</h2>
 
         <ul>
@@ -80,8 +86,6 @@
         </ul>
 
         <p>The pattern is consistent: <strong>explicit beats implicit, standalone beats buried, named beats described</strong>.</p>
-
-        <hr>
 
         <h2>Recognising context rot</h2>
 
@@ -146,8 +150,6 @@
           <p>Do not hedge on claims that can be verified from the source material. If something cannot be verified, say so explicitly rather than softening it with language that implies speculation about a fact that can be checked.</p>
         </blockquote>
 
-        <hr>
-
         <h2>Writing for compaction</h2>
 
         <p>The most durable elements in compaction are standalone user messages with clear structure. The most volatile are conversational replies, tool output, and implicit context.</p>
@@ -189,8 +191,6 @@
           <p>The original five-theme structure has been rejected. Do not propose adding other themes. If a point belongs in the document, fit it into one of the three existing themes.</p>
         </blockquote>
 
-        <hr>
-
         <h2>Manual checkpointing</h2>
 
         <p>A checkpoint is a message you send before compaction happens automatically — asking Claude Code to summarise the current state, then verifying that summary is accurate before you continue.</p>
@@ -207,8 +207,6 @@
           <li>When you notice any of the context rot symptoms above</li>
         </ul>
 
-        <hr>
-
         <h2>The compaction survival checklist</h2>
 
         <p>Use this before starting any long Claude Code session where you care about consistency across many turns:</p>
@@ -220,8 +218,6 @@
           <li>Checkpoint before long or complex phases. Verify the summary. Correct it before continuing.</li>
           <li>Watch for context rot symptoms. When you see them, restate the relevant constraint immediately — as a standalone message, not as a conversational aside.</li>
         </ol>
-
-        <hr>
 
         <h2>Copy, Personalise, Use</h2>
 
@@ -243,8 +239,6 @@
           <li>The phrase "I will confirm the summary is accurate before we continue" is load-bearing — it signals that this is a checkpoint and that you expect to verify the output rather than treat it as final.</li>
           <li>The phrase "say so rather than guessing" reduces the risk that Claude Code fills in gaps with plausible-sounding but invented details.</li>
         </ul>
-
-        <hr>
 
         <h2>Next</h2>
 

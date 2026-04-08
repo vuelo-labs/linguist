@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-beginner">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Beginner</span>
-    <span class="sep">›</span>
-    <span>B-08</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Beginner</span>
+      <span class="sep">›</span>
+      <span>B-08</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,13 +51,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>When a response misses the mark, there is a right response and a wrong one. The wrong response is to pile corrections on top of a bad start. This module teaches the right ones.</p>
-
-        <hr>
 
         <h2>What is happening</h2>
 
@@ -60,8 +68,6 @@
         <p><strong>A new conversation</strong> works when the current conversation has drifted too far. If you have tried corrections and restates and the responses keep circling the same wrong interpretation, the AI has accumulated too many conflicting signals in the current conversation. Starting fresh clears all of that. You bring only the essential information forward.</p>
 
         <p>The reason layering corrections often makes things worse: each correction adds to the context the AI is working from. It tries to reconcile all of it — your original message, what it produced, your correction, what it produced next, your next correction. By the third or fourth correction, it may be as confused as it is capable of being. Starting fresh is faster than fixing a tangled thread.</p>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -103,8 +109,6 @@
 
         <p>Compare the results from all three steps. Which approach produced the most useful response?</p>
 
-        <hr>
-
         <h2>COPY — PERSONALISE — USE</h2>
 
         <p>The restate template:</p>
@@ -123,21 +127,15 @@
 
         <p><strong>[constraint]</strong> — what you do not want, or the boundaries of the task. "No jargon." "Professional but not formal." "Do not suggest things I did not ask for." One constraint is enough.</p>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>The restate in the same conversation, or the clean start in a new conversation, should produce a noticeably better response than the correction attempt. If you find yourself on your third or fourth correction of the same response, the restate or the new conversation will almost always be faster.</p>
-
-        <hr>
 
         <h2>If this did not work</h2>
 
         <p>If the restate in the same conversation still felt like it was fighting the earlier context, trust that instinct — move to a new conversation. There is no benefit to staying in a conversation that has drifted. The AI has no preference. Every new conversation starts completely fresh.</p>
 
         <p>If you cannot identify what was wrong with your original message, go back to the output review checklist from B-07. What did the AI miss? Was the task unclear? Was the context missing? Was there no stopping condition? The answer tells you what to add to the restate.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

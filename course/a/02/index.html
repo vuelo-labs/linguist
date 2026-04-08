@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-02</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-02</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,8 +51,6 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>What you already know</h2>
 
         <p>In the Enabled User stage you learned that context is fuel: the more relevant information you give the AI, the better its response. That is true, and it stays true here.</p>
@@ -48,8 +58,6 @@
         <p>In Claude Code you will encounter a second truth that sits alongside the first. The container for all that fuel is finite. As your session runs longer, earlier content gets compressed to make room for new content. Both things are true — context is fuel, and the tank has a size limit. They operate at different scales. Context is fuel describes what happens within a message. The finite container describes what happens across a long session. You will learn to manage both.</p>
 
         <p>This module covers the three-part mental model that underpins everything in the advanced track. Get these three ideas solid and every subsequent module will make sense immediately.</p>
-
-        <hr>
 
         <h2>Part 1: Claude Code executes your message, not your intent</h2>
 
@@ -86,8 +94,6 @@
         </blockquote>
 
         <p>The constraint ("only what differentiates Enterprise") eliminates the failure mode before it starts.</p>
-
-        <hr>
 
         <h2>Part 2: The context window is finite and degrades over time</h2>
 
@@ -128,8 +134,6 @@
 
         <p>The standalone format and explicit instruction to monitor for drift both help the constraint persist.</p>
 
-        <hr>
-
         <h2>Part 3: Tools are how Claude Code acts in the world</h2>
 
         <p>Claude Code cannot read your files, search your codebase, run commands, or launch a subagent without tools. Each of those actions is a tool call. Understanding which tools exist and what they cost lets you guide Claude Code toward the right approach rather than letting it choose the most expensive path by default.</p>
@@ -163,8 +167,6 @@
 
         <p>The instruction specifies the tool, the query, the sources to prefer, and the output format. Claude Code cannot take a shortcut.</p>
 
-        <hr>
-
         <h2>The three parts, together</h2>
 
         <p>These three things describe the same underlying reality from three angles:</p>
@@ -194,8 +196,6 @@
 
         <p>Every module in the advanced track is an application of one or more of these. When something goes wrong in a Claude Code session, the cause is almost always traceable to one of these three.</p>
 
-        <hr>
-
         <h2>Copy, Personalise, Use</h2>
 
         <p>Use this starter to test your own mental model on any task. Fill in the brackets with your real situation.</p>
@@ -217,8 +217,6 @@
           <li>[What you want preserved]: Any constraint that protects something you don't want changed. "Don't change the structure." "Keep it under 200 words." "Don't add recommendations I didn't ask for."</li>
           <li>[specific description of done]: Format and length. "A single paragraph." "Three bullet points, each under 20 words." "A draft email ready to send."</li>
         </ul>
-
-        <hr>
 
         <h2>Next</h2>
 

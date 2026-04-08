@@ -63,6 +63,7 @@
     @media (max-width: 480px) {
       .site-header { padding: 0.85rem 1rem; }
       .site-header-link { display: none; }
+      .site-header-link.site-header-link--primary { display: inline; }
     }
 
     /* ---- Hero ---- */
@@ -214,18 +215,20 @@
   </style>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/guide" class="site-header-link">Guide</a>
       <a href="/manifesto" class="site-header-link">Manifesto</a>
-      <a href="/course" class="site-header-link">Course</a>
+      <a href="/course" class="site-header-link site-header-link--primary">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/see" class="site-header-cta">Give it a go →</a>
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
 
     <section style="padding: 0; border-bottom: 1px solid var(--w-border);">
       <div class="container">
@@ -276,13 +279,49 @@
     </div>
     </section>
 
-    <section style="border-top:1px solid var(--w-border);padding:2.5rem 0;">
+    <section style="border-top:1px solid var(--w-border);padding:3rem 0 3.5rem;">
     <div class="container">
-      <p style="font-family:var(--sans);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--w-faint);margin-bottom:1.25rem;">Read &amp; download</p>
-      <div style="display:flex;flex-wrap:wrap;gap:1.5rem;">
-        <a href="/download" style="font-family:var(--sans);font-size:0.88rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Manifesto <span style="color:var(--w-faint);font-size:0.78rem;">— the why</span></a>
-        <a href="/pdf" style="font-family:var(--sans);font-size:0.88rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Booklet <span style="color:var(--w-faint);font-size:0.78rem;">— eight principles, one framework</span></a>
-        <a href="/handbook" style="font-family:var(--sans);font-size:0.88rem;color:var(--w-muted);text-decoration:none;" onmouseover="this.style.color='var(--w-accent)'" onmouseout="this.style.color='var(--w-muted)'">The Handbook <span style="color:var(--w-faint);font-size:0.78rem;">— the full how</span></a>
+      <p style="font-family:var(--sans);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--w-faint);margin-bottom:0.6rem;">Go as deep as you need</p>
+      <p style="font-family:var(--serif);font-size:1rem;color:var(--w-muted);line-height:1.6;max-width:48ch;margin-bottom:2.25rem;">Four layers. Each one builds on the last. Stop when you have what you need — or keep going when you want more.</p>
+
+      <div style="display:grid;gap:0;border:1px solid var(--w-border);border-radius:8px;overflow:hidden;max-width:640px;">
+
+        <a href="/download" style="display:grid;grid-template-columns:2.5rem 1fr;gap:0 1rem;padding:1.1rem 1.25rem;text-decoration:none;color:inherit;border-bottom:1px solid var(--w-border);transition:background 0.15s;" onmouseover="this.style.background='var(--w-bg-card)'" onmouseout="this.style.background=''">
+          <span style="font-family:var(--sans);font-size:0.7rem;font-weight:600;letter-spacing:0.08em;color:var(--w-faint);padding-top:0.2rem;line-height:1.3;">01</span>
+          <span>
+            <span style="display:block;font-family:var(--sans);font-size:0.78rem;font-weight:600;color:var(--w-muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.25rem;">The Manifesto · The why</span>
+            <span style="display:block;font-family:var(--serif);font-size:0.95rem;color:var(--w-text);line-height:1.5;margin-bottom:0.3rem;">What this costs you and why it's worth changing. One read. No action required.</span>
+            <span style="display:block;font-family:var(--sans);font-size:0.75rem;color:var(--w-faint);">10 min read →</span>
+          </span>
+        </a>
+
+        <a href="/pdf" style="display:grid;grid-template-columns:2.5rem 1fr;gap:0 1rem;padding:1.1rem 1.25rem;text-decoration:none;color:inherit;border-bottom:1px solid var(--w-border);transition:background 0.15s;" onmouseover="this.style.background='var(--w-bg-card)'" onmouseout="this.style.background=''">
+          <span style="font-family:var(--sans);font-size:0.7rem;font-weight:600;letter-spacing:0.08em;color:var(--w-faint);padding-top:0.2rem;line-height:1.3;">02</span>
+          <span>
+            <span style="display:block;font-family:var(--sans);font-size:0.78rem;font-weight:600;color:var(--w-muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.25rem;">The Booklet · The what</span>
+            <span style="display:block;font-family:var(--serif);font-size:0.95rem;color:var(--w-text);line-height:1.5;margin-bottom:0.3rem;">Eight principles. One framework. The thing you print, pin up, and check before you type.</span>
+            <span style="display:block;font-family:var(--sans);font-size:0.75rem;color:var(--w-faint);">5 min read · save as PDF →</span>
+          </span>
+        </a>
+
+        <a href="/handbook" style="display:grid;grid-template-columns:2.5rem 1fr;gap:0 1rem;padding:1.1rem 1.25rem;text-decoration:none;color:inherit;border-bottom:1px solid var(--w-border);transition:background 0.15s;" onmouseover="this.style.background='var(--w-bg-card)'" onmouseout="this.style.background=''">
+          <span style="font-family:var(--sans);font-size:0.7rem;font-weight:600;letter-spacing:0.08em;color:var(--w-faint);padding-top:0.2rem;line-height:1.3;">03</span>
+          <span>
+            <span style="display:block;font-family:var(--sans);font-size:0.78rem;font-weight:600;color:var(--w-muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.25rem;">The Handbook · The how</span>
+            <span style="display:block;font-family:var(--serif);font-size:0.95rem;color:var(--w-text);line-height:1.5;margin-bottom:0.3rem;">How each principle works in practice. Enough depth to build real habits — without committing to a course.</span>
+            <span style="display:block;font-family:var(--sans);font-size:0.75rem;color:var(--w-faint);">20 min read · save as PDF →</span>
+          </span>
+        </a>
+
+        <a href="/course" style="display:grid;grid-template-columns:2.5rem 1fr;gap:0 1rem;padding:1.1rem 1.25rem;text-decoration:none;color:inherit;transition:background 0.15s;" onmouseover="this.style.background='var(--w-bg-card)'" onmouseout="this.style.background=''">
+          <span style="font-family:var(--sans);font-size:0.7rem;font-weight:600;letter-spacing:0.08em;color:var(--w-faint);padding-top:0.2rem;line-height:1.3;">04</span>
+          <span>
+            <span style="display:block;font-family:var(--sans);font-size:0.78rem;font-weight:600;color:var(--w-muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.25rem;">The Course · The practice</span>
+            <span style="display:block;font-family:var(--serif);font-size:0.95rem;color:var(--w-text);line-height:1.5;margin-bottom:0.3rem;">Twenty-six modules across three stages. Each one short, practical, and completable in a sitting. Guardrails at every step — you decide when you're done and when you need more.</span>
+            <span style="display:block;font-family:var(--sans);font-size:0.75rem;color:var(--w-faint);">26 modules · free · go at your own pace →</span>
+          </span>
+        </a>
+
       </div>
     </div>
     </section>

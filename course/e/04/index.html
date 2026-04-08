@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-enabled">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Enabled User</span>
-    <span class="sep">›</span>
-    <span>E-04</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Enabled User</span>
+      <span class="sep">›</span>
+      <span>E-04</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,13 +51,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>In E-03 you learned to load context before the AI starts — giving it what it needs so the first response is specific, not generic. E-04 is what to do when, despite that, a conversation still goes wrong. Not every wrong response means starting over. Small corrections in the same conversation work fine. The skill is recognising the moment when patching has stopped working and restating has become the faster path.</p>
-
-        <hr>
 
         <h2>The concept</h2>
 
@@ -61,8 +69,6 @@
 
         <p>This is not failure. The AI has no memory of your effort. It does not register that you tried. Every new conversation is clean. Use that.</p>
 
-        <hr>
-
         <h2>Recognising the spiral</h2>
 
         <p>Three signals that a correction spiral has started:</p>
@@ -74,8 +80,6 @@
         </ol>
 
         <p>Any one of these is enough. When you notice one, stop. Do not send another correction. Restate.</p>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -104,8 +108,6 @@
 
         <p>Send it. Compare the first response to what you got after three rounds of correction in the original.</p>
 
-        <hr>
-
         <h2>Copy-Personalise-Use</h2>
 
         <p><strong>The restate starter</strong></p>
@@ -130,19 +132,13 @@
 
         <p>The difference between this and your first attempt is usually specificity. You now know what the AI will do if you leave something vague. Fill that gap.</p>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>The first response to your restate is closer to what you wanted than the fifth response in the original conversation. You used one message instead of six. The AI did not need to be corrected — it had what it needed from the start.</p>
 
-        <hr>
-
         <h2>If the restate also goes wrong</h2>
 
         <p>This is less common, but it happens. If it does: look at the restate message itself and run the load-bearing test from E-03. What is the AI still having to guess? Add that, and try once more. Three clear attempts — each one a full restate, not a patch — is usually enough to identify what the task actually needs.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

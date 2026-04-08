@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-enabled">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Enabled User</span>
-    <span class="sep">›</span>
-    <span>E-06</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Enabled User</span>
+      <span class="sep">›</span>
+      <span>E-06</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,13 +51,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>E-05 was about planning before you start — catching wrong turns before any work has been done. E-06 is about the other end: knowing when a conversation has run its course and starting fresh. Not because something went wrong, but because the conversation has done its job and continuing it is now costing more than it is giving.</p>
-
-        <hr>
 
         <h2>The concept</h2>
 
@@ -54,8 +62,6 @@
         <p>Starting fresh is not abandonment. The AI has no continuity preference. It does not register that the conversation ended. Every new conversation is completely fresh to it. The only continuity in AI use is what you carry forward yourself.</p>
 
         <p>The re-seed is how you do that. It is a short opening message for the new conversation that captures only the essential context from the old one — not a summary of everything that happened, not a transcript, not a recap of the process. Just the load-bearing facts and the new task.</p>
-
-        <hr>
 
         <h2>Signals that a conversation needs re-seeding</h2>
 
@@ -69,8 +75,6 @@
 
         <p>Any one of these is enough. When you notice one, the conversation has run its course.</p>
 
-        <hr>
-
         <h2>The re-seed template</h2>
 
         <p>A re-seed has three parts. It should fit in a short paragraph.</p>
@@ -82,8 +86,6 @@
         <p><strong>Part 3 — The new task:</strong> Verb + specific thing + stopping condition + constraint. Everything from the full message structure you have been building across the course.</p>
 
         <p>Three parts. One short paragraph. The AI gets what it needs and nothing it does not.</p>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -102,8 +104,6 @@
         </ul>
 
         <p>You are not looking to prove the old conversation was bad. You are building the habit of knowing when to move.</p>
-
-        <hr>
 
         <h2>Copy-Personalise-Use</h2>
 
@@ -127,19 +127,13 @@
 
         <p>The discipline here is the one-sentence carry-forward. It forces you to decide what actually matters from the old conversation. If you find yourself wanting to write three sentences of carry-forward, run the load-bearing test from E-03: which sentence, if removed, would change the output? Keep that one.</p>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>The new conversation's first response is more useful than the last few responses in the old one. The AI has exactly what it needs — no more — and it uses it. You did not have to re-explain something you already explained. The re-seed was the whole setup.</p>
 
-        <hr>
-
         <h2>If the re-seed produces a generic response</h2>
 
         <p>The carry-forward probably did not include enough specific context. Add one more load-bearing fact — the one piece of information from the old conversation that most changes what the AI should produce — and try again.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

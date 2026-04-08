@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-beginner">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Beginner</span>
-    <span class="sep">›</span>
-    <span>B-01</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Beginner</span>
+      <span class="sep">›</span>
+      <span>B-01</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,51 +51,81 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
-        <p>You do not need to know anything about AI to do this. You do not need to be good at technology. You are going to type one sentence, press send, and read what comes back. That is the whole exercise.</p>
+        <div data-profile="newrole">
+          <p class="profile-context">You are about to start a job where people will probably assume you already know how to use this. That assumption is mostly fine — there is not much to know yet. What you need right now is to get one message sent so the tool stops feeling like something you need to figure out before you can use it. This is a dry run. Nothing you type here matters.</p>
+        </div>
 
-        <hr>
+        <p>You do not need to know anything about AI to do this. You do not need to be good at technology. You are going to type one sentence, press send, and read what comes back. That is the whole exercise.</p>
 
         <h2>The exercise</h2>
 
         <p>This takes under three minutes. Two steps. The first is required. The second is optional.</p>
 
-        <h3>Step 1: Send one message</h3>
+        <div class="exercise-set">
 
-        <p>Copy this message exactly as written:</p>
+          <!-- Default exercise -->
+          <div class="exercise exercise--default">
+            <h3>Step 1: Send one message</h3>
 
-        <blockquote>
-          <p>What is the capital of France?</p>
-        </blockquote>
+            <p>Copy this message exactly as written:</p>
 
-        <p>Paste it into the text area on your platform. Press send.</p>
+            <blockquote>
+              <p>What is the capital of France?</p>
+            </blockquote>
 
-        <p>The AI will respond with something about Paris. It may include extra information. It may be a single sentence. It may be a paragraph. Any of those are fine.</p>
+            <p>Paste it into the text area on your platform. Press send.</p>
 
-        <p>That is your first message sent. The AI answered. It did not ask why you wanted to know. It did not judge the question. Nothing broke.</p>
+            <p>The AI will respond with something about Paris. It may include extra information. It may be a single sentence. It may be a paragraph. Any of those are fine.</p>
 
-        <h3>Step 2: Now make it yours (optional)</h3>
+            <p>That is your first message sent. The AI answered. It did not ask why you wanted to know. It did not judge the question. Nothing broke.</p>
 
-        <p>Here is a second message you can try:</p>
+            <h3>Step 2: Now make it yours (optional)</h3>
 
-        <blockquote>
-          <p>What are three things I could cook for dinner tonight using chicken and rice?</p>
-        </blockquote>
+            <p>Here is a second message you can try:</p>
 
-        <p>Before you send this one, change it to match what you actually have. Replace "chicken and rice" with whatever ingredients are in your kitchen right now.</p>
+            <blockquote>
+              <p>What are three things I could cook for dinner tonight using chicken and rice?</p>
+            </blockquote>
 
-        <p>This is a pattern you will use throughout the course: start with a message someone else wrote, then change the parts that should be yours. The next module (B-02) walks through this step by step. For now, just swap those two ingredients and send it.</p>
+            <p>Before you send this one, change it to match what you actually have. Replace "chicken and rice" with whatever ingredients are in your kitchen right now.</p>
 
-        <hr>
+            <p>This is a pattern you will use throughout the course: start with a message someone else wrote, then change the parts that should be yours. The next module (B-02) walks through this step by step. For now, just swap those two ingredients and send it.</p>
+          </div>
+
+          <!-- New role exercise variant -->
+          <div class="exercise exercise--newrole">
+            <h3>Step 1: Send one message</h3>
+
+            <p>Copy this message exactly as written:</p>
+
+            <blockquote>
+              <p>I'm starting a new job at a marketing agency next month. What are three things I could do in my first week to make a good impression?</p>
+            </blockquote>
+
+            <p>Paste it into the text area on your platform. Press send.</p>
+
+            <p>The AI will respond with a list of suggestions. It may be bullet points. It may be paragraphs. It may include context you did not ask for. Any of those are fine.</p>
+
+            <p>That is your first message sent. The AI answered. Nothing broke.</p>
+
+            <h3>Step 2: Now make it yours (optional)</h3>
+
+            <p>Here is a second message you can try:</p>
+
+            <blockquote>
+              <p>I'm starting a new job at [type of company or team] next month as a [your job title]. What are three things I could do in my first week to make a good impression?</p>
+            </blockquote>
+
+            <p>Before you send this one, replace the parts in square brackets with your actual situation. This is the pattern that runs through the rest of the course: start with a message someone else wrote, change the parts that should be yours, send it. B-02 walks through that in full.</p>
+          </div>
+
+        </div>
 
         <h2>If your response looks different from what you expected</h2>
 
         <p>That is normal. Every conversation with an AI is slightly different, even when you send the same message twice. The wording, the length, and the level of detail will vary. If the response was clearly about the right topic, it worked. If it seemed completely unrelated to what you asked, start a new conversation and try sending the same message again. Starting a new conversation is instant and free — the AI has no memory of previous conversations, so there is nothing to lose.</p>
-
-        <hr>
 
         <h2>If it asks you to upgrade</h2>
 
@@ -94,8 +136,6 @@
           <li><strong>ChatGPT</strong> — a rolling message limit applies on the free plan. An upgrade prompt appears when it is reached.</li>
           <li><strong>Gemini</strong> — free accounts may switch to a lighter model when daily limits are reached. This is automatic and usually does not affect everyday tasks.</li>
         </ul>
-
-        <hr>
 
         <h2>Where to type</h2>
 
@@ -127,13 +167,9 @@
 
         <p>Claude Code is a command-line tool for developers. If you are using Claude Code, you should be following the <strong>Advanced track</strong> (A-series modules, starting at A-00). The exercises in this beginner module are designed for the web and desktop platforms listed above. Head to A-00: Getting Started with Claude Code for your path.</p>
 
-        <hr>
-
         <h2>A note on data</h2>
 
         <p>Before you paste work documents or other sensitive content into any AI tool, check the platform's data policy. On some free plans, the AI company may use your conversations to improve the product — paid plans typically do not. If you are using a tool provided by your employer, ask your IT team what applies. For this exercise, you are typing one test sentence, so there is nothing sensitive at stake. But it is a good habit to know the policy before you share anything that matters.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

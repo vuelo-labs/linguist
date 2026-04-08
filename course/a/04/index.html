@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-04</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-04</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,8 +51,6 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>What you already know</h2>
 
         <p>In E-06 you learned that conversations have a useful lifespan. When the AI starts repeating itself, forgetting your instructions, or drifting from your topic, it is faster to start fresh than to keep correcting. You learned to write a re-seed — a clean opening message that carries forward what was valuable from the old conversation.</p>
@@ -48,8 +58,6 @@
         <p>In B-08 you learned that the AI mirrors your session's accumulated style and context. The longer a conversation runs, the more its earlier content shapes later responses — sometimes helpfully, sometimes not.</p>
 
         <p>Session hygiene in Claude Code is the same principle, applied more deliberately. Claude Code sessions accumulate context from tool calls, file reads, and multiple turns. When you switch tasks without clearing that context, the earlier task's details become background noise that affects the new task's output. The <code>/clear</code> command is how you reset without leaving the terminal. The session scoping habit is how you avoid needing to clear in the first place.</p>
-
-        <hr>
 
         <h2>The three practices</h2>
 
@@ -83,8 +91,6 @@
         <p>This is the same principle as E-02 (constraints), but in Claude Code it has a cost dimension: when Claude Code makes a wrong choice because a constraint was missing, correcting it requires rework. Rework means more tool calls. More tool calls means more tokens. Stating the constraint upfront costs nothing extra.</p>
 
         <p>Front-loading also protects your constraints through compaction. Constraints stated before the model begins work are stated in early, prominent user messages — exactly the messages that compaction preserves. Constraints added mid-task as conversational corrections are far more likely to be compressed or lost.</p>
-
-        <hr>
 
         <h2>Without / With</h2>
 
@@ -123,8 +129,6 @@
           <p>Do not give me background context, a prep document, or framing advice. Just the three bullets.</p>
         </blockquote>
 
-        <hr>
-
         <h2>Connecting to B-08 and E-06</h2>
 
         <p>The session hygiene skills in this module are Claude Code versions of two things you already know.</p>
@@ -138,8 +142,6 @@
         <blockquote>
           <p>I've been working on [previous task]. That work is done. The new task is: [new task, with constraints].</p>
         </blockquote>
-
-        <hr>
 
         <h2>Copy, Personalise, Use</h2>
 
@@ -165,8 +167,6 @@
           <li>[What to leave alone]: Any constraint that protects something you want preserved. Anything Claude Code might change by default that you do not want changed.</li>
           <li>[Done when]: Describe the finished state specifically enough that you will know when you have arrived. "A draft" is not specific. "A 150-word draft email, professional tone, no sign-off" is specific.</li>
         </ul>
-
-        <hr>
 
         <h2>Next</h2>
 

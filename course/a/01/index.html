@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-01</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-01</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,8 +51,6 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Before You Go Further</h2>
 
         <p>You have run your first session. You know what Claude Code can do — it reads files, writes files, runs commands, and reports back. You have approved your first tool call and seen your first response.</p>
@@ -49,15 +59,11 @@
 
         <p>Claude Code is not free. Every session is metered. This module gives you the mental model to use it with intention, not surprises. It is not here to make you cautious. It is here to make you informed.</p>
 
-        <hr>
-
         <h2>What a Token Is</h2>
 
         <p>A token is roughly three-quarters of a word. "Hello world" is about 3 tokens. A short paragraph is about 75 tokens. A full page of text is about 400 tokens.</p>
 
         <p>Everything you send and everything Claude Code responds with costs tokens. The files it reads become tokens. The commands it runs produce tokens. Token cost is what becomes your bill.</p>
-
-        <hr>
 
         <h2>How Billing Works</h2>
 
@@ -81,8 +87,6 @@
         </ul>
 
         <p>Pricing changes over time. For current per-token rates, check anthropic.com/pricing.</p>
-
-        <hr>
 
         <h2>What Makes a Session Expensive</h2>
 
@@ -111,8 +115,6 @@
         <p>When Claude Code spawns a subagent — a separate AI instance that handles part of the work — that subagent runs its own context window. It reads its own files, generates its own responses, and costs its own tokens. Delegation multiplies cost because you are paying for two or more AI sessions at once.</p>
 
         <p>A-08 covers agent delegation in detail. For now, know that it exists and that it is the single biggest cost multiplier in Claude Code. Do not use delegation until you reach that module.</p>
-
-        <hr>
 
         <h2>Reading Your Usage</h2>
 
@@ -146,8 +148,6 @@
 
         <p>The numbers scale linearly. Double the tokens, double the cost. A session with 150,000 input tokens and 30,000 output tokens on the same model would cost roughly $0.90. A session on Opus with the same token counts would cost several times more.</p>
 
-        <hr>
-
         <h2>Setting a Mental Budget</h2>
 
         <p>Before starting a session, ask yourself:</p>
@@ -172,8 +172,6 @@
 
         <p>The pattern is simple: more tokens in, more tokens out, more cost. You now have the mental model to predict which sessions will be cheap and which will not.</p>
 
-        <hr>
-
         <h2>The Cost Gate</h2>
 
         <p>From here in the course, two modules carry a cost warning before their exercises:</p>
@@ -184,8 +182,6 @@
         </ul>
 
         <p>These are where cost can escalate quickly. You have the mental model to use them wisely.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

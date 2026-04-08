@@ -12,10 +12,10 @@
   --w-border:       #E5DFD6;
   --w-border-focus: #8C7355;
   --w-text:         #2A2420;
-  --w-muted:        #7A6E68;
-  --w-faint:        #B0A89E;
-  --w-accent:       #8C7355;
-  --w-accent-soft:  #A08870;
+  --w-muted:        #5E5450;
+  --w-faint:        #6C6460;
+  --w-accent:       #6B5540;
+  --w-accent-soft:  #856650;
   --w-accent-light: #F5EFE6;
 
   /* Cool palette */
@@ -123,6 +123,25 @@ a:hover { color: var(--w-accent-soft); }
   white-space: nowrap;
 }
 
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--w-bg);
+  color: var(--w-text);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  border: 2px solid var(--w-accent);
+  border-radius: 3px;
+  text-decoration: none;
+  transition: top 0.15s;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
 .text-muted { color: var(--w-muted); }
 .text-mono  { font-family: var(--mono); font-size: 0.9em; }
 
@@ -176,6 +195,28 @@ a:hover { color: var(--w-accent-soft); }
   color: var(--w-muted);
 }
 .btn-ghost:hover { border-color: var(--w-accent); color: var(--w-accent); }
+
+/* ---- Focus styles ---- */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--w-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* ---- Responsive ---- */
 @media (max-width: 640px) {

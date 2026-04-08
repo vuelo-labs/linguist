@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-enabled">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Enabled User</span>
-    <span class="sep">›</span>
-    <span>E-03</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Enabled User</span>
+      <span class="sep">›</span>
+      <span>E-03</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,13 +51,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>In E-02 you learned to protect the parts of your work you want left alone. Now you look at the other side: what you put in, before the AI starts. The verb sets what it does. The constraint sets what it leaves alone. Context is what lets it do either of those things well.</p>
-
-        <hr>
 
         <h2>The concept</h2>
 
@@ -71,8 +79,6 @@
 
         <p>Same verb. Same task. The second version gives the AI what it actually needs to produce something specific.</p>
 
-        <hr>
-
         <h2>The load-bearing test</h2>
 
         <p>Before you add a piece of context, ask one question: <strong>if I removed this, would the AI have to guess?</strong></p>
@@ -92,8 +98,6 @@
         </ul>
 
         <p>You do not need all of these for every task. You need the ones that would change the response if they were missing.</p>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -126,8 +130,6 @@
 
         <p>You are not looking for "better." You are looking for what the context actually changed.</p>
 
-        <hr>
-
         <h2>Copy-Personalise-Use</h2>
 
         <p><strong>Starter</strong></p>
@@ -152,19 +154,13 @@
 
         <p>If you find yourself writing more than three or four context sentences, run the load-bearing test again. Something in there is probably decorative.</p>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>The response addresses your actual situation — not a generic version of the task. You can see that it used the context you gave it. There is nothing in the response that you would need to undo because the AI had to guess.</p>
 
-        <hr>
-
         <h2>If the response is still generic</h2>
 
         <p>The context is probably still too thin. Ask yourself: what would make this task different from anyone else's version of it? The answer to that question is usually the load-bearing context you are missing. Add it and try again.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

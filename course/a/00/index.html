@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-00</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-00</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -44,8 +56,6 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>What You Are Leaving Behind and What You Are Keeping</h2>
 
         <p>Until now, you have been using a web or desktop tool — Claude.ai, ChatGPT, Gemini, or something similar. You type a message, the AI responds, you read the response. The conversation happens inside a browser window.</p>
@@ -56,15 +66,11 @@
 
         <p><strong>What is new:</strong> Claude Code can see your file system, with your permission. It can write files, run commands, and use specialised tools. This means results are not just words in a chat window — they are actual changes to actual files on your computer.</p>
 
-        <hr>
-
         <h2>What Claude Code Is</h2>
 
         <p>Imagine your AI tool could open files on your computer, read them, make changes to them, and save them — while you watch and approve each step. That is Claude Code.</p>
 
         <p>It runs in your terminal — the text-based interface where you type commands instead of clicking buttons. It asks permission before taking any action. You can approve or reject each action. You are always in control. Nothing happens to your files without your say-so.</p>
-
-        <hr>
 
         <h2>Installation</h2>
 
@@ -111,8 +117,6 @@
           <li><strong>"npm: command not found"</strong> — Node.js did not install correctly. Reinstall from nodejs.org and make sure to restart your terminal afterwards.</li>
           <li><strong>"claude: command not found" after installing</strong> — close your terminal completely and open a new one. The command sometimes does not register until you do this.</li>
         </ul>
-
-        <hr>
 
         <h2>Your First Session</h2>
 
@@ -161,21 +165,15 @@
 
         <p>This is the same opening seed from the Enabled User stage. The only change is <code>[filename]</code> — Claude Code can see your files if you name them.</p>
 
-        <hr>
-
         <h2>The Permission Model</h2>
 
         <p>Claude Code will always ask before reading a file, writing a file, or running a command. You approve or reject each action. This is your control layer.</p>
 
         <p>Never approve an action you do not understand. If you are not sure what an action will do, type <strong>n</strong> to reject it and ask Claude Code to explain what it was going to do and why.</p>
 
-        <hr>
-
         <h2>Cost Preview</h2>
 
         <p>Claude Code uses the Anthropic API. Every message, every tool call, every file read costs tokens. Tokens cost money. The next module — A-01 — covers this in full. Before you go further, know this: Claude Code is not free. You are billed for usage through your Anthropic account. Set a budget for yourself before your next session.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

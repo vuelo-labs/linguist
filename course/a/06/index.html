@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-06</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-06</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,8 +51,6 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>What you already know</h2>
 
         <p>In E-05 you learned the habit of reading Claude Code's full response before acting on it — treating the first response as a draft, not a final product.</p>
@@ -48,8 +58,6 @@
         <p>That habit assumes the response is worth reading critically. This module is about the step before: making sure Claude Code produces the right kind of response in the first place.</p>
 
         <p>Two skills here. The first is separating plan from execution. The second is controlling output format. They are related: both are about taking deliberate control of what Claude Code produces before it starts, rather than correcting it after.</p>
-
-        <hr>
 
         <h2>Plan before execute</h2>
 
@@ -107,8 +115,6 @@
 
         <p>One turn to choose. No rework.</p>
 
-        <hr>
-
         <h2>Connecting to E-05</h2>
 
         <p>In E-05 you learned the two-message pattern for planning: first ask the AI to plan, then confirm before it acts. In Claude Code, <code>/plan</code> activates a dedicated planning mode that formalises this into the session. The same principle — see the approach before it becomes action — is now a built-in feature, not just a prompting technique.</p>
@@ -116,8 +122,6 @@
         <p>If you use <code>/plan</code>, Claude Code will present its intended approach and wait. You review. You either approve or redirect. Then it acts.</p>
 
         <p>If you prefer not to use <code>/plan</code>, add "Before you do anything, tell me what you plan to do. Wait for my approval before starting." to any message. The effect is the same.</p>
-
-        <hr>
 
         <h2>Output format control</h2>
 
@@ -164,8 +168,6 @@
           <p>Write one paragraph, maximum 100 words, summarising the current state of the AI infrastructure market. Focus on: what is growing fastest and who the dominant players are. No subheadings, no bullet points, no caveats. Write it as if I am forwarding it in an email.</p>
         </blockquote>
 
-        <hr>
-
         <h2>Copy, Personalise, Use</h2>
 
         <h3>Starter 1: Planning message</h3>
@@ -210,8 +212,6 @@
           <li>You do not need to fill in every format field. Use only the ones where the default is not what you want. If the default length is fine, skip the length line.</li>
           <li>"Do not include" is often the most useful line. Claude Code adds introductions, closing summaries, and unsolicited suggestions by default. If you want clean output, name what to cut.</li>
         </ul>
-
-        <hr>
 
         <h2>Next</h2>
 

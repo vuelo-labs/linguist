@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-beginner">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Beginner</span>
-    <span class="sep">›</span>
-    <span>B-10</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Beginner</span>
+      <span class="sep">›</span>
+      <span>B-10</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,13 +51,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>Every conversation with the AI starts with a first message. That message sets the direction for everything that follows. Getting it right takes about thirty seconds once you know what goes in it.</p>
-
-        <hr>
 
         <h2>What is happening</h2>
 
@@ -62,8 +70,6 @@
         <p><strong>Done</strong> — what a good response looks like. This is your stopping condition from B-06. A format, a length, a scope. "A 3-bullet summary." "A draft email under 150 words." "Five options with a one-sentence description of each."</p>
 
         <p>Together, these four parts form what this course calls the Opening Seed. You do not need to memorise the terms. You just need the four slots.</p>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -102,8 +108,6 @@
 
         <p>Send your Opening Seed. Use it inside the project you set up in B-09 if you have one. Read the response using the checklist from B-07.</p>
 
-        <hr>
-
         <h2>Worked example</h2>
 
         <p>Here is what the template looks like after personalising:</p>
@@ -116,13 +120,9 @@
 
         <p>Notice: no brackets left. Every part is specific and real. The AI has everything it needs.</p>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>A response to a well-formed Opening Seed should feel like it was written for your situation, not for a generic version of your task. The format and length should match what you asked for. The tone should match the context you provided. If any of those are off, the B-07 checklist will tell you which part of the Opening Seed to adjust.</p>
-
-        <hr>
 
         <h2>If this did not work</h2>
 
@@ -131,8 +131,6 @@
         <p>If the response was the wrong length or format, the done slot needs tightening. "A summary" is not a done condition. "A 5-bullet summary, each bullet under 20 words" is.</p>
 
         <p>If you are not sure what went wrong, use the output review checklist from B-07 to diagnose it before rewriting the message.</p>
-
-        <hr>
 
         <h2>Your take-home template card</h2>
 
@@ -147,8 +145,6 @@
         <p>Here's what you need to know: [context: 1–3 load-bearing facts].</p>
 
         <p>Done when: [format, length, scope].</p>
-
-        <hr>
 
         <h2>Next</h2>
 
@@ -165,6 +161,21 @@
             <span class="module-pagination-title">E-01: The First Word Matters →</span>
           </a>
         </nav>
+
+        <div class="stage-complete-prompt" id="stage-complete-prompt">
+          <p class="stage-complete-prompt-label">Stage 1 complete</p>
+          <p class="stage-complete-prompt-heading">Ten modules down.</p>
+          <p class="stage-complete-prompt-body">Want to save your place? Enter your email and we'll bookmark where you are — nothing else, no password, just something to find you again on any device.</p>
+          <div class="stage-complete-form" id="stage-email-form">
+            <label for="stage-email-input" class="visually-hidden">Email address</label>
+            <input type="email" id="stage-email-input" placeholder="your@email.com" autocomplete="email">
+            <button onclick="LinguistProgress.saveEmail()">Save my place →</button>
+          </div>
+          <p class="stage-complete-saved" id="stage-email-saved">Saved. Pick up where you left off any time.</p>
+          <button class="stage-complete-skip" onclick="LinguistProgress.dismissPrompt()">No thanks, keep going</button>
+        </div>
+
+        <p style="text-align:center;margin-top:2rem;font-family:var(--sans);font-size:0.9rem;"><a href="/course/e/01">Continue to E-01: The First Word Matters →</a></p>
 
       </div>
     </div>

@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-enabled">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Enabled User</span>
-    <span class="sep">›</span>
-    <span>E-02</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Enabled User</span>
+      <span class="sep">›</span>
+      <span>E-02</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,13 +51,9 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Intro</h2>
 
         <p>In B-08 you learned what to do when the AI goes wrong: start over, rewrite from scratch. Here is how to stop it going wrong in the first place. Prevention costs one line. Correction costs a whole extra conversation.</p>
-
-        <hr>
 
         <h2>The concept</h2>
 
@@ -68,8 +76,6 @@
         </blockquote>
 
         <p>Same verb. Same task. The second version tells it where its authority ends.</p>
-
-        <hr>
 
         <h2>The exercise</h2>
 
@@ -141,8 +147,6 @@
 
         <p>You do not need all of these at once. Pick the one that protects what matters for this particular task.</p>
 
-        <hr>
-
         <h2>Common constraint patterns</h2>
 
         <p>Keep these. Use them as a starting point when you are not sure how to word a constraint.</p>
@@ -155,21 +159,15 @@
           <li>"Keep my [voice / structure / examples] — only change [the specific thing you named]."</li>
         </ul>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>The response addresses exactly what you named and nothing else. The parts you did not mention are unchanged. You do not need to undo anything.</p>
-
-        <hr>
 
         <h2>If the AI ignored your constraint</h2>
 
         <p>It does happen. When it does, the response itself usually tells you why — the AI may have interpreted your task as requiring the thing you said not to do, or the constraint may have been too vague for it to apply.</p>
 
         <p>Do not patch it. Start a new message. Make the constraint more specific: instead of "don't change the structure," try "keep the same three paragraphs in the same order." Name what you want preserved as precisely as you named what you want changed.</p>
-
-        <hr>
 
         <h2>Next</h2>
 

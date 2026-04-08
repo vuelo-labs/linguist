@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body class="module-page stage-advanced">
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
     <div class="site-header-links">
       <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
       <a href="/guide" class="site-header-link">Guide</a>
     </div>
   </header>
 
   <div class="module-nav-bar">
-    <a href="/course">Course</a>
-    <span class="sep">›</span>
-    <span>Advanced Practitioner</span>
-    <span class="sep">›</span>
-    <span>A-08</span>
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-08</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
   </div>
 
-  <main>
+  <main id="main-content">
     <div class="container">
 
       <section class="module-hero">
@@ -39,15 +51,11 @@
 
       <div class="module-body">
 
-        <hr>
-
         <h2>Cost warning</h2>
 
         <p>Agent delegation is the most expensive Claude Code operation. A subagent runs its own context window — every file it reads, every search it runs, every response it generates adds to your total cost on top of the main session. A complex delegation can cost $5–20, as noted in A-01's benchmarks.</p>
 
         <p>Set a budget before delegating. If you are unsure whether to delegate, do the task in the main session first. You can always delegate a second attempt once you understand what the task actually requires.</p>
-
-        <hr>
 
         <h2>What you already know</h2>
 
@@ -56,8 +64,6 @@
         <p>Delegation takes this further. You are not asking Claude Code to plan a task and then execute it in front of you. You are asking it to hand that task off to an entirely separate session — a subagent — which will run its own tool calls, produce its own results, and report back with a summary. You receive conclusions, not process.</p>
 
         <p>This is powerful. It is also the most expensive thing you can do in Claude Code. Understanding when to use it — and when not to — is the final skill in the Advanced Practitioner track.</p>
-
-        <hr>
 
         <h2>The delegation decision</h2>
 
@@ -105,8 +111,6 @@
 
         <p>This is not a good candidate for delegation. The question — is the tone right? — requires your judgement, not the subagent's. You know this client. You know what the relationship requires. A subagent will give you an opinion, but you cannot evaluate it without doing the same thinking yourself. Do this in the main session.</p>
 
-        <hr>
-
         <h2>The 5-part brief</h2>
 
         <p>A subagent starts every task with zero context. It has not seen your main session. It does not know what you have tried, what you have decided, or why this task matters. Brief it the way you would brief a capable colleague who has just walked into the room with no background.</p>
@@ -124,8 +128,6 @@
         <p><strong>5. Length target</strong> — a word count or item count. "Under 300 words total." "One paragraph per topic." "A list of no more than 10 items." Without this, the subagent will produce whatever length feels complete to it — which may be much more than you need.</p>
 
         <p>These five parts are not bureaucratic. They are the minimum information a capable person would need to do the job without coming back to ask questions. Write a brief that could be handed to someone with no other context and still produce exactly what you need.</p>
-
-        <hr>
 
         <h2>Without / With: The brief in practice</h2>
 
@@ -161,8 +163,6 @@
           <p>Length target: Under 300 words total.</p>
         </blockquote>
 
-        <hr>
-
         <h2>Exercise: Write and send a brief</h2>
 
         <h3>Part 1 — The delegation decision</h3>
@@ -193,8 +193,6 @@
 
         <p>If the answer to any of these is no, note what the brief got wrong. You will use that in the recovery path.</p>
 
-        <hr>
-
         <h2>Copy, Personalise, Use</h2>
 
         <p>Use this brief template for every delegation.</p>
@@ -218,15 +216,11 @@
           <li>Length target — a ceiling, not a target. "Under 300 words" means the subagent should stop at 300 even if it has more to say. That constraint forces prioritisation.</li>
         </ul>
 
-        <hr>
-
         <h2>What good looks like</h2>
 
         <p>The subagent produces exactly what the brief specified — no more, no less. The output fits within the length target. The format matches what you asked for. When you read it, you can evaluate whether it is correct, because you gave the subagent a precise enough scope that you know what correct looks like.</p>
 
         <p>You do not need to understand how the subagent got there. You specified the output. The subagent handled the process. That is the point of delegation.</p>
-
-        <hr>
 
         <h2>Recovery path</h2>
 
@@ -238,15 +232,13 @@
 
         <p>Do not try to correct the subagent's output by continuing to send it messages. Once the brief fails, the session is over. The correction happens in the brief, not in the conversation.</p>
 
-        <hr>
-
         <h2>You have completed the Advanced Practitioner track</h2>
 
         <p>You now have the full Claude Code workflow: cost awareness, mental models, persistent instructions, session hygiene, context management, planning before execution, tool selection, and delegation.</p>
 
         <p>These are not steps in a sequence to be done once. They are habits that compound. The practitioner who names tools in every message, separates planning from execution, and delegates only what genuinely warrants isolation will get consistently better results at consistently lower cost than one who relies on Claude Code's defaults.</p>
 
-        <p>The next stage — the Builder track — is for those who want to design AI systems for others: building workflows, writing system prompts, defining tools, and architecting multi-agent pipelines via the API or Workbench. If that is where you are headed, continue to X-01: API Fundamentals.</p>
+        <p>The next stage — the Builder track — is for those who want to design AI systems for others: building workflows, writing system prompts, defining tools, and architecting multi-agent pipelines via the API or Workbench. That track is coming.</p>
 
         <p class="keynote" style="text-align:center;max-width:none;margin:4rem auto;">The machine will wait. It does not mind. Go do the work.</p>
 
@@ -257,6 +249,21 @@
           </a>
           <span class="module-pagination-spacer"></span>
         </nav>
+
+        <div class="stage-complete-prompt" id="stage-complete-prompt">
+          <p class="stage-complete-prompt-label">Course complete</p>
+          <p class="stage-complete-prompt-heading">All twenty-six modules.</p>
+          <p class="stage-complete-prompt-body">Save your progress and we'll be in touch when new content is added. Just your email — nothing else.</p>
+          <div class="stage-complete-form" id="stage-email-form">
+            <label for="stage-email-input" class="visually-hidden">Email address</label>
+            <input type="email" id="stage-email-input" placeholder="your@email.com" autocomplete="email">
+            <button onclick="LinguistProgress.saveEmail()">Save my place →</button>
+          </div>
+          <p class="stage-complete-saved" id="stage-email-saved">Saved. We'll let you know when new content arrives.</p>
+          <button class="stage-complete-skip" onclick="LinguistProgress.dismissPrompt()">No thanks</button>
+        </div>
+
+        <p style="text-align:center;margin-top:2rem;font-family:var(--sans);font-size:0.9rem;"><a href="/course">Back to course overview →</a></p>
 
       </div>
     </div>

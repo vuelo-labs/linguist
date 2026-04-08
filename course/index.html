@@ -9,8 +9,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
   <header class="site-header">
     <a href="/" class="site-logo">Linguist</a>
@@ -21,7 +24,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
 
     <!-- Hero -->
     <section class="course-hero">
@@ -30,6 +33,37 @@
         <h1 class="module-title">Linguist</h1>
         <p>Learn to use AI well — when to think alongside it, when to hand it a task, and how to stay in control of both. No experience required.</p>
         <a href="/course/b/01" class="btn btn-warm" style="display:inline-block;margin-top:1.5rem;font-family:var(--sans);font-size:0.9rem;font-weight:500;color:var(--w-bg);background:var(--w-accent);padding:0.65rem 1.5rem;border-radius:4px;text-decoration:none;transition:background 0.15s;">Start here: Your First Message →</a>
+      </div>
+    </section>
+
+    <!-- Profile recommendation block (shown when profile cookie is set) -->
+    <section style="padding: 2rem 0 0;">
+      <div class="container">
+
+        <div class="profile-rec" data-profile="newrole">
+          <p class="profile-rec-eyebrow">Your starting point</p>
+          <p class="profile-rec-headline">You are not behind. You just haven't started yet.</p>
+          <p class="profile-rec-body">Most people starting new jobs right now are in the same place — they've heard the word "AI" more times than they've actually used it deliberately. The first three modules will get you to a point where you can use AI for real work tasks before you've been in the job a week.</p>
+          <a href="/course/b/01" class="profile-rec-cta">Start at B-01: Your First Message →</a>
+          <a href="/start" class="profile-rec-change">Change profile</a>
+        </div>
+
+        <div class="profile-rec" data-profile="professional">
+          <p class="profile-rec-eyebrow">Your starting point</p>
+          <p class="profile-rec-headline">You've already started. Now find out why it's inconsistent.</p>
+          <p class="profile-rec-body">Skip B-01 through B-03 — you know how to send a message and you've found your way around the platform. Start at B-04, which explains the single most common reason experienced users get unpredictable results: the way you phrase your request is directly shaping what comes back.</p>
+          <a href="/course/b/04" class="profile-rec-cta">Start at B-04: Your Input Shapes the Output →</a>
+          <a href="/start" class="profile-rec-change">Change profile</a>
+        </div>
+
+        <div class="profile-rec" data-profile="maker">
+          <p class="profile-rec-eyebrow">Your starting point</p>
+          <p class="profile-rec-headline">Skip ahead. Your foundation is already there.</p>
+          <p class="profile-rec-body">The A-track is not a more advanced version of the chat interface tutorials you've already read. It's a different mode entirely — Claude Code runs in your terminal, reads your actual files, and can delegate discrete tasks to separate sessions. After this track you'll be able to control what tools it uses, write session briefs that produce evaluable outputs, and decide when delegation saves time versus when it just costs more.</p>
+          <a href="/course/a/00" class="profile-rec-cta">Start at A-00: Getting Started with Claude Code →</a>
+          <a href="/start" class="profile-rec-change">Change profile</a>
+        </div>
+
       </div>
     </section>
 
