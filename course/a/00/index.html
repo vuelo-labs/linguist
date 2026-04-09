@@ -70,6 +70,18 @@
 
         <p>It runs in your terminal — the text-based interface where you type commands instead of clicking buttons. It asks permission before taking any action. You can approve or reject each action. You are always in control. Nothing happens to your files without your say-so.</p>
 
+        <h2>Before you start: terminal basics</h2>
+
+        <p>Claude Code lives in the terminal — a text interface to your computer. If you have only used GUI tools (Slack, email, a browser), the terminal can feel unfamiliar. These four concepts are all you need.</p>
+
+        <p><strong>Working directory.</strong> Claude Code reads and writes files relative to the folder you are in when you start a session. Before you run <code>claude</code>, navigate to the folder that contains your project. Use <code>cd folder-name</code> to move into a folder, and <code>pwd</code> to check where you are.</p>
+
+        <p><strong>Running commands yourself vs asking Claude Code.</strong> If you can do something in the terminal in five seconds — list files, check a version, move a file — do it yourself. Asking Claude Code to run shell commands costs tokens and is slower. Use Claude Code's tools for work that is part of the task, not for navigation or setup.</p>
+
+        <p><strong>Exit codes.</strong> When a command works, it exits silently or prints its output. When it fails, it prints an error message. The message almost always tells you what went wrong. You do not need to memorise error codes — read the message first.</p>
+
+        <p><strong>Permissions.</strong> If you see "permission denied", the command needs higher privileges than your current user has. On Mac or Linux, prefix the command with <code>sudo</code>. You will be asked for your password. Only do this if you understand what the command does.</p>
+
         <h2>Installation</h2>
 
         <p>You need three things: Node.js, the Claude Code package, and an Anthropic API key.</p>
