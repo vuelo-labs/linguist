@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capstone: A Real Project · Linguist</title>
+  <meta name="description" content="Apply the full Advanced Practitioner toolkit to a real piece of work you need to do. Not an exercise. Actual work.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/course/course.css">
+  <script src="/profile.js"></script>
+  <script src="/progress.js"></script>
+</head>
+<body class="module-page stage-advanced">
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/start" class="site-header-link">Where to start</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <div class="module-nav-bar">
+    <div class="module-nav-crumb">
+      <a href="/course">Course</a>
+      <span class="sep">›</span>
+      <span>Advanced Practitioner</span>
+      <span class="sep">›</span>
+      <span>A-09</span>
+    </div>
+    <div class="module-nav-actions">
+      <span id="module-nav-top-prev"></span>
+      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
+      <span id="module-nav-top-next"></span>
+      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section class="module-hero">
+        <p class="module-eyebrow">Advanced Practitioner · Module 09</p>
+        <h1 class="module-title">Capstone: A Real Project</h1>
+        <p class="module-objective">After this, you will have completed a real piece of work using the full Advanced Practitioner toolkit — CLAUDE.md, scoped sessions, compaction management, output engineering, tool naming, and delegation — and reflected on which habits you now reach for without thinking.</p>
+      </section>
+
+      <div class="module-body">
+
+        <h2>What this is</h2>
+
+        <p>This is not an exercise with a correct answer. It is a real project — something from your actual work — completed using the techniques from A-00 through A-08.</p>
+
+        <p>The difference between an advanced practitioner and someone who has read about being one is whether the habits have been applied under real conditions. A contrived exercise cannot give you that. A real project can.</p>
+
+        <h2>Choose your project</h2>
+
+        <p>Pick something you actually need to do. It should meet three conditions:</p>
+
+        <ul>
+          <li><strong>It requires multiple sessions.</strong> A task you can finish in one 10-minute session is too small. You want something that warrants at least two or three scoped sessions — a research summary, a documentation pass, a structured analysis, a first draft of something meaningful.</li>
+          <li><strong>It has files.</strong> Claude Code works with your file system. The project should involve files you can point it at — documents, notes, code, data. If everything lives in your head, Claude Code has nothing to work with.</li>
+          <li><strong>You will use the output.</strong> The capstone should produce something you actually need. This is the only way to know whether the result was genuinely good — not just plausible-looking.</li>
+        </ul>
+
+        <p>If nothing comes to mind: take a folder of notes, research, or documents you have been meaning to make sense of and build a structured brief from them. That task meets all three conditions and is achievable in an afternoon.</p>
+
+        <h2>Before you start: set up properly</h2>
+
+        <p>Do not open a Claude Code session yet. Do this first.</p>
+
+        <ol>
+          <li><strong>Create a CLAUDE.md in your project folder.</strong> Write the constraints, conventions, and preferences that apply to this project. At minimum: who you are, what this project is for, the format you want output in, and at least one thing Claude Code should never do in this project.</li>
+          <li><strong>Define your sessions.</strong> Before you start, decide how you will break the work across sessions. Each session should have one clear task. Write them down — even roughly — so you know when to use <code>/clear</code>.</li>
+          <li><strong>Identify one task you will delegate.</strong> Before you start working, identify a sub-task that is independent, produces evaluable output, and would generate noise in the main session. This is the task you will brief a subagent to handle.</li>
+        </ol>
+
+        <h2>The required techniques</h2>
+
+        <p>As you work through the project, apply each of these at least once. You are not being tested — no one is watching. But if you skip one, you have not completed the capstone.</p>
+
+        <ol>
+          <li><strong>CLAUDE.md active from session one.</strong> Start every session in the folder that contains your CLAUDE.md. Verify it loads. If Claude Code does not appear to be following it, check that you are in the right directory. (A-03)</li>
+          <li><strong>Use <code>/clear</code> at a phase boundary.</strong> When you finish one session and start a different phase of work, clear the context. Do not carry session state from a completed task into a new one. (A-04)</li>
+          <li><strong>Send one manual checkpoint.</strong> Partway through your longest session, send the checkpoint prompt. Read the summary. Verify that your key constraints and decisions are in it. Correct anything that is missing before you continue. (A-05)</li>
+          <li><strong>Separate planning from execution in at least one session.</strong> Before asking Claude Code to produce anything, ask it for a plan first. Read the plan. Approve or correct it. Then execute. Do not let it plan and execute in the same step. (A-06)</li>
+          <li><strong>Name tools in at least two messages.</strong> When you need a file read, say "read this file." When you need a search, say "search for." When you need a command run, say "run this command." Do not assume Claude Code will choose correctly — name the tool. (A-07)</li>
+          <li><strong>Brief and run one subagent.</strong> Write the full 5-part brief for the task you identified in setup. Send it. Evaluate the output against the brief. If the brief failed, note what it got wrong. (A-08)</li>
+        </ol>
+
+        <h2>What good looks like</h2>
+
+        <p>The project is complete. The output is something you actually use — not a draft you discard, not a summary you skim and close.</p>
+
+        <p>You used <code>/clear</code> at least once and noticed the improvement in focus in the next session. Your checkpoint revealed at least one thing — either confirming a constraint survived or catching one that did not. Your subagent brief produced output within the scope you defined.</p>
+
+        <p>The CLAUDE.md you wrote at the start is a document you will reuse or update for the next project in that folder — not something you created for this exercise and never looked at again.</p>
+
+        <h2>Reflection</h2>
+
+        <p>When the project is done, answer these three questions. You do not need to write them down anywhere. Think about them.</p>
+
+        <ol>
+          <li><strong>Which technique did you reach for without thinking?</strong> That is the one that has become a habit. It will improve every session from here without effort.</li>
+          <li><strong>Which one did you skip or almost skip?</strong> That is the one still in your head as a rule rather than a reflex. You know it works. You just have to use it enough that it becomes automatic.</li>
+          <li><strong>Is there anything in your CLAUDE.md you would write differently now?</strong> If yes, update it before you close the project. A CLAUDE.md that reflects what you actually learned is more valuable than one that reflects what you planned at the start.</li>
+        </ol>
+
+        <p class="keynote" style="text-align:center;max-width:none;margin:4rem auto;">The machine will wait. It does not mind. Go do the work.</p>
+
+        <nav class="module-pagination">
+          <a href="/course/a/08" class="module-pagination-prev">
+            <span class="module-pagination-label">Previous</span>
+            <span class="module-pagination-title">← A-08: Agent Delegation and Briefing</span>
+          </a>
+          <span class="module-pagination-spacer"></span>
+        </nav>
+
+        <div class="stage-complete-prompt" id="stage-complete-prompt">
+          <p class="stage-complete-prompt-label">Course complete</p>
+          <p class="stage-complete-prompt-heading">All twenty-seven modules.</p>
+          <p class="stage-complete-prompt-body">Save your progress and we'll be in touch when new content is added. Just your email — nothing else.</p>
+          <div class="stage-complete-form" id="stage-email-form">
+            <label for="stage-email-input" class="visually-hidden">Email address</label>
+            <input type="email" id="stage-email-input" placeholder="your@email.com" autocomplete="email">
+            <button onclick="LinguistProgress.saveEmail()">Save my place →</button>
+          </div>
+          <p class="stage-complete-saved" id="stage-email-saved">Saved. We'll let you know when new content arrives.</p>
+          <button class="stage-complete-skip" onclick="LinguistProgress.dismissPrompt()">No thanks</button>
+        </div>
+
+        <p style="text-align:center;margin-top:2rem;font-family:var(--sans);font-size:0.9rem;"><a href="/course">Back to course overview →</a></p>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
