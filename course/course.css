@@ -419,6 +419,32 @@ body.stage-advanced .stage-threshold-title { color: var(--c-text); }
   padding: 0;
 }
 
+.keynote--closing {
+  text-align: center;
+  max-width: none;
+  margin: 4rem auto;
+}
+
+/* ---- Without / With comparison blocks ---- */
+.ww-without,
+.ww-with {
+  padding: 0.75rem 1rem 0.75rem 1.1rem;
+  border-left: 3px solid;
+  border-radius: 0 3px 3px 0;
+  max-width: 65ch;
+}
+
+.ww-without {
+  border-color: var(--w-border);
+  background: var(--w-bg-card);
+  color: var(--w-muted);
+}
+
+.ww-with {
+  border-color: var(--w-accent);
+  background: var(--w-accent-light);
+}
+
 /* ---- Human voice ---- */
 .human-voice {
   font-family: var(--serif);

@@ -126,9 +126,9 @@
 
         <h3>Without / With: Coding</h3>
 
-        <p>Without: A developer builds a form validation library. They established early in the session that all validation errors must use error codes (<code>REQUIRED_FIELD</code>, <code>INVALID_EMAIL</code>) rather than human-readable strings. After a long session and compaction, Claude Code starts returning <code>{ error: "This field is required" }</code> instead of <code>{ code: "REQUIRED_FIELD" }</code>. The developer does not notice until they are writing tests.</p>
+        <p class="ww-without">Without: A developer builds a form validation library. They established early in the session that all validation errors must use error codes (<code>REQUIRED_FIELD</code>, <code>INVALID_EMAIL</code>) rather than human-readable strings. After a long session and compaction, Claude Code starts returning <code>{ error: "This field is required" }</code> instead of <code>{ code: "REQUIRED_FIELD" }</code>. The developer does not notice until they are writing tests.</p>
 
-        <p>With: The developer notices the format changed. They recognise this as context rot and respond:</p>
+        <p class="ww-with">With: The developer notices the format changed. They recognise this as context rot and respond:</p>
 
         <blockquote>
           <p>Stop — you are using human-readable error strings. We established at the start of this session that all validation errors use error codes (REQUIRED_FIELD, INVALID_EMAIL, etc.), not strings. Rewrite the last output using the code format.</p>
@@ -139,9 +139,9 @@
 
         <h3>Without / With: Content and research</h3>
 
-        <p>Without: A researcher builds a competitive intelligence report. Early in the session the responses were precise and sourced. After compaction, responses become hedged and general: "it appears that", "generally speaking", "their strategy seems to focus on." The researcher accepts the vaguer output without recognising it as a symptom.</p>
+        <p class="ww-without">Without: A researcher builds a competitive intelligence report. Early in the session the responses were precise and sourced. After compaction, responses become hedged and general: "it appears that", "generally speaking", "their strategy seems to focus on." The researcher accepts the vaguer output without recognising it as a symptom.</p>
 
-        <p>With: The researcher notices the shift in register. They respond:</p>
+        <p class="ww-with">With: The researcher notices the shift in register. They respond:</p>
 
         <blockquote>
           <p>Your last few responses have been significantly more vague than earlier in this session — using phrases like "it appears" and "seems to."</p>
@@ -164,9 +164,9 @@
 
         <h3>Without / With: Coding</h3>
 
-        <p>Without: A developer establishes a rule by commenting on Claude Code's output: "Don't hardcode that — it should be configurable." This is a conversational reply. During compaction the nuance may not survive. Later the rule is violated.</p>
+        <p class="ww-without">Without: A developer establishes a rule by commenting on Claude Code's output: "Don't hardcode that — it should be configurable." This is a conversational reply. During compaction the nuance may not survive. Later the rule is violated.</p>
 
-        <p>With: The developer writes the constraint as a standalone message:</p>
+        <p class="ww-with">With: The developer writes the constraint as a standalone message:</p>
 
         <blockquote>
           <p>Architecture constraint for this entire session:</p>
@@ -176,9 +176,9 @@
 
         <h3>Without / With: Content and research</h3>
 
-        <p>Without: A writer and Claude Code work through several rounds deciding to frame a report around three themes rather than five. The decision was reached through dialogue and exists in the conversation flow, but was never stated as a clean decision. After compaction, Claude Code might return to proposing the five-theme structure.</p>
+        <p class="ww-without">Without: A writer and Claude Code work through several rounds deciding to frame a report around three themes rather than five. The decision was reached through dialogue and exists in the conversation flow, but was never stated as a clean decision. After compaction, Claude Code might return to proposing the five-theme structure.</p>
 
-        <p>With: The writer writes a consolidating message:</p>
+        <p class="ww-with">With: The writer writes a consolidating message:</p>
 
         <blockquote>
           <p>Decision for this document — confirmed:</p>
