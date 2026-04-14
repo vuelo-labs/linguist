@@ -370,14 +370,14 @@
   <script>
     (function () {
       var QUIZ_DATA = [
-        { q: 'q1', url: '/course/b/01', label: 'Start at B-01', desc: 'Your first AI message' },
-        { q: 'q2', url: '/course/b/02', label: 'Start at B-02', desc: 'Editing template prompts' },
-        { q: 'q3', url: '/course/b/06', label: 'Start at B-06', desc: 'Stopping conditions' },
-        { q: 'q4', url: '/course/b/10', label: 'Start at B-10', desc: 'Writing complete prompts' },
-        { q: 'q5', url: '/course/e/01', label: 'Start at E-01', desc: 'Choosing the right verbs' },
-        { q: 'q6', url: '/course/e/03', label: 'Start at E-03', desc: 'Context that changes output' },
-        { q: 'q7', url: '/course/e/06', label: 'Start at E-06', desc: 'Starting fresh conversations' },
-        { q: 'q8', url: '/course/a/00', label: 'Start at A-00', desc: 'Claude Code in the terminal' }
+        { q: 'q1', url: '/course/b/01', label: 'Start at B-01', desc: 'Your first AI message', title: 'B-01: Your First Message' },
+        { q: 'q2', url: '/course/b/02', label: 'Start at B-02', desc: 'Editing template prompts', title: 'B-02: Copy, Personalise, Use' },
+        { q: 'q3', url: '/course/b/06', label: 'Start at B-06', desc: 'Stopping conditions', title: 'B-06: Tell It When to Stop' },
+        { q: 'q4', url: '/course/b/10', label: 'Start at B-10', desc: 'Writing complete prompts', title: 'B-10: The Opening Seed' },
+        { q: 'q5', url: '/course/e/01', label: 'Start at E-01', desc: 'Choosing the right verbs', title: 'E-01: The First Word Matters' },
+        { q: 'q6', url: '/course/e/03', label: 'Start at E-03', desc: 'Context that changes output', title: 'E-03: Context Is Fuel' },
+        { q: 'q7', url: '/course/e/06', label: 'Start at E-06', desc: 'Starting fresh conversations', title: 'E-06: Migration and Re-seed' },
+        { q: 'q8', url: '/course/a/00', label: 'Start at A-00', desc: 'Claude Code in the terminal', title: 'A-00: Getting Started with Claude Code' }
       ];
 
       var PLATFORM_PICKER_HTML = [
@@ -440,6 +440,8 @@
         if (firstUnchecked === 0) {
           // All checked — A-track
           setProfileSilently('maker');
+          localStorage.setItem('linguist_quiz_module', '/course/a/00');
+          localStorage.setItem('linguist_quiz_label', 'A-00: Getting Started with Claude Code');
           html += '<p class="result-label">Your starting point</p>';
           html += '<p class="result-heading">The A-track — Claude Code and agentic workflows</p>';
           html += '<p style="font-family:var(--sans);font-size:0.88rem;color:var(--w-muted);line-height:1.6;margin-top:0.5rem;">Start at the A-track. Skim anything that feels familiar — if something clicks that you didn\'t know you knew, that\'s the course working.</p>';
@@ -447,6 +449,8 @@
         } else {
           var entry = QUIZ_DATA[firstUnchecked - 1];
           setProfileSilently(profileForResult(firstUnchecked));
+          localStorage.setItem('linguist_quiz_module', entry.url);
+          localStorage.setItem('linguist_quiz_label', entry.title);
 
           html += '<p class="result-label">Your starting point</p>';
           html += '<p class="result-heading">' + entry.label + ' — ' + entry.desc + '</p>';
