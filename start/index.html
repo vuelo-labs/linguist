@@ -3,136 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Where are you starting from? — Linguist</title>
-  <meta name="description" content="The course adapts to where you're starting from. Pick the one that's closest.">
+  <title>Where does your path start? — Linguist</title>
+  <meta name="description" content="Eight statements. Check the ones that are true for you right now — the course adapts from there.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="/profile.js"></script>
   <link rel="stylesheet" href="/style.css">
   <style>
 
-    .start-hero {
-      padding: 3.5rem 0 2rem;
-      max-width: 560px;
-    }
-
-    .start-hero h1 {
-      font-family: var(--serif);
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      font-weight: normal;
-      line-height: 1.2;
-      color: var(--w-text);
-      margin-bottom: 0.75rem;
-    }
-
-    .start-hero p {
-      font-family: var(--sans);
-      font-size: 0.95rem;
-      color: var(--w-muted);
-      line-height: 1.6;
-    }
-
-    .profile-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-width: 600px;
-      padding-bottom: 4rem;
-    }
-
-    .profile-card {
-      border: 1px solid var(--w-border);
-      border-radius: 6px;
-      padding: 1.5rem 1.75rem;
-      background: var(--w-bg-card);
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-      position: relative;
-    }
-
-    .profile-card:hover {
-      border-color: var(--w-accent);
-      background: var(--w-bg);
-    }
-
-    /* Highlight current profile */
-    .profile-card.is-current {
-      border-color: var(--w-accent);
-      background: var(--w-accent-light);
-    }
-
-    .profile-card-label {
-      font-family: var(--sans);
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--w-text);
-      margin-bottom: 0.35rem;
-    }
-
-    .profile-card-desc {
-      font-family: var(--serif);
-      font-size: 1rem;
-      color: var(--w-text);
-      line-height: 1.5;
-      margin-bottom: 0.6rem;
-      font-style: italic;
-    }
-
-    .profile-card-detail {
-      font-family: var(--sans);
-      font-size: 0.82rem;
-      color: var(--w-muted);
-      line-height: 1.65;
-      margin-bottom: 1.1rem;
-    }
-
-    .profile-card-cta {
-      display: inline-block;
-      font-family: var(--sans);
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: var(--w-bg);
-      background: var(--w-text);
-      padding: 0.45rem 1rem;
-      border-radius: 6px;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-
-    .profile-card-cta:hover { opacity: 0.75; }
-
-    .profile-card.is-current .profile-card-cta {
-      background: var(--w-accent);
-    }
-
-    .profile-card-current-note {
-      display: none;
-      font-family: var(--sans);
-      font-size: 0.75rem;
-      color: var(--w-accent);
-      margin-top: 0.5rem;
-    }
-
-    .profile-card.is-current .profile-card-current-note { display: block; }
-
-    .start-skip {
-      padding: 0 0 3rem;
-      font-family: var(--sans);
-      font-size: 0.8rem;
-      color: var(--w-faint);
-    }
-
-    .start-skip a {
-      color: var(--w-muted);
-      text-decoration: underline;
-      text-decoration-color: var(--w-border);
-    }
-
-    .start-skip a:hover { color: var(--w-text); }
-
-    /* Header — same as main site */
+    /* ---- Header ---- */
     .site-header {
       position: sticky;
       top: 0;
@@ -174,6 +53,229 @@
       .site-header { padding: 0.85rem 1rem; }
     }
 
+    /* ---- Quiz section ---- */
+    .quiz-section {
+      padding: 3.5rem 0 4rem;
+      max-width: 600px;
+    }
+
+    .quiz-section h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: normal;
+      line-height: 1.2;
+      color: var(--w-text);
+      margin-bottom: 0.75rem;
+    }
+
+    .quiz-intro {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--w-muted);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    /* ---- Quiz form ---- */
+    .quiz-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .quiz-item {
+      border-bottom: 1px solid var(--w-border);
+    }
+
+    .quiz-item:first-child {
+      border-top: 1px solid var(--w-border);
+    }
+
+    .quiz-item label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      padding: 0.9rem 0.25rem;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .quiz-item label:hover {
+      background: var(--w-accent-light);
+      margin: 0 -0.25rem;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .quiz-item input[type="checkbox"] {
+      flex-shrink: 0;
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-top: 0.2rem;
+      accent-color: var(--w-accent);
+      cursor: pointer;
+    }
+
+    .quiz-item span {
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--w-text);
+    }
+
+    .quiz-form .btn {
+      margin-top: 1.75rem;
+      align-self: flex-start;
+    }
+
+    /* ---- Result ---- */
+    .quiz-result {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 2px solid var(--w-border);
+    }
+
+    .result-framing {
+      font-family: var(--serif);
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--w-muted);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      max-width: 58ch;
+    }
+
+    #result-content {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--w-text);
+      line-height: 1.6;
+    }
+
+    #result-content .result-label {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    #result-content .result-heading {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: normal;
+      color: var(--w-text);
+      margin-bottom: 0.6rem;
+    }
+
+    #result-content .result-link {
+      display: inline-block;
+      margin-top: 1rem;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--w-bg);
+      background: var(--w-accent);
+      padding: 0.5rem 1.1rem;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    #result-content .result-link:hover {
+      background: var(--w-accent-soft);
+      color: var(--w-bg);
+    }
+
+    /* ---- Platform picker (inlined from course.css) ---- */
+    .platform-picker {
+      margin: 1.25rem 0 1.5rem;
+      max-width: 65ch;
+    }
+
+    .platform-picker-label {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .platform-option {
+      border: 1px solid var(--w-border);
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      background: var(--w-bg);
+    }
+
+    .platform-option > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.65rem 1rem;
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--w-text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s;
+    }
+
+    .platform-option > summary:hover {
+      background: var(--w-accent-light);
+    }
+
+    .platform-option > summary::-webkit-details-marker { display: none; }
+
+    .platform-option > summary::before {
+      content: '\25B8';
+      font-size: 0.7rem;
+      color: var(--w-muted);
+      transition: transform 0.15s;
+    }
+
+    .platform-option[open] > summary::before {
+      transform: rotate(90deg);
+    }
+
+    .platform-url {
+      font-family: var(--mono, monospace);
+      font-size: 0.78rem;
+      color: var(--w-muted);
+      font-weight: 400;
+    }
+
+    .platform-option > p {
+      padding: 0.5rem 1rem 1rem 1.85rem;
+      font-family: var(--serif);
+      font-size: 0.92rem;
+      line-height: 1.7;
+      color: var(--w-text);
+      margin: 0;
+    }
+
+    .platform-option > p a {
+      color: var(--w-accent);
+    }
+
+    /* ---- Skip link ---- */
+    .start-skip {
+      padding: 2rem 0 3rem;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-faint);
+    }
+
+    .start-skip a {
+      color: var(--w-muted);
+      text-decoration: underline;
+      text-decoration-color: var(--w-border);
+    }
+
+    .start-skip a:hover { color: var(--w-text); }
+
   </style>
 </head>
 <body>
@@ -188,41 +290,77 @@
   <main>
     <div class="container">
 
-      <div class="start-hero">
-        <h1>Where are you starting from?</h1>
-        <p>Pick the one that's closest. The course adapts from there — different starting point, different examples, different framing. You can change this at any time — it only affects your starting point and examples.</p>
-      </div>
+      <section class="quiz-section">
+        <h1>Where does your path start?</h1>
+        <p class="quiz-intro">Eight statements. Check the ones that are true for you right now.</p>
 
-      <div class="profile-cards">
+        <form class="quiz-form" id="quiz-form">
 
-        <!-- Card 1: Starting a new role -->
-        <div class="profile-card" id="card-newrole">
-          <p class="profile-card-label">Starting a new role</p>
-          <p class="profile-card-desc">"I'm starting a job where AI is already expected and I don't want to look like I don't know what I'm doing."</p>
-          <p class="profile-card-detail">You may have tried an AI tool like ChatGPT, Claude, or Gemini at least once, but not in a way that would help you at work. Your colleagues probably talk about AI like it's already a normal part of the job. You do not want to be the person who has to ask how it works in front of everyone on week one.</p>
-          <button class="profile-card-cta" onclick="LinguistProfile.set('newrole')">Choose: Starting a new role →</button>
-          <p class="profile-card-current-note">Your current profile — click to confirm</p>
+          <div class="quiz-item">
+            <label>
+              <input type="checkbox" name="q1" value="1">
+              <span>I have sent at least one message to an AI tool and read the response.</span>
+            </label>
+          </div>
+
+          <div class="quiz-item">
+            <label>
+              <input type="checkbox" name="q2" value="2">
+              <span>I can take a template prompt, edit the parts in [square brackets], and send it as my own.</span>
+            </label>
+          </div>
+
+          <div class="quiz-item">
+            <label>
+              <input type="checkbox" name="q3" value="3">
+              <span>I include a stopping condition in my messages — something like "Keep it under 100 words" or "Give me 3 options."</span>
+            </label>
+          </div>
+
+          <div class="quiz-item">
+            <label>
+              <input type="checkbox" name="q4" value="4">
+              <span>I can write a complete prompt with: who the AI should act as, what to do, relevant context, and when to stop.</span>
+            </label>
+          </div>
+
+          <div class="quiz-item">
+            <label>
+              <input type="checkbox" name="q5" value="5">
+              <span>I know which verbs give predictable results (summarise, explain, draft) and which are risky (improve, enhance, make better).</span>
+            </label>
+          </div>
+
+          <div class="quiz-item">
+            <label>
+              <input type="checkbox" name="q6" value="6">
+              <span>I can tell the difference between context that changes the output and context that doesn't.</span>
+            </label>
+          </div>
+
+          <div class="quiz-item">
+            <label>
+              <input type="checkbox" name="q7" value="7">
+              <span>I know when a conversation has gone stale and how to start a fresh one with the right context carried forward.</span>
+            </label>
+          </div>
+
+          <div class="quiz-item">
+            <label>
+              <input type="checkbox" name="q8" value="8">
+              <span>I have used Claude Code in a terminal.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-warm">Find my starting point →</button>
+        </form>
+
+        <!-- Result (hidden until submit) -->
+        <div class="quiz-result" id="quiz-result" style="display:none">
+          <p class="result-framing">This is where your path starts. AI is new — genuinely new. Nobody has had years to build these skills. Starting at B-01 doesn't mean you're behind. It means you're at the beginning of something most people haven't started yet.</p>
+          <div id="result-content"></div>
         </div>
-
-        <!-- Card 2: Made mandatory -->
-        <div class="profile-card" id="card-professional">
-          <p class="profile-card-label">It was made mandatory</p>
-          <p class="profile-card-desc">"I've been using it for a month because I had to, and the results are all over the place."</p>
-          <p class="profile-card-detail">You know how to do your job. You went to the training, you've been using the tool, and sometimes it's actually useful. More often it produces something that needs so much editing you wonder what the point was. The problem isn't the tool and it isn't you. It's that no one explained how the thing actually works.</p>
-          <button class="profile-card-cta" onclick="LinguistProfile.set('professional')">This is me →</button>
-          <p class="profile-card-current-note">Your current profile — click to confirm</p>
-        </div>
-
-        <!-- Card 3: Daily AI user -->
-        <div class="profile-card" id="card-maker">
-          <p class="profile-card-label">Daily AI user</p>
-          <p class="profile-card-desc">"I use Claude and ChatGPT every day but feel like I'm missing a systematic approach."</p>
-          <p class="profile-card-detail">You know how to write a decent message. You've set up custom instructions, you understand context windows, you've tried a few multi-step workflows. The results are inconsistent and you can't fully explain why. You're not missing the basics — you're missing the structure underneath them. You've heard about Claude Code and agentic workflows but every tutorial either assumes you're a developer or starts from "what is AI."</p>
-          <button class="profile-card-cta" onclick="LinguistProfile.set('maker')">This is me →</button>
-          <p class="profile-card-current-note">Your current profile — click to confirm</p>
-        </div>
-
-      </div>
+      </section>
 
       <p class="start-skip">Not sure? <a href="/course">Go to the course</a> and start wherever feels right.</p>
 
@@ -230,12 +368,103 @@
   </main>
 
   <script>
-    // Highlight current profile card if already set
-    var current = LinguistProfile.current;
-    if (current) {
-      var card = document.getElementById('card-' + current);
-      if (card) card.classList.add('is-current');
-    }
+    (function () {
+      var QUIZ_DATA = [
+        { q: 'q1', url: '/course/b/01', label: 'Start at B-01', desc: 'Your first AI message' },
+        { q: 'q2', url: '/course/b/02', label: 'Start at B-02', desc: 'Editing template prompts' },
+        { q: 'q3', url: '/course/b/06', label: 'Start at B-06', desc: 'Stopping conditions' },
+        { q: 'q4', url: '/course/b/10', label: 'Start at B-10', desc: 'Writing complete prompts' },
+        { q: 'q5', url: '/course/e/01', label: 'Start at E-01', desc: 'Choosing the right verbs' },
+        { q: 'q6', url: '/course/e/03', label: 'Start at E-03', desc: 'Context that changes output' },
+        { q: 'q7', url: '/course/e/06', label: 'Start at E-06', desc: 'Starting fresh conversations' },
+        { q: 'q8', url: '/course/a/00', label: 'Start at A-00', desc: 'Claude Code in the terminal' }
+      ];
+
+      var PLATFORM_PICKER_HTML = [
+        '<div class="platform-picker">',
+        '<p class="platform-picker-label">First, pick a platform and get set up:</p>',
+        '<details class="platform-option">',
+        '<summary>Claude <span class="platform-url">claude.ai</span></summary>',
+        '<p>Go to <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a> and sign in or create an account. You\'ll see a large text area in the centre of the screen. Type your message and press Enter to send.</p>',
+        '</details>',
+        '<details class="platform-option">',
+        '<summary>ChatGPT <span class="platform-url">chatgpt.com</span></summary>',
+        '<p>Go to <a href="https://chatgpt.com" target="_blank" rel="noopener">chatgpt.com</a> and sign in or create an account. The text area is at the bottom of the screen. Type your message and press Enter to send.</p>',
+        '</details>',
+        '<details class="platform-option">',
+        '<summary>Gemini <span class="platform-url">gemini.google.com</span></summary>',
+        '<p>Go to <a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a> and sign in with your Google account. The text area is at the bottom. Type your message and press Enter to send.</p>',
+        '</details>',
+        '<details class="platform-option">',
+        '<summary>Claude Code <span class="platform-url">terminal</span></summary>',
+        '<p>Open your terminal and type <code>claude</code> to start. If you\'re heading into Claude Code territory, the A-track is the better fit — it\'s built for that path.</p>',
+        '</details>',
+        '</div>'
+      ].join('');
+
+      // Set profile cookie and class without redirecting
+      function setProfileSilently(profile) {
+        var VALID = ['newrole', 'professional', 'maker'];
+        if (VALID.indexOf(profile) === -1) return;
+        document.cookie = 'lng_profile=' + profile + '; path=/; max-age=31536000; SameSite=Lax';
+        var html = document.documentElement;
+        VALID.forEach(function (p) { html.classList.remove('profile-' + p); });
+        html.classList.add('profile-' + profile);
+      }
+
+      function profileForResult(firstUnchecked) {
+        // firstUnchecked is 1-based index (1–8), or 9 if all checked
+        if (firstUnchecked <= 4) return 'newrole';
+        if (firstUnchecked <= 7) return 'professional';
+        return 'maker'; // q8 unchecked or all checked
+      }
+
+      document.getElementById('quiz-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var form = e.target;
+        var firstUnchecked = 0; // 0 = none found yet
+
+        for (var i = 1; i <= 8; i++) {
+          var cb = form.querySelector('input[name="q' + i + '"]');
+          if (cb && !cb.checked) {
+            firstUnchecked = i;
+            break;
+          }
+        }
+
+        var resultEl = document.getElementById('quiz-result');
+        var contentEl = document.getElementById('result-content');
+        var html = '';
+
+        if (firstUnchecked === 0) {
+          // All checked — A-track
+          setProfileSilently('maker');
+          html += '<p class="result-label">Your starting point</p>';
+          html += '<p class="result-heading">The A-track — Claude Code and agentic workflows</p>';
+          html += '<p style="font-family:var(--sans);font-size:0.88rem;color:var(--w-muted);line-height:1.6;margin-top:0.5rem;">Start at the A-track. Skim anything that feels familiar — if something clicks that you didn\'t know you knew, that\'s the course working.</p>';
+          html += '<a class="result-link" href="/course/a/00">Go to A-00 →</a>';
+        } else {
+          var entry = QUIZ_DATA[firstUnchecked - 1];
+          setProfileSilently(profileForResult(firstUnchecked));
+
+          html += '<p class="result-label">Your starting point</p>';
+          html += '<p class="result-heading">' + entry.label + ' — ' + entry.desc + '</p>';
+
+          if (firstUnchecked === 1) {
+            // Special case: never used an AI tool — show platform picker first
+            html += PLATFORM_PICKER_HTML;
+            html += '<a class="result-link" href="' + entry.url + '">Ready — go to your first lesson →</a>';
+          } else {
+            html += '<a class="result-link" href="' + entry.url + '">Go to ' + entry.label.replace('Start at ', '') + ' →</a>';
+          }
+        }
+
+        contentEl.innerHTML = html;
+        resultEl.style.display = 'block';
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    })();
   </script>
 
 </body>
