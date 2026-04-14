@@ -67,13 +67,15 @@
 
         <p><strong>Bash</strong> — runs a terminal command. This is powerful and flexible, but it is also more expensive than the dedicated tools above, and some commands are irreversible. Only reach for Bash when Read, Glob, and Grep genuinely cannot do what you need.</p>
 
+        <p><strong>WebSearch</strong> — fetches live information from the web. Use this when you need current data that is not in your project files — competitor pricing, public documentation, recent news. It is in the same cost bracket as Bash: more expensive than the file tools, but far cheaper than Agent.</p>
+
         <p><strong>Agent</strong> — starts an entirely separate Claude Code session to handle a subtask, then reports the result back to your main session. This is the most expensive tool by a significant margin. It is covered in full in A-08.</p>
 
         <p>The cost hierarchy, from cheapest to most expensive:</p>
 
-        <p><code>Read / Glob / Grep → Bash → Agent</code></p>
+        <p><code>Read / Glob / Grep → Bash / WebSearch → Agent</code></p>
 
-        <p>The dedicated tools (Read, Glob, Grep) are in the same cost bracket: targeted, reviewable, predictable. Bash costs more because it runs shell execution. Agent costs the most because it opens a second full session with its own context window.</p>
+        <p>The dedicated file tools (Read, Glob, Grep) are in the same cost bracket: targeted, reviewable, predictable. Bash and WebSearch cost more — Bash because it runs shell execution, WebSearch because it makes external requests. Agent costs the most because it opens a second full session with its own context window.</p>
 
         <h2>The key technique: name the tool</h2>
 
@@ -161,13 +163,13 @@
         <p>Use this starter whenever you want to guide Claude Code to a specific tool.</p>
 
         <blockquote>
-          <p>Use [tool name: Read / Glob / Grep / Bash] to [specific action]. [What to look for / what to find / what to run]. Report what you find before doing anything else.</p>
+          <p>Use [tool name: Read / Glob / Grep / Bash / WebSearch] to [specific action]. [What to look for / what to find / what to run]. Report what you find before doing anything else.</p>
         </blockquote>
 
         <p>How to edit this:</p>
 
         <ul>
-          <li>[tool name] — choose the right tool using the hierarchy. If you know the file, use Read. If you need to find files by name, use Glob. If you need to find text inside files, use Grep. If you need a terminal command, use Bash. If none of these apply, see A-08 for Agent.</li>
+          <li>[tool name] — choose the right tool using the hierarchy. If you know the file, use Read. If you need to find files by name, use Glob. If you need to find text inside files, use Grep. If you need a terminal command, use Bash. If you need live information from the web, use WebSearch. If none of these apply, see A-08 for Agent.</li>
           <li>[specific action] — be as precise as possible. "Open README.md" is better than "look at the readme." "Search for the word 'deadline'" is better than "find mentions of deadlines."</li>
           <li>[what to look for / what to find / what to run] — the content of the task. This is where you tell Claude Code what it is actually looking for.</li>
           <li>"Report what you find before doing anything else" — keeps Claude Code from reading one file and immediately going to read three more. It forces a pause where you can see what was found and decide what to do next.</li>
