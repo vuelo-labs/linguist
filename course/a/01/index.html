@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cost, Tokens, and What Things Actually Cost · Linguist</title>
-  <meta name="description" content="Build a mental model of Claude Code costs so you can make deliberate spend decisions.">
+  <title>Mental Model Refresher · Linguist</title>
+  <meta name="description" content="Understand what Claude Code is actually doing when it reads your project and responds.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
@@ -28,7 +28,7 @@
       <span class="sep">›</span>
       <span>Advanced Practitioner</span>
       <span class="sep">›</span>
-      <span>A-01</span>
+      <span>A-02</span>
     </div>
     <div class="module-nav-actions">
       <span id="module-nav-top-prev"></span>
@@ -42,160 +42,193 @@
     <div class="container">
 
       <section class="module-hero">
-        <p class="module-eyebrow">Advanced Practitioner · Module 01</p>
-        <h1 class="module-title">Cost, Tokens, and What Things Actually Cost</h1>
-        <p class="module-objective">After this, you can estimate the cost of a Claude Code session before starting, read token usage after, and understand what makes sessions expensive.</p>
+        <p class="module-eyebrow">Advanced Practitioner · Module 02</p>
+        <h1 class="module-title">Mental Model Refresher for Claude Code</h1>
+        <p class="module-objective">After this, you can explain what Claude Code is actually doing when it responds — and use that understanding to write messages that produce the result you intended, not the result the AI guessed at.</p>
       </section>
 
       <div class="module-body">
 
-        <h2>Before You Go Further</h2>
+        <h2>What you already know</h2>
 
-        <p>You have run your first session. You know what Claude Code can do — it reads files, writes files, runs commands, and reports back. You have approved your first tool call and seen your first response.</p>
+        <p>In the Enabled User stage you learned that context is fuel: the more relevant information you give the AI, the better its response. That is true, and it stays true here.</p>
 
-        <p>Before you go further, know what it costs.</p>
+        <p>In Claude Code you will encounter a second truth that sits alongside the first. The container for all that fuel is finite. As your session runs longer, earlier content gets compressed to make room for new content. Both things are true — context is fuel, and the tank has a size limit. They operate at different scales. Context is fuel describes what happens within a message. The finite container describes what happens across a long session. You will learn to manage both.</p>
 
-        <p>Claude Code is not free. Every session is metered. This module gives you the mental model to use it with intention, not surprises. It is not here to make you cautious. It is here to make you informed.</p>
+        <p>This module covers the three-part mental model that underpins everything in the advanced track. Get these three ideas solid and every subsequent module will make sense immediately.</p>
 
-        <h2>What a Token Is</h2>
+        <h2>Part 1: Claude Code executes your message, not your intent</h2>
 
-        <p>A token is roughly three-quarters of a word. "Hello world" is about 3 tokens. A short paragraph is about 75 tokens. A full page of text is about 400 tokens.</p>
+        <p>Claude Code processes the text you send and produces a response. It has no access to what you meant, what you assumed, or what you left unstated. Where your message is ambiguous, Claude Code fills the gap with its own judgement — which may or may not match what you had in mind.</p>
 
-        <p>Everything you send and everything Claude Code responds with costs tokens. The files it reads become tokens. The commands it runs produce tokens. Token cost is what becomes your bill.</p>
+        <p>Every decision Claude Code makes on your behalf is one you did not control. The way to control the output is to reduce the decisions left to Claude Code's judgement.</p>
 
-        <h2>How Billing Works</h2>
+        <p>This is the same principle you learned in E-01 when you studied verb choice. In Claude Code, it applies across every dimension of your message: the verb, the scope, the format, the constraints, and the target.</p>
 
-        <p>Claude Code uses the Anthropic API. You are billed based on how many tokens flow through each session.</p>
+        <h3>Without / With: Coding</h3>
 
-        <p>There are two sides to every exchange:</p>
+        <p>Without: "Fix the modal."</p>
+
+        <p>Claude Code reads the component, decides the whole structure is outdated, rewrites the close logic, extracts a new hook, adds keyboard handling, and reformats the layout. The original bug — a missing click handler — is fixed somewhere in a 200-line change you did not ask for.</p>
+
+        <p>With: "Add onClick={onClose} to the overlay div. Do not change anything else."</p>
+
+        <p>One edit. The instruction left no room for interpretation.</p>
+
+        <h3>Without / With: Content and research</h3>
+
+        <p>Without: "Research how Notion positions their product."</p>
+
+        <p>Claude Code produces a general overview of Notion's product, brand voice, pricing philosophy, and feature set. You wanted specifically how their enterprise tier is differentiated from their standard tier — what it emphasises, what objections it addresses. The general research is accurate but it answers the wrong question.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Research how Notion positions their Enterprise tier compared to their Business tier. I want to understand:</p>
+          <p>1. What features are exclusive to Enterprise in their public marketing<br>
+          2. What pain points their Enterprise messaging addresses<br>
+          3. What language they use to justify the price premium</p>
+          <p>Do not summarise their general product — only what differentiates Enterprise.</p>
+        </blockquote>
+
+        <p>The constraint ("only what differentiates Enterprise") eliminates the failure mode before it starts.</p>
+
+        <h2>Part 2: The context window is finite and degrades over time</h2>
+
+        <p>Everything Claude Code knows about your task lives in the context window. What is not there does not exist. As your session grows longer, Claude Code automatically compacts the earlier parts of the conversation into a summary to make room for new content. That summary replaces the original messages — some details may not survive.</p>
+
+        <p>What tends to survive compaction: things you stated explicitly as standalone facts, named constraints, specific decisions you confirmed.</p>
+
+        <p>What tends to be lost: details you established only through example, constraints expressed conversationally, tool output and intermediate reasoning.</p>
+
+        <p>This is why the way you state things matters as much as what you state. A constraint buried in casual conversation may vanish. The same constraint written as a clear, standalone statement is far more likely to persist.</p>
+
+        <h3>Without / With: Coding</h3>
+
+        <p>Without: A developer establishes early in a long session that all payment errors must be wrapped in a specific error class before they surface. They never restate this. Forty turns later, after compaction, Claude Code starts writing bare error calls. The developer does not notice until code review.</p>
+
+        <p>With: The developer states the constraint as a clean, standalone message at the start of the session:</p>
+
+        <blockquote>
+          <p>Important constraint for this entire session: all errors thrown in the payment module must be wrapped in PaymentError. Never throw a bare error. This rule applies to every file we touch.</p>
+        </blockquote>
+
+        <p>Explicit standalone messages are preserved verbatim during compaction. The constraint survives.</p>
+
+        <h3>Without / With: Content and research</h3>
+
+        <p>Without: A writer starts a long document production session with style rules — no first-person voice, Oxford comma always, maximum 20-word sentences. They state these once in passing at the start. By the third section the model has started using "we" and writing longer sentences.</p>
+
+        <p>With: The writer front-loads the rules as a message written to survive the session:</p>
+
+        <blockquote>
+          <p>Style rules for this entire document — apply to every section:</p>
+          <p>- No first-person voice (no "we", "our", "I")<br>
+          - Oxford comma always<br>
+          - Maximum sentence length: 20 words. Split any sentence that runs longer.<br>
+          - Tone: formal but not academic</p>
+          <p>I will be building this in sections. Remind me if I drift from these rules.</p>
+        </blockquote>
+
+        <p>The standalone format and explicit instruction to monitor for drift both help the constraint persist.</p>
+
+        <h2>Part 3: Tools are how Claude Code acts in the world</h2>
+
+        <p>Claude Code cannot read your files, search your codebase, run commands, or launch a subagent without tools. Each of those actions is a tool call. Understanding which tools exist and what they cost lets you guide Claude Code toward the right approach rather than letting it choose the most expensive path by default.</p>
+
+        <p>A vague request triggers expensive tool chains. A targeted request may need only one tool call. The difference is how precisely you frame the task.</p>
+
+        <p>The full tool hierarchy and cost comparison are covered in A-07. For now, the key insight: if you name the tool and the target explicitly, Claude Code uses exactly what you named. If you describe a vague goal, Claude Code decides how to get there — and may take a longer route than necessary.</p>
+
+        <h3>Without / With: Coding</h3>
+
+        <p>Without: "How does currency formatting work in this codebase?"</p>
+
+        <p>Claude Code does not know the function name. It searches multiple files to find candidates, reads several of them, and eventually finds the right one. More time, more tokens.</p>
+
+        <p>With: "Read the formatCurrency function and explain how it works. Don't look at any other files."</p>
+
+        <p>One read. Immediate result.</p>
+
+        <h3>Without / With: Content and research</h3>
+
+        <p>Without: "Find out how many employees Stripe has."</p>
+
+        <p>Claude Code may use training data (which may be outdated), or run a vague web search that returns a blog post with a stale figure, or launch an extended research process. The path and the reliability vary.</p>
+
+        <p>With:</p>
+
+        <blockquote>
+          <p>Use WebSearch to find Stripe's current employee count. Search for "Stripe employees 2026" and prioritise results from LinkedIn, Crunchbase, or Stripe's own website.</p>
+          <p>Report the number, the source URL, and the date of the source.</p>
+        </blockquote>
+
+        <p>The instruction specifies the tool, the query, the sources to prefer, and the output format. Claude Code cannot take a shortcut.</p>
+
+        <h2>The three parts, together</h2>
+
+        <p>These three things describe the same underlying reality from three angles:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>The core idea</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Claude Code executes text, not intent</td>
+              <td>Say what you mean, explicitly</td>
+            </tr>
+            <tr>
+              <td>The context window is finite and degrades</td>
+              <td>State important things durably</td>
+            </tr>
+            <tr>
+              <td>Tools are the action layer</td>
+              <td>Name the tool and the target</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>Every module in the advanced track is an application of one or more of these. When something goes wrong in a Claude Code session, the cause is almost always traceable to one of these three.</p>
+
+        <h2>Copy, Personalise, Use</h2>
+
+        <p>Use this starter to test your own mental model on any task. Fill in the brackets with your real situation.</p>
+
+        <blockquote>
+          <p>I'm working on [brief description of the task]. Here's what you need to know:</p>
+          <p>[1-3 specific facts that change the output — not everything you know, just what's load-bearing]</p>
+          <p>Constraints:</p>
+          <p>- [What you want preserved or left alone]<br>
+          - [Any tool or method preference, if you have one]</p>
+          <p>Done when: [specific description of what the finished response looks like — format, length, scope]</p>
+        </blockquote>
+
+        <p>How to edit this:</p>
 
         <ul>
-          <li><strong>Input tokens</strong> — what you send. This includes your messages and any file content Claude Code reads on your behalf. If you ask Claude Code to read a 10-page report, every word of that report becomes input tokens.</li>
-          <li><strong>Output tokens</strong> — what Claude Code generates. Its responses, any files it writes, any plans it explains. Output tokens cost more per token than input tokens.</li>
+          <li>[brief description of the task]: One sentence. Start with a verb. "Draft", "Summarise", "Fix", "Research" — not "Help me with" or "Look at."</li>
+          <li>[1-3 specific facts]: Only include facts that would change the response if you removed them. If removing a fact wouldn't change anything, leave it out.</li>
+          <li>[What you want preserved]: Any constraint that protects something you don't want changed. "Don't change the structure." "Keep it under 200 words." "Don't add recommendations I didn't ask for."</li>
+          <li>[specific description of done]: Format and length. "A single paragraph." "Three bullet points, each under 20 words." "A draft email ready to send."</li>
         </ul>
-
-        <p><strong>Tool calls add up.</strong> Every time Claude Code reads a file, searches your folders, or runs a command, the action and its result both contribute tokens. A session with 15 tool calls uses significantly more tokens than a session with 2.</p>
-
-        <p><strong>Different models, different costs.</strong> Claude Code can use different models depending on the task:</p>
-
-        <ul>
-          <li><strong>claude-opus-4-6</strong> — the most capable model. Also the most expensive per token. Used for complex reasoning and difficult tasks.</li>
-          <li><strong>claude-sonnet-4-6</strong> — the default for most Claude Code sessions. Strong capability at a moderate price.</li>
-          <li><strong>claude-haiku-4-5</strong> — the fastest and cheapest model. Used for simpler tasks where speed matters more than depth.</li>
-        </ul>
-
-        <p>Pricing changes over time. For current per-token rates, check anthropic.com/pricing.</p>
-
-        <h2>What Makes a Session Expensive</h2>
-
-        <p>Four things drive cost. Each one is within your control.</p>
-
-        <h3>Long context</h3>
-
-        <p>Sharing a 50-page report costs more than sharing one page. Every token of that document is processed as input.</p>
-
-        <p>You learned in E-03 that context is fuel — the more relevant material you give Claude Code, the better the result. That remains true. The cost side is straightforward: give it what it needs, not everything you have. If you need a summary of chapter 3, share chapter 3, not the whole book.</p>
-
-        <h3>Many tool calls</h3>
-
-        <p>Each file read, each command, each search adds tokens to the session. A session where Claude Code reads 20 files costs more than one where it reads 2.</p>
-
-        <p>This does not mean you should avoid tool calls. It means you should be specific. "Read the introduction of annual-report.pdf" costs less than "Look through all the documents in this folder and figure out what's relevant." Name the file. Name the section. Reduce the search space.</p>
-
-        <h3>Long sessions</h3>
-
-        <p>Claude Code resends the conversation history with every message. The longer a session runs, the more context accumulates, and the more tokens are sent with each new exchange. Message 25 in a session costs more than message 3, even if both messages are the same length.</p>
-
-        <p>Keep sessions focused on one task. When you finish, start a new session for the next task. Use <code>/clear</code> to reset context when you change direction within a session. (A-04 covers this in full.) Fresh sessions are cheaper.</p>
-
-        <h3>Agent delegation</h3>
-
-        <p>When Claude Code spawns a subagent — a separate AI instance that handles part of the work — that subagent runs its own context window. It reads its own files, generates its own responses, and costs its own tokens. Delegation multiplies cost because you are paying for two or more AI sessions at once.</p>
-
-        <p>A-08 covers agent delegation in detail. For now, know that it exists and that it is the single biggest cost multiplier in Claude Code. Do not use delegation until you reach that module.</p>
-
-        <h2>Reading Your Usage</h2>
-
-        <p>Token counts appear in two places.</p>
-
-        <p><strong>In Claude Code:</strong> at the end of each response, you will see the number of input tokens and output tokens used. This tells you what that exchange cost.</p>
-
-        <p><strong>In console.anthropic.com:</strong> the usage dashboard shows your total usage over time, with per-session breakdowns. This is where you see the full picture — which sessions used the most tokens, how your usage trends over days and weeks.</p>
-
-        <h3>What the numbers mean</h3>
-
-        <p>The two numbers that matter are input tokens and output tokens. Input is everything you sent — your messages plus every file Claude Code read. Output is everything Claude Code generated — its responses plus any files it wrote.</p>
-
-        <p>Here is a worked example. Suppose a session shows:</p>
-
-        <ul>
-          <li>15,000 input tokens</li>
-          <li>3,000 output tokens</li>
-          <li>Model: claude-sonnet-4-6</li>
-        </ul>
-
-        <p>At approximate current pricing (which may have changed since this was written), Sonnet input tokens cost around $3 per million and output tokens cost around $15 per million. That session would cost roughly:</p>
-
-        <ul>
-          <li>Input: 15,000 / 1,000,000 x $3 = $0.045</li>
-          <li>Output: 3,000 / 1,000,000 x $15 = $0.045</li>
-          <li>Total: approximately $0.09</li>
-        </ul>
-
-        <p>Nine cents for a focused working session. That is a realistic number for a short-to-medium session with a few file reads and clear messages.</p>
-
-        <p>The numbers scale linearly. Double the tokens, double the cost. A session with 150,000 input tokens and 30,000 output tokens on the same model would cost roughly $0.90. A session on Opus with the same token counts would cost several times more.</p>
-
-        <h2>Setting a Mental Budget</h2>
-
-        <p>Before starting a session, ask yourself:</p>
-
-        <ol>
-          <li><strong>How many messages am I likely to send?</strong> A focused 5-message session is cheap. A 30-message exploration costs more.</li>
-          <li><strong>Will Claude Code need to read large files?</strong> Each file read adds tokens proportional to the file size.</li>
-          <li><strong>Will I be using agent delegation?</strong> If yes, multiply your estimate.</li>
-          <li><strong>What is my limit for this task?</strong> Set it before you start, not after.</li>
-        </ol>
-
-        <h3>Rough benchmarks</h3>
-
-        <p>These are honest approximations to build your intuition. Actual costs depend on the model, the length of your messages, and the size of files involved.</p>
-
-        <ul>
-          <li><strong>Short focused session</strong> (5-10 messages, no large file reads, minimal tool calls): a few cents. This is your typical "summarise this document" or "rewrite this paragraph" session.</li>
-          <li><strong>Medium working session</strong> (20-30 messages, several file reads, back-and-forth iteration): tens of cents to low single-digit dollars. This is a realistic session where you are working through a task with some complexity.</li>
-          <li><strong>Long session with many tool calls</strong> (30+ messages, reading and writing across multiple files, running searches and commands): several dollars. This is a deep research or multi-file editing session.</li>
-          <li><strong>Agent delegation on a complex task</strong> (subagents reading and writing across many files, running their own tool chains): $5-20 depending on scope. This is the high end, and you will not reach it until A-08.</li>
-        </ul>
-
-        <p>The pattern is simple: more tokens in, more tokens out, more cost. You now have the mental model to predict which sessions will be cheap and which will not.</p>
-
-        <h2>The Cost Gate</h2>
-
-        <p>From here in the course, two modules carry a cost warning before their exercises:</p>
-
-        <ul>
-          <li><strong>A-07: Tool Fluency</strong> — where you learn to guide Claude Code's tool selection. Each tool call costs tokens, and some tools are more expensive than others.</li>
-          <li><strong>A-08: Agent Delegation</strong> — where you learn to delegate tasks to subagents. Delegation multiplies cost because each subagent runs its own context window.</li>
-        </ul>
-
-        <p>These are where cost can escalate quickly. You have the mental model to use them wisely.</p>
 
         <h2>Next</h2>
 
-        <p>You understand what tokens are, how billing works, what makes sessions expensive, and how to set a mental budget.</p>
-
-        <p>Continue to A-02: Mental Model Refresher for Claude Code.</p>
+        <p>A-03 covers CLAUDE.md — the file where you store the standing instructions that should apply to every Claude Code session, so you do not have to write them again each time.</p>
 
         <nav class="module-pagination">
-          <a href="/course/a/00" class="module-pagination-prev">
+          <a href="/course/a/01" class="module-pagination-prev">
             <span class="module-pagination-label">Previous</span>
-            <span class="module-pagination-title">← A-00: Getting Started with Claude Code</span>
+            <span class="module-pagination-title">← A-01: Cost, Tokens, and What Things Actually Cost</span>
           </a>
           <span class="module-pagination-spacer"></span>
-          <a href="/course/a/02" class="module-pagination-next">
+          <a href="/course/a/03" class="module-pagination-next">
             <span class="module-pagination-label">Next</span>
-            <span class="module-pagination-title">A-02: Mental Model Refresher →</span>
+            <span class="module-pagination-title">A-03: CLAUDE.md →</span>
           </a>
         </nav>
 
