@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Where are you starting from? — Linguist</title>
+  <meta name="description" content="The course adapts to where you're starting from. Pick the one that's closest.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="/profile.js"></script>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+
+    .start-hero {
+      padding: 3.5rem 0 2rem;
+      max-width: 560px;
+    }
+
+    .start-hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: normal;
+      line-height: 1.2;
+      color: var(--w-text);
+      margin-bottom: 0.75rem;
+    }
+
+    .start-hero p {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--w-muted);
+      line-height: 1.6;
+    }
+
+    .profile-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 600px;
+      padding-bottom: 4rem;
+    }
+
+    .profile-card {
+      border: 1px solid var(--w-border);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      background: var(--w-bg-card);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+
+    .profile-card:hover {
+      border-color: var(--w-accent);
+      background: var(--w-bg);
+    }
+
+    /* Highlight current profile */
+    .profile-card.is-current {
+      border-color: var(--w-accent);
+      background: var(--w-accent-light);
+    }
+
+    .profile-card-label {
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--w-text);
+      margin-bottom: 0.35rem;
+    }
+
+    .profile-card-desc {
+      font-family: var(--serif);
+      font-size: 1rem;
+      color: var(--w-text);
+      line-height: 1.5;
+      margin-bottom: 0.6rem;
+      font-style: italic;
+    }
+
+    .profile-card-detail {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-muted);
+      line-height: 1.65;
+      margin-bottom: 1.1rem;
+    }
+
+    .profile-card-cta {
+      display: inline-block;
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--w-bg);
+      background: var(--w-text);
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .profile-card-cta:hover { opacity: 0.75; }
+
+    .profile-card.is-current .profile-card-cta {
+      background: var(--w-accent);
+    }
+
+    .profile-card-current-note {
+      display: none;
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      color: var(--w-accent);
+      margin-top: 0.5rem;
+    }
+
+    .profile-card.is-current .profile-card-current-note { display: block; }
+
+    .start-skip {
+      padding: 0 0 3rem;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--w-faint);
+    }
+
+    .start-skip a {
+      color: var(--w-muted);
+      text-decoration: underline;
+      text-decoration-color: var(--w-border);
+    }
+
+    .start-skip a:hover { color: var(--w-text); }
+
+    /* Header — same as main site */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-muted);
+      text-decoration: none;
+    }
+
+    .site-header-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .site-header-link {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--w-muted);
+      text-decoration: none;
+    }
+
+    .site-header-link:hover { color: var(--w-text); }
+
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+    }
+
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <div class="start-hero">
+        <h1>Where are you starting from?</h1>
+        <p>Pick the one that's closest. The course adapts from there — different starting point, different examples, different framing.</p>
+      </div>
+
+      <div class="profile-cards">
+
+        <!-- Card 1: Starting a new role -->
+        <div class="profile-card" id="card-newrole">
+          <p class="profile-card-label">Starting a new role</p>
+          <p class="profile-card-desc">"I'm starting a job where AI is already expected and I don't want to look like I don't know what I'm doing."</p>
+          <p class="profile-card-detail">You have used ChatGPT at least once, but not in a way that would help you at work. Your colleagues probably talk about AI like it's already a normal part of the job. You do not want to be the person who has to ask how it works in front of everyone on week one.</p>
+          <button class="profile-card-cta" onclick="LinguistProfile.set('newrole')">Choose: Starting a new role →</button>
+          <p class="profile-card-current-note">Your current profile — click to confirm</p>
+        </div>
+
+        <!-- Card 2: Made mandatory -->
+        <div class="profile-card" id="card-professional" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){this.click();event.preventDefault()}">
+          <p class="profile-card-label">It was made mandatory</p>
+          <p class="profile-card-desc">"I've been using it for a month because I had to, and the results are all over the place."</p>
+          <p class="profile-card-detail">You know how to do your job. You went to the training, you've been using the tool, and sometimes it's actually useful. More often it produces something that needs so much editing you wonder what the point was. The problem isn't the tool and it isn't you. It's that no one explained how the thing actually works.</p>
+          <button class="profile-card-cta" onclick="LinguistProfile.set('professional')">This is me →</button>
+          <p class="profile-card-current-note">Your current profile — click to confirm</p>
+        </div>
+
+        <!-- Card 3: Daily AI user -->
+        <div class="profile-card" id="card-maker" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){this.click();event.preventDefault()}">
+          <p class="profile-card-label">Daily AI user</p>
+          <p class="profile-card-desc">"I use Claude and ChatGPT every day but feel like I'm missing a systematic approach."</p>
+          <p class="profile-card-detail">You know how to write a decent message. You've set up custom instructions, you understand context windows, you've tried a few multi-step workflows. The results are inconsistent and you can't fully explain why. You're not missing the basics — you're missing the structure underneath them. You've heard about Claude Code and agentic workflows but every tutorial either assumes you're a developer or starts from "what is AI."</p>
+          <button class="profile-card-cta" onclick="LinguistProfile.set('maker')">This is me →</button>
+          <p class="profile-card-current-note">Your current profile — click to confirm</p>
+        </div>
+
+      </div>
+
+      <p class="start-skip">Not sure? <a href="/course">Go to the course</a> and start wherever feels right.</p>
+
+    </div>
+  </main>
+
+  <script>
+    // Highlight current profile card if already set
+    var current = LinguistProfile.current;
+    if (current) {
+      var card = document.getElementById('card-' + current);
+      if (card) card.classList.add('is-current');
+    }
+  </script>
+
+</body>
+</html>

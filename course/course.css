@@ -889,7 +889,11 @@ html.profile-maker        .exercise-set > .exercise--maker        { display: blo
   max-width: 680px;
 }
 
-html[class*="profile-"] .profile-rec { display: block; }
+html.profile-newrole     .profile-rec[data-profile="newrole"]       { display: block; }
+html.profile-professional .profile-rec[data-profile="professional"]  { display: block; }
+html.profile-maker        .profile-rec[data-profile="maker"]         { display: block; }
+
+html[class*="profile-"] .hero-default-cta { display: none; }
 
 .profile-rec-eyebrow {
   font-family: var(--sans);
@@ -1063,4 +1067,68 @@ html[class*="profile-"] .profile-rec { display: block; }
   font-size: 0.95rem;
   color: var(--w-accent);
   font-style: italic;
+}
+
+/* ---- Platform picker (B-01) ---- */
+.platform-picker {
+  margin: var(--space-md) 0 var(--space-lg);
+  max-width: 65ch;
+}
+
+.platform-option {
+  border: 1px solid var(--w-border);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  background: var(--w-bg);
+}
+
+.platform-option > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.65rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--w-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.15s;
+}
+
+.platform-option > summary:hover {
+  background: var(--w-accent-light);
+}
+
+.platform-option > summary::-webkit-details-marker { display: none; }
+
+.platform-option > summary::before {
+  content: '\25B8';
+  font-size: 0.7rem;
+  color: var(--w-muted);
+  transition: transform 0.15s;
+}
+
+.platform-option[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.platform-url {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--w-muted);
+  font-weight: 400;
+}
+
+.platform-option > p {
+  padding: 0.5rem 1rem 1rem 1.85rem;
+  font-family: var(--serif);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--w-text);
+  margin: 0;
+}
+
+.platform-option > p a {
+  color: var(--w-accent);
 }
