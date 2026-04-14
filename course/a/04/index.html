@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Session Hygiene · Linguist</title>
-  <meta name="description" content="Start every Claude Code session in a known state and keep context costs under control.">
+  <title>Context Awareness and Compaction · Linguist</title>
+  <meta name="description" content="Understand what compaction does to your session and how to work with it.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
@@ -28,7 +28,7 @@
       <span class="sep">›</span>
       <span>Advanced Practitioner</span>
       <span class="sep">›</span>
-      <span>A-04</span>
+      <span>A-05</span>
     </div>
     <div class="module-nav-actions">
       <span id="module-nav-top-prev"></span>
@@ -42,143 +42,250 @@
     <div class="container">
 
       <section class="module-hero">
-        <p class="module-eyebrow">Advanced Practitioner · Module 04</p>
-        <h1 class="module-title">Session Hygiene</h1>
-        <p class="module-objective">After this, you can scope a Claude Code session to a single task, use <code>/clear</code> when changing direction, and recognise when a session has accumulated enough unrelated context that starting fresh will produce better results.</p>
+        <p class="module-eyebrow">Advanced Practitioner · Module 05</p>
+        <h1 class="module-title">Context Awareness and Compaction</h1>
+        <p class="module-objective">After this, you can recognise when compaction has degraded your session, write messages that survive the compaction process, and take a manual checkpoint before automatic compaction fires.</p>
       </section>
 
       <div class="module-body">
 
-        <h2>What you already know</h2>
+        <h2>What compaction is</h2>
 
-        <p>In E-06 you learned that conversations have a useful lifespan. When the AI starts repeating itself, forgetting your instructions, or drifting from your topic, it is faster to start fresh than to keep correcting. You learned to write a re-seed — a clean opening message that carries forward what was valuable from the old conversation.</p>
+        <p>When a Claude Code session gets long, Claude Code automatically summarises the earlier parts of the conversation to make room for new content. This summary replaces the original messages — some details may not survive.</p>
 
-        <p>In B-08 you learned that the AI mirrors your session's accumulated style and context. The longer a conversation runs, the more its earlier content shapes later responses — sometimes helpfully, sometimes not.</p>
+        <p>This process is called compaction. You do not trigger it and you do not control when it happens. It fires when the conversation reaches a certain length. Once it fires, the original messages are gone from the active context. What remains is the summary that was generated from them.</p>
 
-        <p>Session hygiene in Claude Code is the same principle, applied more deliberately. Claude Code sessions accumulate context from tool calls, file reads, and multiple turns. When you switch tasks without clearing that context, the earlier task's details become background noise that affects the new task's output. The <code>/clear</code> command is how you reset without leaving the terminal. The session scoping habit is how you avoid needing to clear in the first place.</p>
+        <p>Most AI users do not know this happens. Knowing it — and knowing what survives and what does not — is one of the things that separates an advanced practitioner from a capable beginner.</p>
 
-        <h2>The three practices</h2>
+        <h2>What compaction preserves</h2>
 
-        <h3>Practice 1: Scope the session before you start</h3>
+        <p>Compaction is not random. It is a structured summarisation that prioritises certain things:</p>
 
-        <p>Decide what one task this session is for before you open it. Not "work on the project" — a specific task with a clear done state.</p>
-
-        <p>Good scopes: "Draft the introduction section of the report." "Fix the null pointer error in the payment flow." "Build the weekly metrics summary for the Monday email."</p>
-
-        <p>Vague scopes create sessions that drift. Drifting sessions compound context from unrelated work. Compounded context degrades output.</p>
-
-        <p>This is the same discipline as "one task per message" from B-05, applied at the session level.</p>
-
-        <h3>Practice 2: Use /clear between tasks</h3>
-
-        <p><code>/clear</code> resets Claude Code's memory within the current session. It is like starting a new conversation without closing the terminal. Your CLAUDE.md instructions stay active (they are reloaded at the start of every context). The accumulated conversation history goes away.</p>
-
-        <p>Use <code>/clear</code> when:</p>
         <ul>
-          <li>You have finished one task and are starting a different, unrelated task</li>
-          <li>The current session has gone in a direction you want to abandon</li>
-          <li>You want a fresh read on something without the earlier conversation influencing the response</li>
+          <li>Your explicit requests and stated intentions</li>
+          <li>Key concepts, frameworks, and decisions that were named clearly</li>
+          <li>Specific file names, function names, and other named items</li>
+          <li>Errors that were encountered and how they were resolved</li>
+          <li>Corrections you made ("do it this way, not that way")</li>
+          <li>Your messages, when they were written as clean standalone statements</li>
+          <li>The task in progress at the moment compaction fired</li>
+          <li>The confirmed next step</li>
         </ul>
 
-        <p>You do not need to use <code>/clear</code> between closely related steps in the same task. If you are drafting section 3 of a report and just finished section 2 in the same session, the context from section 2 is useful — keep it.</p>
+        <h2>What compaction loses</h2>
 
-        <h3>Practice 3: Front-load your constraints</h3>
+        <ul>
+          <li>Raw tool output — file reads, search results, shell command output</li>
+          <li>Intermediate reasoning Claude Code generated along the way</li>
+          <li>Context that was established through example rather than stated explicitly ("you can see from this file that we use...")</li>
+          <li>Constraints expressed conversationally ("yeah, probably don't do that") rather than as clear rules</li>
+          <li>Nuance buried inside long paragraphs</li>
+          <li>Anything that was implied but never stated directly</li>
+        </ul>
 
-        <p>State everything Claude Code needs to know about a task before it starts working. Not during. Not after.</p>
+        <p>The pattern is consistent: <strong>explicit beats implicit, standalone beats buried, named beats described</strong>.</p>
 
-        <p>This is the same principle as E-02 (constraints), but in Claude Code it has a cost dimension: when Claude Code makes a wrong choice because a constraint was missing, correcting it requires rework. Rework means more tool calls. More tool calls means more tokens. Stating the constraint upfront costs nothing extra.</p>
+        <h2>Recognising context rot</h2>
 
-        <p>Front-loading also protects your constraints through compaction. Constraints stated before the model begins work are stated in early, prominent user messages — exactly the messages that compaction preserves. Constraints added mid-task as conversational corrections are far more likely to be compressed or lost.</p>
+        <p>Context rot is the gradual degradation of Claude Code's working state as a session runs long. It surfaces as re-asked questions, constraint drift, wrong terminology, or responses that were precise earlier becoming vague.</p>
 
-        <h2>Without / With</h2>
+        <p>Compaction is the main cause. The session summary is generated by a model — it inherits the limitations of any summarisation. Implicit context, naming conventions established by example, and nuanced constraints expressed conversationally are the most likely things to compress poorly.</p>
 
-        <h3>Session scoping: Coding</h3>
+        <h3>Symptoms of context rot</h3>
 
-        <p>Without: A developer debugs a Redis connection issue, then in the same session switches to building a new API endpoint. The session grows long and compacts. The summary now contains extensive context about Redis connection strings, retry logic, and environment variables — none of which is relevant to the API endpoint. The model's response to the new task is subtly contaminated: it adds unnecessary connection error handling to the endpoint code because it is "aware" of connectivity problems that were already resolved.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Signal</th>
+              <th>What it means</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Claude Code re-asks a question you already answered</td>
+              <td>That answer did not survive compaction</td>
+            </tr>
+            <tr>
+              <td>Claude Code violates a constraint you set earlier</td>
+              <td>The constraint drifted out of active context</td>
+            </tr>
+            <tr>
+              <td>Claude Code uses a different name for something</td>
+              <td>The terminology anchor was lost in summarisation</td>
+            </tr>
+            <tr>
+              <td>Responses become more hedged and general</td>
+              <td>Claude Code is working from a summary, not the original specifics</td>
+            </tr>
+            <tr>
+              <td>Claude Code repeats work it already did</td>
+              <td>It has lost track of completed state</td>
+            </tr>
+          </tbody>
+        </table>
 
-        <p>With: After the Redis issue is resolved, the developer types <code>/clear</code>. The new session starts with only the endpoint task in context. The output is clean.</p>
+        <h3>Without / With: Coding</h3>
 
-        <h3>Session scoping: Content and research</h3>
+        <p class="ww-without">Without: A developer builds a form validation library. They established early in the session that all validation errors must use error codes (<code>REQUIRED_FIELD</code>, <code>INVALID_EMAIL</code>) rather than human-readable strings. After a long session and compaction, Claude Code starts returning <code>{ error: "This field is required" }</code> instead of <code>{ code: "REQUIRED_FIELD" }</code>. The developer does not notice until they are writing tests.</p>
 
-        <p>Without: A researcher investigates two separate competitive topics in one session — first a competitor's new product, then a second competitor's pricing changes. By the time they reach the second topic, the model's context is full of details about the first competitor. The compaction blends the two. The model draws comparisons between the two competitors that were not requested, and occasionally attributes features to the wrong company.</p>
-
-        <p>With: Two sessions. One per topic. Each starts with a clean brief. The research stays separate.</p>
-
-        <h3>Front-loading constraints: Coding</h3>
-
-        <p>Without: A developer writes "add date formatting to the new feature." The project is mid-migration from one date library to another. The model picks the old library because it appears throughout the existing code. The developer has to correct it. Two turns instead of one.</p>
-
-        <p>With:</p>
+        <p class="ww-with">With: The developer notices the format changed. They recognise this as context rot and respond:</p>
 
         <blockquote>
-          <p>Add a date formatting function to the utilities file. Use the new date library we are migrating to — not the old one you will see in the existing files. Format: "January 5, 2026" (full month name, day, four-digit year).</p>
+          <p>Stop — you are using human-readable error strings. We established at the start of this session that all validation errors use error codes (REQUIRED_FIELD, INVALID_EMAIL, etc.), not strings. Rewrite the last output using the code format.</p>
+          <p>Reminder: all validation errors for this entire session must use the code format.</p>
         </blockquote>
 
-        <p>The constraint is present before the model writes a single line.</p>
+        <p>They restate the constraint and continue.</p>
 
-        <h3>Front-loading constraints: Content and research</h3>
+        <h3>Without / With: Content and research</h3>
 
-        <p>Without: A product manager asks for help preparing for a difficult stakeholder meeting. The model produces a full preparation document: context summary, stakeholder profiles, recommended framing, complete question-and-answer prep, and talking points. The PM wanted three bullet points addressing one specific objection.</p>
+        <p class="ww-without">Without: A researcher builds a competitive intelligence report. Early in the session the responses were precise and sourced. After compaction, responses become hedged and general: "it appears that", "generally speaking", "their strategy seems to focus on." The researcher accepts the vaguer output without recognising it as a symptom.</p>
 
-        <p>With:</p>
+        <p class="ww-with">With: The researcher notices the shift in register. They respond:</p>
 
         <blockquote>
-          <p>Give me three bullet points — one to two sentences each — addressing the most likely objection from finance to a six-week roadmap delay: that the team underestimated the work.</p>
-          <p>Do not give me background context, a prep document, or framing advice. Just the three bullets.</p>
+          <p>Your last few responses have been significantly more vague than earlier in this session — using phrases like "it appears" and "seems to."</p>
+          <p>Do not hedge on claims that can be verified from the source material. If something cannot be verified, say so explicitly rather than softening it with language that implies speculation about a fact that can be checked.</p>
         </blockquote>
 
-        <h2>Connecting to B-08 and E-06</h2>
+        <h2>Writing for compaction</h2>
 
-        <p>The session hygiene skills in this module are Claude Code versions of two things you already know.</p>
+        <p>The most durable elements in compaction are standalone user messages with clear structure. The most volatile are conversational replies, tool output, and implicit context.</p>
 
-        <p><strong>B-08 (Recovery)</strong> taught you what to do when output goes wrong. <code>/clear</code> and session scoping are how you prevent the conditions that make recovery necessary in the first place. Clean sessions produce cleaner output; you recover less often.</p>
+        <p>Writing for compaction means structuring your important messages so they survive.</p>
 
-        <p><strong>E-06 (Migration and Re-seed)</strong> taught you to recognise when a conversation has run its useful course and to start fresh with a re-seed. In Claude Code, <code>/clear</code> gives you a faster version of the same reset — you do not need to open a new conversation, just type <code>/clear</code> and write your opening message for the new task as a re-seed would.</p>
+        <p><strong>What to do:</strong></p>
+        <ul>
+          <li>State constraints as standalone messages, not as replies embedded in a longer exchange</li>
+          <li>Name things explicitly — do not establish terminology only through example</li>
+          <li>Use phrases like "confirmed finding:" or "decision for this session:" to signal a message that should survive</li>
+          <li>Reference specific names (files, concepts, decisions) in your messages, not just in the context of tool results</li>
+        </ul>
 
-        <p>The re-seed format from E-06 works here:</p>
+        <h3>Without / With: Coding</h3>
+
+        <p class="ww-without">Without: A developer establishes a rule by commenting on Claude Code's output: "Don't hardcode that — it should be configurable." This is a conversational reply. During compaction the nuance may not survive. Later the rule is violated.</p>
+
+        <p class="ww-with">With: The developer writes the constraint as a standalone message:</p>
 
         <blockquote>
-          <p>I've been working on [previous task]. That work is done. The new task is: [new task, with constraints].</p>
+          <p>Architecture constraint for this entire session:</p>
+          <p>Configuration values must never be hardcoded in source files. All configurable values must be read from environment variables or configuration files at runtime.</p>
+          <p>This applies to everything we build today. If you are about to hardcode a value, stop and ask me for the configuration key name instead.</p>
         </blockquote>
+
+        <h3>Without / With: Content and research</h3>
+
+        <p class="ww-without">Without: A writer and Claude Code work through several rounds deciding to frame a report around three themes rather than five. The decision was reached through dialogue and exists in the conversation flow, but was never stated as a clean decision. After compaction, Claude Code might return to proposing the five-theme structure.</p>
+
+        <p class="ww-with">With: The writer writes a consolidating message:</p>
+
+        <blockquote>
+          <p>Decision for this document — confirmed:</p>
+          <p>We are using three themes, not five:</p>
+          <p>1. Speed to value<br>
+          2. Integration simplicity<br>
+          3. Compliance without complexity</p>
+          <p>The original five-theme structure has been rejected. Do not propose adding other themes. If a point belongs in the document, fit it into one of the three existing themes.</p>
+        </blockquote>
+
+        <h2>Manual checkpointing</h2>
+
+        <p>A checkpoint is a message you send before compaction happens automatically — asking Claude Code to summarise the current state, then verifying that summary is accurate before you continue.</p>
+
+        <p>Automatic compaction happens when the context reaches a certain length. You have no control over when it fires or what it preserves. Manual checkpointing gives you both: you choose the moment, and you can correct the summary before it becomes the working context for the rest of the session.</p>
+
+        <p>A corrected checkpoint costs one turn. Uncorrected drift can cost many.</p>
+
+        <p><strong>When to checkpoint:</strong></p>
+        <ul>
+          <li>Before switching from one phase of work to another</li>
+          <li>Halfway through a long task, when the session is getting long</li>
+          <li>Before starting on the most complex or highest-stakes part of a task</li>
+          <li>When you notice any of the context rot symptoms above</li>
+        </ul>
+
+        <h2>The compaction survival checklist</h2>
+
+        <p>Use this before starting any long Claude Code session where you care about consistency across many turns:</p>
+
+        <ol>
+          <li>State your key constraints in standalone messages before work begins — not buried in the opening paragraph.</li>
+          <li>Name things explicitly. Use the term you want used, not a description that the model has to infer a label from.</li>
+          <li>When a decision is made through dialogue, confirm it as a clean standalone statement: "Decision confirmed: [the decision]."</li>
+          <li>Checkpoint before long or complex phases. Verify the summary. Correct it before continuing.</li>
+          <li>Watch for context rot symptoms. When you see them, restate the relevant constraint immediately — as a standalone message, not as a conversational aside.</li>
+        </ol>
+
+        <h2>Exercise: run a checkpoint</h2>
+
+        <p>This exercise takes one real Claude Code session. You will set up two explicit constraints, do a block of work, send a checkpoint, and verify what survived.</p>
+
+        <p>Pick a task you actually need to do — a draft, a code file, a research summary. It needs to be large enough to take 6–10 turns. If you do not have one, use this: summarise a folder of notes or documents into a single structured brief.</p>
+
+        <ol>
+          <li>
+            <p>Before you describe the task, send this as your first message — filling in your actual constraints:</p>
+            <blockquote>
+              <p>Session constraints — apply for this entire session:</p>
+              <p>1. [Your first constraint — something about format, style, or structure]</p>
+              <p>2. [Your second constraint — something about what to exclude or avoid]</p>
+              <p>Confirm you have read these before we start.</p>
+            </blockquote>
+          </li>
+          <li><p>Then describe the task. Work through it for 6–10 turns.</p></li>
+          <li>
+            <p>Partway through — before you finish — send the checkpoint prompt from "Copy, Personalise, Use" below. Read the summary Claude Code gives you.</p>
+          </li>
+          <li>
+            <p>Check: did both constraints appear in the summary?</p>
+            <ul>
+              <li>If yes — confirm the summary is accurate and continue.</li>
+              <li>If no — correct the summary before you continue. Send a message that restates the missing constraint as a standalone statement, then continue.</li>
+            </ul>
+          </li>
+        </ol>
+
+        <h3>What you are looking for</h3>
+
+        <p>The point is not whether the constraints survived — it is whether you noticed and what you did about it. A constraint that survived but was never verified gives you false confidence. A constraint that was missing but you caught and corrected is exactly how this technique is supposed to work.</p>
+
+        <p>If both constraints appeared in the summary unchanged, that is the technique working as intended. If one was missing or paraphrased, that is the technique revealing a gap before it costs you.</p>
 
         <h2>Copy, Personalise, Use</h2>
 
-        <p>Use this starter at the opening of any Claude Code session. It front-loads your task scope and constraints before any work begins.</p>
+        <p>Use this starter to send a manual checkpoint at any point in a long session.</p>
 
         <blockquote>
-          <p>Session scope: [one-sentence description of the single task for this session]</p>
-          <p>What I need:<br>
-          [Verb] [the specific thing]. [Stopping condition — format, length, scope].</p>
-          <p>Constraints:<br>
-          - [What to leave alone or not change]<br>
-          - [Any tool, method, or boundary restriction]<br>
-          - [What not to add, suggest, or include]</p>
-          <p>Done when: [specific description of the finished output]</p>
+          <p>Checkpoint before we continue.</p>
+          <p>Please summarise:</p>
+          <p>1. What we have completed so far in this session, and the key decisions made<br>
+          2. What constraints and rules are active for this session<br>
+          3. What is the agreed next step</p>
+          <p>I will confirm the summary is accurate before we continue. If you are uncertain about any item, say so rather than guessing.</p>
         </blockquote>
 
         <p>How to edit this:</p>
 
         <ul>
-          <li>[one-sentence description]: One task. If it takes more than one sentence to describe, you are probably scoping more than one session's worth of work. Split it.</li>
-          <li>[Verb]: Start with a precise verb. Fix, draft, summarise, research, read, compare. Not "help me with" or "look at."</li>
-          <li>[Stopping condition]: Tell Claude Code when to stop. Word count, number of items, a specific format, or an explicit "stop here and wait for my feedback."</li>
-          <li>[What to leave alone]: Any constraint that protects something you want preserved. Anything Claude Code might change by default that you do not want changed.</li>
-          <li>[Done when]: Describe the finished state specifically enough that you will know when you have arrived. "A draft" is not specific. "A 150-word draft email, professional tone, no sign-off" is specific.</li>
+          <li>You can replace the three numbered items with whatever you need confirmed. Common additions: "What is the grain or structure of the data/document we are building?" "What have we decided NOT to include?" "What was the last completed step?"</li>
+          <li>The phrase "I will confirm the summary is accurate before we continue" is load-bearing — it signals that this is a checkpoint and that you expect to verify the output rather than treat it as final.</li>
+          <li>The phrase "say so rather than guessing" reduces the risk that Claude Code fills in gaps with plausible-sounding but invented details.</li>
         </ul>
 
         <h2>Next</h2>
 
-        <p>A-05 covers context awareness and compaction in depth — what happens when a session gets long, what survives the automatic summarisation, and how to write messages that preserve what matters.</p>
+        <p>A-06 covers output engineering — specifically the plan-before-execute pattern and how to control the format and structure of Claude Code's responses.</p>
 
         <nav class="module-pagination">
-          <a href="/course/a/03" class="module-pagination-prev">
+          <a href="/course/a/04" class="module-pagination-prev">
             <span class="module-pagination-label">Previous</span>
-            <span class="module-pagination-title">← A-03: CLAUDE.md</span>
+            <span class="module-pagination-title">← A-04: Session Hygiene</span>
           </a>
           <span class="module-pagination-spacer"></span>
-          <a href="/course/a/05" class="module-pagination-next">
+          <a href="/course/a/06" class="module-pagination-next">
             <span class="module-pagination-label">Next</span>
-            <span class="module-pagination-title">A-05: Context Awareness and Compaction →</span>
+            <span class="module-pagination-title">A-06: Output Engineering →</span>
           </a>
         </nav>
 
