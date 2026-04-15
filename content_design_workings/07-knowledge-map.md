@@ -20,7 +20,7 @@ These are the concepts the course cannot function without. Every module either i
 | 4 | New conversation as reset | B-01 | B-08 recovery; E-06 re-seeding; A-04 session hygiene |
 | 5 | Verb choice / safe verbs | B-02 (partial); E-01 (formalised) | Every message template from E-01 onward |
 | 6 | Load-bearing context / load-bearing test | B-10 (context slot); E-03 (formalised) | E-04 through E-07; throughout A-track |
-| 7 | Compaction | A-02 (introduced); A-05 (detailed) | A-03, A-04, A-05, A-06 practices |
+| 7 | Compaction | A-01 (introduced); A-05 (detailed) | A-03, A-04, A-05, A-06 practices |
 
 ### 1. Stopping condition
 
@@ -48,7 +48,7 @@ The concept of load-bearing context is seeded in B-10's context slot of the Open
 
 ### 7. Compaction
 
-Introduced in A-02 as part of the three-part mental model (the context window is finite and degrades via compaction) and detailed in A-05. Compaction is the process by which Claude Code summarises earlier conversation turns to free up context space. Understanding what survives compaction and what is lost provides the rationale for session hygiene (A-04), writing style choices (A-05), manual checkpointing (A-05), and plan-before-execute discipline (A-06).
+Introduced in A-01 as part of the three-part mental model (the context window is finite and degrades via compaction) and detailed in A-05. Compaction is the process by which Claude Code summarises earlier conversation turns to free up context space. Understanding what survives compaction and what is lost provides the rationale for session hygiene (A-04), writing style choices (A-05), manual checkpointing (A-05), and plan-before-execute discipline (A-06).
 
 ---
 
@@ -81,8 +81,8 @@ B-01: Sending a message; new conversation as reset; platform choice
 │   │                           ├─── A-track ──────────────────────────────────────
 │   │                           │
 │   │                           └── A-00: Terminal; Claude Code; tool calls; permission model
-│   │                               └── A-01: Tokens; billing; cost drivers
-│   │                                   └── A-02: Mental model (text not intent; compaction; tools)
+│   │                               └── A-01: Mental model (text not intent; compaction; tools)
+│   │                                   └── A-02: Tokens; billing; cost drivers
 │   │                                       ├── A-03: CLAUDE.md (project + user level)
 │   │                                       ├── A-04: Session scoping; /clear
 │   │                                       │   └── A-05: Compaction detailed; context rot; checkpointing
@@ -101,7 +101,7 @@ B-01: Sending a message; new conversation as reset; platform choice
 **Cross-track dependency flow:**
 
 - B-10 (Opening Seed) → unlocks both E-01 and A-00
-- E-03 (load-bearing context) → assumed by A-01, A-02, A-03, A-08
+- E-03 (load-bearing context) → assumed by A-01, A-02, A-03, A-08  *(unchanged — both A-01 and A-02 use context concepts)*
 - E-05 (plan-before-execute) → assumed by A-06, A-08
 - E-06 (re-seed) → assumed by A-04 (session scoping)
 - B-09 (persistent instructions) → assumed by A-03 (CLAUDE.md)
@@ -150,14 +150,14 @@ The A-track comprises 10 modules. It assumes full B-track and E-track completion
 | Module | Introduces | Assumes (B/E) | Assumes (A-track) | Reinforces |
 |--------|-----------|---------------|-------------------|------------|
 | A-00 | Terminal; working directory; Claude Code install; tool calls; permission model | Opening Seed (B-10); CPU (B-02); all B/E prompting principles | — | Opening Seed; E-track constraints/verbs/context |
-| A-01 | Tokens; billing; model tiers; 4 cost drivers; cost benchmarks; mental budget | Context is fuel (E-03) | A-00: API-metered sessions | E-03 |
-| A-02 | Three-part mental model: (1) executes text not intent; (2) context window finite/degrades via compaction; (3) tools are action layer | Verb choice (E-01); constraints (E-02); context as fuel (E-03) | A-00/A-01: basics and cost | E-01; E-02; E-03 |
-| A-03 | CLAUDE.md (project-level + user-level ~/.claude/CLAUDE.md); what belongs vs doesn't; iterating over time | Persistent instructions (B-09) | A-00: working directory; A-01: sessions | B-09; B-10 |
-| A-04 | Session scoping (one task per session); /clear; front-loading constraints as session discipline | Re-seed (E-06); B-08 recovery; B-05 one-thing-at-a-time; constraints (E-02) | A-01: /clear first mentioned; A-02: compaction introduced | E-06; B-08; B-05; E-02 |
-| A-05 | Compaction detailed; what survives vs is lost; context rot; writing for compaction; manual checkpointing | — | A-02: compaction introduced in mental model; A-04: hygiene as prevention | A-02 Part 2; A-04 |
+| A-01 | Three-part mental model: (1) executes text not intent; (2) context window finite/degrades via compaction; (3) tools are action layer | Verb choice (E-01); constraints (E-02); context as fuel (E-03) | A-00/basics | E-01; E-02; E-03 |
+| A-02 | Tokens; billing; model tiers; 4 cost drivers; cost benchmarks; mental budget | Context is fuel (E-03) | A-00: API-metered sessions; A-01: mental model | E-03 |
+| A-03 | CLAUDE.md (project-level + user-level ~/.claude/CLAUDE.md); what belongs vs doesn't; iterating over time | Persistent instructions (B-09) | A-00: working directory; A-01: mental model | B-09; B-10 |
+| A-04 | Context Awareness and Compaction (what fits in context, summarisation, /compact) | Re-seed (E-06); B-08 recovery; B-05 one-thing-at-a-time; constraints (E-02) | A-01: compaction introduced; A-02: cost awareness | E-06; B-08; B-05; E-02 |
+| A-05 | Session Hygiene; starting/ending sessions well; what to carry forward | — | A-01: compaction introduced in mental model; A-04: context awareness | A-01 Part 2; A-04 |
 | A-06 | Plan-before-execute in Claude Code; /plan command; output format control; verbosity mirroring | Get the Plan First (E-05) | A-05: wrong approach costs tokens via rework | E-05; E-02 constraints |
-| A-07 | Tool hierarchy: Read, Glob, Grep, Bash, WebSearch, Agent; cost order (Read/Glob/Grep → Bash/WebSearch → Agent); naming tool explicitly | — | A-02 Part 3: tools are the action layer; A-01: cost awareness; A-06: plan-before-execute | A-02 Part 3; A-01 |
-| A-08 | Delegation decision (3-question test); 5-part brief (Goal, Context, Scope, Output format, Length); "never delegate understanding" | E-05: plan-before-execute | A-01: cost warning; A-06: plan-before-execute; A-07: Agent at top of hierarchy | A-01; A-06; A-07 |
+| A-07 | Tool hierarchy: Read, Glob, Grep, Bash, WebSearch, Agent; cost order (Read/Glob/Grep → Bash/WebSearch → Agent); naming tool explicitly | — | A-01 Part 3: tools are the action layer; A-02: cost awareness; A-06: plan-before-execute | A-01 Part 3; A-02 |
+| A-08 | Delegation decision (3-question test); 5-part brief (Goal, Context, Scope, Output format, Length); "never delegate understanding" | E-05: plan-before-execute | A-02: cost warning; A-06: plan-before-execute; A-07: Agent at top of hierarchy | A-02; A-06; A-07 |
 | A-09 | Nothing new — integration and reflection across all A-track techniques | — | All A-00 through A-08 | Full A-track |
 
 ---
@@ -185,7 +185,7 @@ The following four sequencing violations were found during the course audit and 
 
 1. **[B-05] Stopping condition bracket appeared before B-06 taught the concept.** The template in B-05 had a bracket labelled `[Stopping condition]` two modules before B-06 formally introduces stopping conditions. **Fix:** renamed to `[how much you want back — e.g. "Keep it under 100 words" or "Give me 3 options"]`. B-04 was clean — both its mentions already had `(B-06 covers this)` deferral notes.
 
-2. **[A-01] /clear command used before A-04 teaches it.** A-01 told learners to "use /clear to reset context" with no explanation of what it does. Consistent with the course's own pattern of deferral notes, **fix:** a deferral note was added: "(A-04 covers this in full.)"
+2. **[A-01] /clear command used before A-05 teaches it.** A-01 (Mental Model) told learners to "use /clear to reset context" with no explanation of what it does. **Fix:** a deferral note was added: "(A-05 covers this in full.)"  *(Note: after A-04/A-05 swap, session hygiene is now A-05.)*
 
 3. **[A-06] Wrong module attribution.** A-06 credited "treating the first response as a draft" to E-05. That habit was introduced in B-07 (output review checklist / response-as-draft mindset). E-05 covers plan-before-execute, which is a different concept. **Fix:** attribution changed to B-07. The separate E-05 mention in A-06 (correctly describing plan-before-execute) was left untouched.
 
@@ -219,11 +219,11 @@ There is no mechanism to verify that learners have completed B-08 and B-09 befor
 
 ### 6. A-01 vs A-02 order
 
-Currently the cost model (A-01) comes before the mental model (A-02). A-02 introduces the three-part framework (text not intent; context window finite/degrades; tools are action layer) that would make A-01's numbers and cost drivers legible. **Options:** (a) swap A-01 and A-02 so the mental model comes first and the cost model is grounded in it, or (b) slim A-01 to a safety-only caution ("this costs real money, here is how to set a spending limit") and defer the full cost model to a point after A-02.
+The mental model (A-01) now comes before the cost model (A-02). **Resolved:** A-01 and A-02 were swapped so that A-01 introduces the three-part framework (text not intent; context window finite/degrades; tools are action layer) and A-02 grounds the cost model in that framework. *(This decision was implemented in the HTML; the knowledge map has been updated to match.)*
 
 ### 7. A-04 vs A-05 order
 
-Session hygiene (A-04) is taught before compaction is fully explained (A-05). A-04 asks learners to manage a problem — context degradation — that they do not yet have the full model for. A-02 introduces compaction as a concept, but A-05 provides the detail (what survives, what is lost, context rot, checkpointing) that makes A-04's practices make sense. **Options:** (a) swap A-04 and A-05, or (b) accept that A-04 teaches the habit and A-05 provides the "why" retroactively.
+Context Awareness and Compaction (A-04) is taught before Session Hygiene is fully elaborated (A-05). A-04 introduces compaction and context management; A-05 covers session-level hygiene practices. A-01 introduces compaction as a concept in the mental model. **Resolved:** A-04 teaches context awareness first; A-05 builds session habits on top of that foundation. The current order is intentional.
 
 ### 8. E-07 as A-track entry
 
