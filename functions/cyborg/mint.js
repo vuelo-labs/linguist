@@ -8,6 +8,10 @@ const DEFAULT_DAYS = 8;  // assessment is 7 days; +1 day grace
 export async function onRequestPost({ request, env }) {
   const auth = request.headers.get('Authorization') || '';
   if (!env.ADMIN_SECRET || auth !== `Bearer ${env.ADMIN_SECRET}`) {
+    const ip = request.headers.get('cf-connecting-ip') || '';
+    const ua = (request.headers.get('user-agent') || '').slice(0, 300);
+    const ref = request.headers.get('referer') || '';
+    console.error(`mint 401: ip=${ip} ua=${ua} ref=${ref} authPrefix=${auth.slice(0, 12)}`);
     return json({ error: 'Unauthorized' }, 401);
   }
 
