@@ -1,14 +1,13 @@
 // POST /cyborg/revoke — admin-only token revocation.
-// Auth: header `Authorization: Bearer <ADMIN_SECRET>`.
+// Auth: Cloudflare Access JWT (cf-access-jwt-assertion header).
 // Body: { token: 'cyb_...' }
 
 import { createClient } from '@supabase/supabase-js';
+import { verifyAccessJwt } from './_access.js';
 
 export async function onRequestPost({ request, env }) {
-  const auth = request.headers.get('Authorization') || '';
-  if (!env.ADMIN_SECRET || auth !== `Bearer ${env.ADMIN_SECRET}`) {
-    return json({ error: 'Unauthorized' }, 401);
-  }
+  const access = await verifyAccessJwt(request, env);
+  if (!access.ok) return json({ error: 'Unauthorized', reason: access.reason }, 401);
 
   let body;
   try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }

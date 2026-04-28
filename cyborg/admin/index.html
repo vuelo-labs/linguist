@@ -62,21 +62,10 @@
 <div class="wrap">
 
   <h1>Cyborg admin</h1>
-  <p class="lede">Mint, revoke, and audit candidate tokens. Admin secret stored in this tab only.</p>
-
-  <!-- Auth gate -->
-  <div class="card" id="auth-card">
-    <h2>Sign in</h2>
-    <div class="field">
-      <label for="secret">Admin secret</label>
-      <input type="password" id="secret" autocomplete="off" />
-    </div>
-    <button class="btn" onclick="signIn()">Continue</button>
-    <div class="status" id="auth-status"></div>
-  </div>
+  <p class="lede">Mint, revoke, and audit candidate tokens. Auth via Cloudflare Access — your email login is the gate.</p>
 
   <!-- Mint -->
-  <div class="card hidden" id="mint-card">
+  <div class="card" id="mint-card">
     <h2>Mint a token</h2>
     <div class="row">
       <div class="field">
@@ -98,12 +87,12 @@
   </div>
 
   <!-- List -->
-  <div class="card hidden" id="list-card">
+  <div class="card" id="list-card">
     <div class="toolbar">
       <h2 style="margin:0;">Tokens</h2>
       <div>
         <button class="btn ghost small" onclick="loadTokens()">Refresh</button>
-        <button class="btn ghost small" onclick="signOut()">Sign out</button>
+        <a class="btn ghost small" href="/cdn-cgi/access/logout" style="text-decoration:none;display:inline-block;">Sign out</a>
       </div>
     </div>
     <div id="list-status" class="status"></div>
@@ -113,66 +102,16 @@
 </div>
 
 <script>
-const STORE_KEY = 'cyborg_admin_secret';
-let _secret = sessionStorage.getItem(STORE_KEY) || '';
-
 document.addEventListener('DOMContentLoaded', () => {
-  if (_secret) tryAuth();
-  document.getElementById('secret').addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); signIn(); }
-  });
+  loadTokens();
 });
-
-async function tryAuth() {
-  // A successful list call confirms the secret.
-  const r = await api('/cyborg/list', { method: 'GET' });
-  if (r.status === 200) {
-    showApp(true);
-    renderTokens(await r.json());
-  } else {
-    sessionStorage.removeItem(STORE_KEY);
-    _secret = '';
-    showApp(false);
-  }
-}
-
-async function signIn() {
-  const v = document.getElementById('secret').value.trim();
-  const status = document.getElementById('auth-status');
-  status.className = 'status'; status.textContent = '';
-  if (!v) { status.className = 'status err'; status.textContent = 'Enter the admin secret.'; return; }
-  _secret = v;
-  const r = await api('/cyborg/list', { method: 'GET' });
-  if (r.status === 200) {
-    sessionStorage.setItem(STORE_KEY, _secret);
-    showApp(true);
-    renderTokens(await r.json());
-  } else {
-    _secret = '';
-    status.className = 'status err';
-    status.textContent = r.status === 401 ? 'Wrong secret.' : `Error (${r.status}).`;
-  }
-}
-
-function signOut() {
-  sessionStorage.removeItem(STORE_KEY);
-  _secret = '';
-  showApp(false);
-  document.getElementById('secret').value = '';
-}
-
-function showApp(authed) {
-  document.getElementById('auth-card').classList.toggle('hidden', authed);
-  document.getElementById('mint-card').classList.toggle('hidden', !authed);
-  document.getElementById('list-card').classList.toggle('hidden', !authed);
-}
 
 async function api(path, opts = {}) {
   return fetch(path, {
     ...opts,
+    credentials: 'same-origin',
     headers: {
       ...(opts.headers || {}),
-      'Authorization': `Bearer ${_secret}`,
       ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
     },
   });
@@ -214,7 +153,7 @@ async function mintToken() {
 async function loadTokens() {
   const r = await api('/cyborg/list', { method: 'GET' });
   if (r.status === 200) renderTokens(await r.json());
-  else if (r.status === 401) signOut();
+  else if (r.status === 401) location.reload();   // Access cookie expired → trigger re-auth
 }
 
 function tokenStatus(t) {
