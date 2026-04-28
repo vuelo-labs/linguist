@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyborg admin</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    :root { --c-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace; }
+    body { background: var(--w-bg); color: var(--w-text); font-family: var(--sans, 'Inter', sans-serif); margin: 0; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-family: var(--serif, 'Newsreader', serif); font-size: 1.8rem; margin: 0 0 6px; font-weight: 500; }
+    .lede { color: var(--w-muted); margin-bottom: 28px; font-size: 0.95rem; }
+    .card { background: var(--w-bg-card); border: 1px solid var(--w-border); border-radius: 12px; padding: 22px 24px; margin: 16px 0; }
+    .card h2 { font-family: var(--serif, 'Newsreader', serif); font-size: 1.15rem; margin: 0 0 14px; font-weight: 500; }
+    label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--w-faint); margin-bottom: 5px; letter-spacing: 0.02em; text-transform: uppercase; }
+    input[type=text], input[type=password], input[type=number], textarea {
+      width: 100%; box-sizing: border-box;
+      background: var(--w-bg-input); border: 1px solid var(--w-border);
+      border-radius: 8px; padding: 9px 12px; font-size: 0.92rem;
+      color: var(--w-text); font-family: inherit;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--w-border-focus); }
+    .field { margin-bottom: 12px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row .field { flex: 1 1 200px; margin-bottom: 0; }
+    .btn {
+      background: var(--w-accent); color: var(--w-bg);
+      border: none; border-radius: 8px;
+      padding: 9px 18px; font-size: 0.9rem; font-weight: 500;
+      font-family: inherit; cursor: pointer;
+    }
+    .btn:hover:not(:disabled) { opacity: 0.9; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .btn.danger { background: #6e2618; }
+    .btn.small { padding: 5px 11px; font-size: 0.82rem; }
+    .btn.ghost { background: transparent; color: var(--w-muted); border: 1px solid var(--w-border); }
+    .status { margin-top: 12px; padding: 9px 12px; border-radius: 7px; font-size: 0.88rem; display: none; }
+    .status.ok { background: #ecf3eb; border: 1px solid #b8d2b3; color: #2d5a26; display: block; }
+    .status.err { background: #fbe9e7; border: 1px solid #e8b8af; color: #6e2618; display: block; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--w-border); vertical-align: top; }
+    th { font-weight: 600; color: var(--w-faint); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    td.mono { font-family: var(--c-mono); font-size: 0.82rem; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 11px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+    .pill.active   { background: #ecf3eb; color: #2d5a26; }
+    .pill.pending  { background: #fdf6e3; color: #6b5022; }
+    .pill.used     { background: var(--w-accent-light); color: var(--w-muted); }
+    .pill.revoked  { background: #fbe9e7; color: #6e2618; }
+    .pill.expired  { background: #efeae1; color: var(--w-faint); }
+    .install-cmd { font-family: var(--c-mono); font-size: 0.82rem; background: #1f1c19; color: #f5f0e6; padding: 10px 12px; border-radius: 7px; margin-top: 10px; overflow-x: auto; white-space: pre; }
+    .toolbar { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .toolbar .grow { flex: 1; }
+    .empty { text-align: center; padding: 32px; color: var(--w-faint); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <h1>Cyborg admin</h1>
+  <p class="lede">Mint, revoke, and audit candidate tokens. Admin secret stored in this tab only.</p>
+
+  <!-- Auth gate -->
+  <div class="card" id="auth-card">
+    <h2>Sign in</h2>
+    <div class="field">
+      <label for="secret">Admin secret</label>
+      <input type="password" id="secret" autocomplete="off" />
+    </div>
+    <button class="btn" onclick="signIn()">Continue</button>
+    <div class="status" id="auth-status"></div>
+  </div>
+
+  <!-- Mint -->
+  <div class="card hidden" id="mint-card">
+    <h2>Mint a token</h2>
+    <div class="row">
+      <div class="field">
+        <label for="m-label">Label (name + email)</label>
+        <input type="text" id="m-label" placeholder="Alex Doe (alex@example.com)" />
+      </div>
+      <div class="field" style="flex:0 0 130px;">
+        <label for="m-days">Days valid</label>
+        <input type="number" id="m-days" value="8" min="1" max="30" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="m-notes">Notes (optional)</label>
+      <input type="text" id="m-notes" placeholder="e.g. internal pilot, friendly dry-run" />
+    </div>
+    <button class="btn" onclick="mintToken()">Mint</button>
+    <div class="status" id="mint-status"></div>
+    <div id="mint-result"></div>
+  </div>
+
+  <!-- List -->
+  <div class="card hidden" id="list-card">
+    <div class="toolbar">
+      <h2 style="margin:0;">Tokens</h2>
+      <div>
+        <button class="btn ghost small" onclick="loadTokens()">Refresh</button>
+        <button class="btn ghost small" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+    <div id="list-status" class="status"></div>
+    <div id="list-body"></div>
+  </div>
+
+</div>
+
+<script>
+const STORE_KEY = 'cyborg_admin_secret';
+let _secret = sessionStorage.getItem(STORE_KEY) || '';
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (_secret) tryAuth();
+  document.getElementById('secret').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); signIn(); }
+  });
+});
+
+async function tryAuth() {
+  // A successful list call confirms the secret.
+  const r = await api('/cyborg/list', { method: 'GET' });
+  if (r.status === 200) {
+    showApp(true);
+    renderTokens(await r.json());
+  } else {
+    sessionStorage.removeItem(STORE_KEY);
+    _secret = '';
+    showApp(false);
+  }
+}
+
+async function signIn() {
+  const v = document.getElementById('secret').value.trim();
+  const status = document.getElementById('auth-status');
+  status.className = 'status'; status.textContent = '';
+  if (!v) { status.className = 'status err'; status.textContent = 'Enter the admin secret.'; return; }
+  _secret = v;
+  const r = await api('/cyborg/list', { method: 'GET' });
+  if (r.status === 200) {
+    sessionStorage.setItem(STORE_KEY, _secret);
+    showApp(true);
+    renderTokens(await r.json());
+  } else {
+    _secret = '';
+    status.className = 'status err';
+    status.textContent = r.status === 401 ? 'Wrong secret.' : `Error (${r.status}).`;
+  }
+}
+
+function signOut() {
+  sessionStorage.removeItem(STORE_KEY);
+  _secret = '';
+  showApp(false);
+  document.getElementById('secret').value = '';
+}
+
+function showApp(authed) {
+  document.getElementById('auth-card').classList.toggle('hidden', authed);
+  document.getElementById('mint-card').classList.toggle('hidden', !authed);
+  document.getElementById('list-card').classList.toggle('hidden', !authed);
+}
+
+async function api(path, opts = {}) {
+  return fetch(path, {
+    ...opts,
+    headers: {
+      ...(opts.headers || {}),
+      'Authorization': `Bearer ${_secret}`,
+      ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+    },
+  });
+}
+
+async function mintToken() {
+  const label = document.getElementById('m-label').value.trim();
+  const days  = parseInt(document.getElementById('m-days').value, 10) || 8;
+  const notes = document.getElementById('m-notes').value.trim();
+  const status = document.getElementById('mint-status');
+  const result = document.getElementById('mint-result');
+  status.className = 'status'; status.textContent = '';
+  result.innerHTML = '';
+
+  const r = await api('/cyborg/mint', {
+    method: 'POST',
+    body: JSON.stringify({ label: label || null, days, notes: notes || null }),
+  });
+  const d = await r.json();
+  if (!r.ok || !d.ok) {
+    status.className = 'status err';
+    status.textContent = d.error || `Error (${r.status}).`;
+    return;
+  }
+
+  status.className = 'status ok';
+  status.textContent = 'Minted.';
+  result.innerHTML = `
+    <div class="install-cmd">${escapeHtml(d.install_cmd)}</div>
+    <p style="font-size:0.84rem;color:var(--w-muted);margin-top:8px;">
+      Token: <code>${escapeHtml(d.token)}</code> — expires ${new Date(d.expires_at).toLocaleString('en-GB')}.
+    </p>
+  `;
+  document.getElementById('m-label').value = '';
+  document.getElementById('m-notes').value = '';
+  loadTokens();
+}
+
+async function loadTokens() {
+  const r = await api('/cyborg/list', { method: 'GET' });
+  if (r.status === 200) renderTokens(await r.json());
+  else if (r.status === 401) signOut();
+}
+
+function tokenStatus(t) {
+  const now = Date.now();
+  if (t.revoked_at) return 'revoked';
+  if (t.used_at)    return 'used';
+  if (!t.approved_at) return 'pending';
+  if (new Date(t.expires_at).getTime() < now) return 'expired';
+  return 'active';
+}
+
+function renderTokens(payload) {
+  const tokens = (payload && payload.tokens) || [];
+  const body = document.getElementById('list-body');
+  if (tokens.length === 0) {
+    body.innerHTML = '<div class="empty">No tokens yet.</div>';
+    return;
+  }
+  const rows = tokens.map(t => {
+    const st = tokenStatus(t);
+    const issued  = new Date(t.issued_at).toLocaleString('en-GB');
+    const expires = new Date(t.expires_at).toLocaleString('en-GB');
+    const usedRevoked = t.revoked_at ? `revoked ${new Date(t.revoked_at).toLocaleString('en-GB')}`
+                      : t.used_at   ? `used ${new Date(t.used_at).toLocaleString('en-GB')}`
+                      : '';
+    const canRevoke = (st === 'active' || st === 'pending');
+    return `
+      <tr>
+        <td><span class="pill ${st}">${st}</span></td>
+        <td>${escapeHtml(t.candidate_label || '')}</td>
+        <td class="mono">${escapeHtml(t.token)}</td>
+        <td>${issued}</td>
+        <td>${expires}</td>
+        <td style="color:var(--w-muted);font-size:0.82rem;">${usedRevoked}</td>
+        <td>${canRevoke ? `<button class="btn danger small" onclick="revokeToken('${escapeHtml(t.token)}')">Revoke</button>` : ''}</td>
+      </tr>
+    `;
+  }).join('');
+  body.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Status</th><th>Candidate</th><th>Token</th><th>Issued</th><th>Expires</th><th>Activity</th><th></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+async function revokeToken(token) {
+  if (!confirm(`Revoke ${token}? This cannot be undone.`)) return;
+  const r = await api('/cyborg/revoke', { method: 'POST', body: JSON.stringify({ token }) });
+  const status = document.getElementById('list-status');
+  if (r.ok) {
+    status.className = 'status ok'; status.textContent = `Revoked ${token}.`;
+    setTimeout(() => { status.className = 'status'; }, 3000);
+    loadTokens();
+  } else {
+    const d = await r.json().catch(() => ({}));
+    status.className = 'status err'; status.textContent = d.error || d.reason || `Error (${r.status}).`;
+  }
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+</script>
+
+<style>.hidden { display: none !important; }</style>
+
+</body>
+</html>
