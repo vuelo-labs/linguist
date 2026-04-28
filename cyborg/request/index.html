@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request a token — Cyborg / Veralux Analytics</title>
+  <meta name="description" content="Request access to the Cyborg data analyst assessment.">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    :root { --c-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace; }
+    body { background: var(--w-bg); color: var(--w-text); font-family: var(--sans, 'Inter', sans-serif); margin: 0; }
+    .wrap { max-width: 620px; margin: 0 auto; padding: 56px 24px 96px; }
+    h1 { font-family: var(--serif, 'Newsreader', serif); font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.01em; margin: 0 0 14px; font-weight: 500; }
+    .lede { font-size: 1.05rem; color: var(--w-muted); line-height: 1.55; margin-bottom: 32px; }
+    .card { background: var(--w-bg-card); border: 1px solid var(--w-border); border-radius: 14px; padding: 28px 28px 24px; margin: 18px 0; }
+    .card h2 { font-family: var(--serif, 'Newsreader', serif); font-size: 1.3rem; margin: 0 0 16px; font-weight: 500; letter-spacing: -0.01em; }
+    label { display: block; font-size: 0.84rem; font-weight: 600; color: var(--w-faint); margin-bottom: 6px; letter-spacing: 0.02em; text-transform: uppercase; }
+    input[type=text], input[type=email], textarea {
+      width: 100%; box-sizing: border-box;
+      background: var(--w-bg-input); border: 1px solid var(--w-border);
+      border-radius: 9px; padding: 11px 14px; font-size: 0.95rem;
+      color: var(--w-text); font-family: inherit;
+      transition: border-color 0.1s;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--w-border-focus); }
+    textarea { resize: vertical; min-height: 100px; line-height: 1.55; }
+    .field { margin-bottom: 16px; }
+    .row-actions { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+    .btn {
+      background: var(--w-accent); color: var(--w-bg);
+      border: none; border-radius: 9px;
+      padding: 11px 24px; font-size: 0.95rem; font-weight: 500;
+      font-family: inherit; cursor: pointer;
+      transition: opacity 0.1s, background 0.1s;
+    }
+    .btn:hover:not(:disabled) { background: var(--w-accent-soft); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .status {
+      padding: 12px 14px; border-radius: 8px;
+      font-size: 0.92rem; line-height: 1.5;
+      margin-top: 16px; display: none;
+    }
+    .status.ok  { background: #ecf3eb; border: 1px solid #b8d2b3; color: #2d5a26; display: block; }
+    .status.err { background: #fbe9e7; border: 1px solid #e8b8af; color: #6e2618; display: block; }
+    .hp { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+    .footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--w-border); font-size: 0.86rem; color: var(--w-faint); line-height: 1.55; }
+    .footer a { color: var(--w-accent); }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <h1>Request a token</h1>
+  <p class="lede">
+    Don't have a token yet? Tell us a little about yourself and we'll be in touch.
+    Tokens are issued one at a time after a quick review.
+  </p>
+
+  <div class="card">
+    <h2>Your details</h2>
+    <form id="req-form" autocomplete="off">
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required maxlength="200" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required maxlength="320" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="notes">A few words on why you're interested (optional)</label>
+        <textarea id="notes" name="notes" maxlength="2000" placeholder="e.g. 'Heard about the role from X' or 'I'd like to try the assessment as practice'…"></textarea>
+      </div>
+
+      <!-- Honeypot — real users won't see or fill this -->
+      <div class="hp" aria-hidden="true">
+        <label for="website">Website (leave blank)</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div class="row-actions">
+        <button type="submit" class="btn" id="submit-btn">Send request</button>
+        <span style="font-size:0.86rem; color:var(--w-muted);">We'll reply by email.</span>
+      </div>
+
+      <div class="status" id="status"></div>
+    </form>
+  </div>
+
+  <div class="footer">
+    Already have a token? <a href="/cyborg/">Start the assessment</a>.
+  </div>
+
+</div>
+
+<script>
+const form = document.getElementById('req-form');
+const status = document.getElementById('status');
+const btn = document.getElementById('submit-btn');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  status.className = 'status'; status.textContent = '';
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  const payload = {
+    name:    document.getElementById('name').value,
+    email:   document.getElementById('email').value,
+    notes:   document.getElementById('notes').value,
+    website: document.getElementById('website').value,
+  };
+
+  try {
+    const r = await fetch('/cyborg/request-token', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const d = await r.json();
+    if (d.ok) {
+      status.className = 'status ok';
+      status.textContent = 'Request received. We\'ll be in touch by email — usually within a working day.';
+      form.reset();
+      btn.textContent = 'Sent';
+    } else {
+      status.className = 'status err';
+      status.textContent = ({
+        'missing_fields': 'Please fill in your name and email.',
+        'bad_email':      'That email doesn\'t look right — double-check it.',
+        'too_large':      'Message is too long. Trim it and try again.',
+        'not_configured': 'Sorry — request handling isn\'t wired up yet. Email the assessment owner directly.',
+      }[d.reason] || 'Could not send your request. Try again or email the assessment owner directly.');
+      btn.disabled = false; btn.textContent = 'Send request';
+    }
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = 'Could not reach the server. Check your connection and try again.';
+    btn.disabled = false; btn.textContent = 'Send request';
+  }
+});
+</script>
+
+</body>
+</html>

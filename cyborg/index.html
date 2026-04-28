@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyborg — Veralux Analytics workspace</title>
+  <meta name="description" content="A 7-day data analyst assessment inside a simulated company. Bring your own AI tool.">
+  <meta property="og:title" content="Cyborg — Veralux Analytics">
+  <meta property="og:description" content="A 7-day data analyst assessment inside a simulated company.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    :root {
+      --c-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    }
+    body { background: var(--w-bg); color: var(--w-text); font-family: var(--sans, 'Inter', sans-serif); margin: 0; }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 56px 24px 96px;
+    }
+
+    h1 {
+      font-family: var(--serif, 'Newsreader', serif);
+      font-size: 2.4rem;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin: 0 0 14px;
+      font-weight: 500;
+    }
+    .lede {
+      font-size: 1.05rem;
+      color: var(--w-muted);
+      line-height: 1.55;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--w-bg-card);
+      border: 1px solid var(--w-border);
+      border-radius: 14px;
+      padding: 28px 28px 24px;
+      margin: 18px 0;
+    }
+    .card h2 {
+      font-family: var(--serif, 'Newsreader', serif);
+      font-size: 1.45rem;
+      margin: 0 0 16px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+    .card p { line-height: 1.6; color: var(--w-text); margin: 0 0 14px; }
+    .card p.muted { color: var(--w-muted); font-size: 0.94rem; }
+
+    label { display: block; font-size: 0.84rem; font-weight: 600; color: var(--w-faint); margin-bottom: 6px; letter-spacing: 0.02em; text-transform: uppercase; }
+    input[type=text] {
+      width: 100%; box-sizing: border-box;
+      background: var(--w-bg-input);
+      border: 1px solid var(--w-border);
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-family: var(--c-mono);
+      font-size: 0.95rem;
+      color: var(--w-text);
+      transition: border-color 0.1s;
+    }
+    input[type=text]:focus { outline: none; border-color: var(--w-border-focus); }
+
+    .btn {
+      background: var(--w-accent);
+      color: var(--w-bg);
+      border: none;
+      border-radius: 9px;
+      padding: 10px 22px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.1s, background 0.1s;
+    }
+    .btn:hover:not(:disabled) { background: var(--w-accent-soft); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .btn.secondary {
+      background: transparent; color: var(--w-accent);
+      border: 1px solid var(--w-border-focus);
+    }
+    .btn.secondary:hover:not(:disabled) { background: var(--w-accent-light); }
+
+    .row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
+    .row > input[type=text] { flex: 1 1 280px; }
+
+    .status {
+      margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+      font-size: 0.92rem; line-height: 1.5;
+      display: none;
+    }
+    .status.ok    { background: #ecf3eb; border: 1px solid #b8d2b3; color: #2d5a26; display: block; }
+    .status.err   { background: #fbe9e7; border: 1px solid #e8b8af; color: #6e2618; display: block; }
+
+    .install {
+      margin-top: 18px;
+      display: none;
+    }
+    .install.show { display: block; }
+
+    .os-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+    .os-tab {
+      padding: 6px 14px; font-size: 0.82rem; font-weight: 500;
+      background: transparent; border: 1px solid var(--w-border);
+      border-radius: 7px; cursor: pointer; color: var(--w-muted);
+      font-family: inherit;
+    }
+    .os-tab.cur { background: var(--w-accent-light); border-color: var(--w-border-focus); color: var(--w-accent); }
+
+    pre.cmd {
+      background: #1f1c19; color: #f5f0e6;
+      padding: 14px 16px; border-radius: 9px;
+      font-family: var(--c-mono); font-size: 0.86rem;
+      overflow-x: auto; margin: 0;
+      line-height: 1.55;
+      white-space: pre;
+    }
+
+    .copy-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 8px; font-size: 0.85rem; color: var(--w-muted);
+    }
+    .copy-btn {
+      background: transparent; border: 1px solid var(--w-border);
+      border-radius: 6px; padding: 4px 12px;
+      font-size: 0.82rem; font-family: inherit;
+      cursor: pointer; color: var(--w-muted);
+      transition: border-color 0.1s, color 0.1s;
+    }
+    .copy-btn:hover { border-color: var(--w-border-focus); color: var(--w-text); }
+    .copy-btn.copied { border-color: #2d5a26; color: #2d5a26; }
+
+    ol.steps { line-height: 1.7; padding-left: 22px; margin: 6px 0 0; }
+    ol.steps li { margin-bottom: 4px; color: var(--w-text); }
+    code { font-family: var(--c-mono); font-size: 0.88em; background: var(--w-accent-light); padding: 1px 5px; border-radius: 4px; }
+
+    .footer {
+      margin-top: 48px; padding-top: 24px;
+      border-top: 1px solid var(--w-border);
+      font-size: 0.86rem; color: var(--w-faint);
+      line-height: 1.55;
+    }
+    .footer a { color: var(--w-accent); }
+
+    .windows-note {
+      background: #fdf6e3; border: 1px solid #e8d99a; color: #6b5022;
+      padding: 12px 14px; border-radius: 8px; font-size: 0.9rem; line-height: 1.5;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <h1>Veralux Analytics — Workspace Setup</h1>
+  <p class="lede">
+    A 7-day data analyst assessment inside a simulated company. The workspace runs locally
+    on your machine via Docker, captures how you work, and submits when you're done.
+  </p>
+
+  <div class="card">
+    <h2>What this is</h2>
+    <p>
+      A self-paced, simulated work week. You'll inherit the data environment of a fictional company,
+      Veralux Analytics — databases, dashboards, Slack exports, ticket archives, git repos, stakeholder
+      profiles. You'll have access to AI tools the same way you would on the job. There's no graded
+      "right answer" — we want to see <em>how</em> you work with messy reality.
+    </p>
+    <p class="muted">
+      The exercise feeds an interview, not an algorithm. A human reads what you produce and how you got there.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>What you'll need</h2>
+    <ol class="steps">
+      <li><strong>Your token</strong> — sent in your invitation email. Single-use.</li>
+      <li><strong>Docker Desktop</strong> — <a href="https://www.docker.com/products/docker-desktop" target="_blank" rel="noopener">download here</a>. Mac, Linux, or Windows-with-WSL2.</li>
+      <li><strong>~5 GB of free disk</strong> for the workspace image, and a laptop that can run a local container without melting.</li>
+      <li><strong>Stable internet</strong> for the one-time AI sign-in (OAuth) and image pull. The container itself runs locally.</li>
+      <li><strong>An IDE you're comfortable with</strong> — VS Code or Cursor with the Remote-SSH extension is the smoothest path. The browser also has a built-in terminal and SQL runner if you'd rather stay there.</li>
+      <li><strong>About 5 minutes to install.</strong> Then 7 days of clock time to use the workspace however suits you.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>To get the most out of it</h2>
+    <p>
+      Treat this like a first week at a new job, not a take-home with a stopwatch. People who do well usually:
+    </p>
+    <ol class="steps">
+      <li>Block out one or two real working sessions. The environment rewards depth — context-switching every five minutes flattens the experience.</li>
+      <li>Read before they act. The handover notes, stakeholder profiles, and recent Slack threads are there for a reason.</li>
+      <li>Write some of their own SQL. The data is small enough to explore by hand. Don't outsource everything to the assistant.</li>
+      <li>Fix friction when they hit it. The environment has some intentional rough edges; how you handle them is informative.</li>
+      <li>Use the AI tool the way you actually use one at work. Don't perform — we'd rather see your real workflow than a curated one.</li>
+      <li>Take notes as you go. By day three you'll have forgotten what you noticed on day one.</li>
+    </ol>
+    <p class="muted" style="margin-top:14px">
+      <strong>Activity is logged.</strong> Browser app opens, terminal commands, AI prompts and responses,
+      file accesses, SQL queries, and edits to a small set of configuration files are all captured. This is so
+      a human can understand how you worked, not so a model can score you. There are no trick questions and
+      no penalty for things you didn't find — but be aware that "I worked it out without using the AI"
+      is verifiable, and so is the opposite.
+    </p>
+    <p class="muted">
+      No Anthropic account or API key needed. Claude Code is built in and uses an OAuth flow on first run
+      (any free Anthropic account works). You can also bring Cursor, VS Code, Codex CLI, Gemini CLI, or any
+      tool that speaks SSH.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Honest expectations</h2>
+    <ol class="steps">
+      <li><strong>This is unusual.</strong> Most processes give you a take-home or a whiteboard. We're giving you a week inside a messy environment because the job is a week inside a messy environment. If it feels weird, that's fine.</li>
+      <li><strong>Submitting locks the workspace.</strong> Once you submit (or the 7-day window closes — whichever comes first) the terminal, SQL runner, and apps become read-only. You can still browse what you found.</li>
+      <li><strong>If the deadline lands before you submit, we auto-submit whatever state you're in.</strong> No penalty for finishing early; no bonus for marathoning.</li>
+      <li><strong>Your token is single-use.</strong> If you accidentally delete the container or hit a hard install error, contact the assessment owner — we'll issue a replacement.</li>
+      <li><strong>If something looks broken, it might be.</strong> That's part of the exercise.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Start</h2>
+    <p>Paste your token, choose your operating system, and copy the install command.</p>
+
+    <div class="row" style="margin-bottom:6px;">
+      <input type="text" id="token" placeholder="cyb_..." autocomplete="off" spellcheck="false" />
+      <button class="btn" id="check-btn" onclick="checkToken()">Continue</button>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="install" id="install">
+      <div class="os-tabs" id="os-tabs">
+        <button class="os-tab cur" data-os="mac"   onclick="setOs('mac')">macOS</button>
+        <button class="os-tab"     data-os="linux" onclick="setOs('linux')">Linux</button>
+        <button class="os-tab"     data-os="win"   onclick="setOs('win')">Windows</button>
+      </div>
+
+      <pre class="cmd" id="cmd"></pre>
+      <div class="copy-bar">
+        <span id="install-hint">Open Terminal and paste this command.</span>
+        <button class="copy-btn" id="copy-btn" onclick="copyCmd()">Copy</button>
+      </div>
+
+      <div class="windows-note" id="win-note" style="display:none;">
+        On Windows, run the command inside <strong>WSL2 (Ubuntu)</strong>. Docker Desktop must be running with WSL2 integration enabled.
+        If you don't have WSL set up, the simplest path is to use a Mac or Linux machine if available.
+      </div>
+
+      <ol class="steps" style="margin-top:18px;">
+        <li>Wait ~10 seconds for the workspace to start.</li>
+        <li>Open <code>http://localhost:3000</code> — the Veralux desktop.</li>
+        <li>In the dock, open the Terminal and type <code>claude</code> to start your AI assistant. Sign in once with any Anthropic account.</li>
+      </ol>
+
+      <p class="muted" style="margin-top:14px">
+        Submitting the assessment locks the workspace (read-only). The same lock applies automatically when the 7-day window closes.
+      </p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Don't have a token? <a href="/cyborg/request/">Request one</a>.<br />
+    Trouble? Reply to your invitation email.<br />
+    For more detail see the <a href="https://github.com/vuelo-labs/cyborg_versions" target="_blank" rel="noopener">install repo</a>.
+  </div>
+
+</div>
+
+<script>
+const VALIDATE_URL = '/cyborg/validate';
+let _os = autoOs();
+let _validToken = null;
+
+function autoOs() {
+  const ua = (navigator.userAgent || '').toLowerCase();
+  if (ua.includes('mac'))     return 'mac';
+  if (ua.includes('linux'))   return 'linux';
+  if (ua.includes('win'))     return 'win';
+  return 'mac';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Pre-fill from ?t=
+  const params = new URLSearchParams(location.search);
+  const t = params.get('t') || params.get('token');
+  if (t) {
+    document.getElementById('token').value = t.trim();
+    checkToken();
+  }
+  setOs(_os);
+  document.getElementById('token').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); checkToken(); }
+  });
+});
+
+function setOs(os) {
+  _os = os;
+  document.querySelectorAll('.os-tab').forEach(b => b.classList.toggle('cur', b.dataset.os === os));
+  document.getElementById('win-note').style.display = (os === 'win') ? 'block' : 'none';
+  if (_validToken) renderCmd();
+}
+
+function renderCmd() {
+  if (!_validToken) return;
+  const tok = _validToken;
+  let cmd;
+  if (_os === 'win') {
+    cmd =
+`# In WSL2 (Ubuntu) terminal:
+curl -fsSL https://raw.githubusercontent.com/vuelo-labs/cyborg_versions/main/install.sh | bash -s ${tok}`;
+  } else {
+    cmd = `curl -fsSL https://raw.githubusercontent.com/vuelo-labs/cyborg_versions/main/install.sh | bash -s ${tok}`;
+  }
+  document.getElementById('cmd').textContent = cmd;
+}
+
+async function checkToken() {
+  const tok = document.getElementById('token').value.trim();
+  const status = document.getElementById('status');
+  const install = document.getElementById('install');
+  const btn = document.getElementById('check-btn');
+
+  status.className = 'status'; status.textContent = '';
+  install.classList.remove('show');
+  _validToken = null;
+
+  if (!tok) {
+    status.className = 'status err';
+    status.textContent = 'Paste your token to continue.';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Checking…';
+  try {
+    const r = await fetch(VALIDATE_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ token: tok }),
+    });
+    const d = await r.json();
+    if (d.ok) {
+      _validToken = tok;
+      const exp = d.expires_at ? new Date(d.expires_at).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : null;
+      const who = d.candidate_label ? ` for ${escapeHtml(d.candidate_label)}` : '';
+      status.className = 'status ok';
+      status.innerHTML = `Token accepted${who}. ${exp ? `Window closes <strong>${exp}</strong>.` : ''}`;
+      install.classList.add('show');
+      renderCmd();
+    } else {
+      status.className = 'status err';
+      status.textContent = ({
+        'already_used':     'This token has already been used. Each token is single-use — contact the assessment owner if you believe this is an error.',
+        'expired':          'This token has expired.',
+        'revoked':          'This token has been revoked.',
+        'pending_approval': 'Your request is still pending approval. We\'ll email you once it\'s ready.',
+        'unknown':          'Token not recognised. Double-check the value from your invitation email.',
+        'missing_token':    'Paste your token to continue.',
+      }[d.reason] || 'Could not validate this token. Try again or contact the assessment owner.');
+    }
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = 'Could not reach the validation server. Check your connection and try again.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Continue';
+  }
+}
+
+async function copyCmd() {
+  const cmd = document.getElementById('cmd').textContent;
+  const btn = document.getElementById('copy-btn');
+  try {
+    await navigator.clipboard.writeText(cmd);
+    btn.classList.add('copied');
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = 'Copy'; }, 1800);
+  } catch (e) {
+    btn.textContent = 'Press ⌘C';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+</script>
+
+</body>
+</html>
