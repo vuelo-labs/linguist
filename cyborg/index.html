@@ -211,10 +211,37 @@
       no penalty for things you didn't find — but be aware that "I worked it out without using the AI"
       is verifiable, and so is the opposite.
     </p>
+  </div>
+
+  <div class="card">
+    <h2>About the AI tooling</h2>
+    <p>
+      <strong>Claude Code is the supported, first-class assistant for this assessment.</strong>
+      It's pre-installed in the workspace. On first run it asks you to sign in via OAuth — any free
+      Anthropic account works, no API key required, no payment.
+    </p>
+    <p>
+      We chose Claude as the bundled tool for three reasons: (1) it's what the assessment author
+      uses day-to-day, so it's the tool the environment was designed and tested against;
+      (2) it's the assistant we get the highest-fidelity activity capture from, which feeds the
+      human review of your work; and (3) zero setup means every candidate starts from the same line.
+      First-class support for other vendors is coming — not in this launch.
+    </p>
+    <p>
+      <strong>You can use a different AI tool if you'd prefer</strong> — the workspace exposes SSH on
+      port 2222 (user <code>candidate</code>, password = your token), and any tool that supports
+      remote shells works:
+    </p>
+    <ol class="steps">
+      <li><strong>Cursor or VS Code</strong> — Remote-SSH extension → <code>candidate@localhost:2222</code> → open <code>/workspace</code>. Use whichever in-IDE assistant you have set up (Cursor's built-in, Copilot, Continue, etc.).</li>
+      <li><strong>Terminal-based agents</strong> — open an SSH session and run <code>aider</code>, <code>codex</code>, <code>gemini</code>, or anything CLI-driven. You'll need to bring your own API key for those.</li>
+      <li><strong>Other GUI tools</strong> — anything that supports Remote-SSH or a remote workspace works the same way as Cursor/VS Code.</li>
+    </ol>
     <p class="muted">
-      No Anthropic account or API key needed. Claude Code is built in and uses an OAuth flow on first run
-      (any free Anthropic account works). You can also bring Cursor, VS Code, Codex CLI, Gemini CLI, or any
-      tool that speaks SSH.
+      A note on fidelity: when you use Claude Code we capture which tools it called and what files
+      it touched. With other assistants we capture the file changes and your terminal commands but
+      not the AI's internal calls. Reviewers compensate for this — using a different tool isn't
+      penalised — but it's worth knowing the picture is slightly less detailed.
     </p>
   </div>
 
