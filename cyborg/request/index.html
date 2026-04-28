@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <style>
     :root { --c-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace; }
     body { background: var(--w-bg); color: var(--w-text); font-family: var(--sans, 'Inter', sans-serif); margin: 0; }
@@ -82,6 +83,10 @@
         <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
       </div>
 
+      <div class="field">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADFJRZfDIYBjNzoS"></div>
+      </div>
+
       <div class="row-actions">
         <button type="submit" class="btn" id="submit-btn">Send request</button>
         <span style="font-size:0.86rem; color:var(--w-muted);">We'll reply by email.</span>
@@ -107,11 +112,20 @@ form.addEventListener('submit', async e => {
   status.className = 'status'; status.textContent = '';
   btn.disabled = true; btn.textContent = 'Sending…';
 
+  const turnstileToken = (form.querySelector('[name="cf-turnstile-response"]') || {}).value || '';
+  if (!turnstileToken) {
+    status.className = 'status err';
+    status.textContent = 'Please complete the verification challenge above.';
+    btn.disabled = false; btn.textContent = 'Send request';
+    return;
+  }
+
   const payload = {
     name:    document.getElementById('name').value,
     email:   document.getElementById('email').value,
     notes:   document.getElementById('notes').value,
     website: document.getElementById('website').value,
+    turnstileToken,
   };
 
   try {
@@ -133,7 +147,10 @@ form.addEventListener('submit', async e => {
         'bad_email':      'That email doesn\'t look right — double-check it.',
         'too_large':      'Message is too long. Trim it and try again.',
         'not_configured': 'Sorry — request handling isn\'t wired up yet. Email the assessment owner directly.',
+        'turnstile_failed': 'Verification failed. Refresh the page and try again.',
+        'missing_turnstile': 'Please complete the verification challenge above.',
       }[d.reason] || 'Could not send your request. Try again or email the assessment owner directly.');
+      if (window.turnstile) window.turnstile.reset();
       btn.disabled = false; btn.textContent = 'Send request';
     }
   } catch (e) {

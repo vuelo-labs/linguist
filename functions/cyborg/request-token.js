@@ -34,6 +34,32 @@ export async function onRequestPost({ request, env }) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     return jsonResponse({ ok: false, reason: 'bad_email' }, 400);
 
+  // ── Turnstile verification ──────────────────────────────────────────────
+  const turnstileToken = (body.turnstileToken || '').toString();
+  if (!turnstileToken) return jsonResponse({ ok: false, reason: 'missing_turnstile' }, 400);
+  if (!env.TURNSTILE_SECRET) return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
+
+  const tsIp = request.headers.get('cf-connecting-ip') || '';
+  const tsForm = new FormData();
+  tsForm.append('secret',   env.TURNSTILE_SECRET);
+  tsForm.append('response', turnstileToken);
+  if (tsIp) tsForm.append('remoteip', tsIp);
+
+  try {
+    const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body:   tsForm,
+    });
+    const tsData = await tsRes.json();
+    if (!tsData.success) {
+      console.error('turnstile failed:', tsData['error-codes']);
+      return jsonResponse({ ok: false, reason: 'turnstile_failed' }, 403);
+    }
+  } catch (e) {
+    console.error('turnstile verify error:', e);
+    return jsonResponse({ ok: false, reason: 'turnstile_failed' }, 502);
+  }
+
   const ip      = request.headers.get('cf-connecting-ip') || '';
   const country = request.headers.get('cf-ipcountry')     || '';
   const ua      = (request.headers.get('user-agent')      || '').slice(0, 300);
