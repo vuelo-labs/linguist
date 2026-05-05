@@ -1,9 +1,15 @@
+---
+course-revision: 2026-05-05
+---
+
 # Layer 7 — Agent Design
 ## Skills 16–17
 
-These skills apply when the task is large enough to warrant delegation to a subagent. The key shift is moving from "how do I prompt the model?" to "how do I architect a delegation?"
+This layer is about designing **in-CLI subagents** — the delegated sub-loops you spawn from inside a Claude Code session. The shift from L6 is mechanical: instead of picking the right tool for the next turn, you are architecting a delegation that runs its own multi-turn loop, returns a summary, and discards everything else. The shift in 2026 is also one of cost shape: forked subagents share the parent's prompt cache, declare their own MCP servers, and run inside `CLAUDE_CODE_FORK_SUBAGENT=1` semantics that didn't exist a year ago.
 
 The fundamental value of subagents is **context isolation**. A subagent's tool outputs — file reads, grep results, bash output, web fetches — run in their own context window and never land in yours. You receive a summary. This protects your main session from being filled with intermediate output you won't need again.
+
+What this layer does **not** cover: hosted Managed Agents, the Memory store, and the Advisor pairing pattern. Those are different substrates — sandboxed harnesses, persistent state, fast-executor/strong-advisor pairings — and they live in the parallel module `managed-agents-memory-advisor.md`. When the in-CLI design decision below bumps into "should this be a hosted agent?" or "should the executor have an advisor?", the answer is in that module, not this one.
 
 ---
 
@@ -11,7 +17,7 @@ The fundamental value of subagents is **context isolation**. A subagent's tool o
 
 **What it is:** Deciding what belongs in the main session versus delegated to a subagent. The criterion from the Agent tool's own source prompt: will you need the raw output again? If no, delegate.
 
-**Why it matters:** The Agent tool's prompt (`tools/AgentTool/prompt.ts`) states this directly: "Fork yourself when the intermediate tool output isn't worth keeping in your context." Subagent output that returns to the main session adds to its context. If you only need the conclusion, not the tool calls and intermediate results that produced it, delegating protects the main context window from noise.
+**Why it matters:** The Agent tool's prompt (`tools/AgentTool/prompt.ts` — internal module path inside the shipped Claude Code npm bundle, not a file in the public `anthropics/claude-code` repo; corroborated by independent reverse-engineering write-ups; structure verified against v2.1.128, 2026-05-05; exact wording may have drifted) frames it directly: *fork yourself when the intermediate tool output isn't worth keeping in your context*. Subagent output that returns to the main session adds to its context. If you only need the conclusion, not the tool calls and intermediate results that produced it, delegating protects the main context window from noise.
 
 **The decision framework:**
 
@@ -27,6 +33,7 @@ The fundamental value of subagents is **context isolation**. A subagent's tool o
 - Searching for a specific known file or function (use Glob/Grep directly — faster)
 - Reading 2–3 files (read them directly)
 - Anything where you'll need to refer to the raw output in your next prompt
+- Anything where the right substrate is *not* an in-CLI subagent at all (long-horizon work that should live in a hosted Managed Agent; advisory pairings that should use the Advisor pattern; persistent state that belongs in Memory) — see `managed-agents-memory-advisor.md`.
 
 ---
 
@@ -97,9 +104,9 @@ The subagent reads, synthesises, and returns 450 words of clean summary.
 
 **What it is:** Writing the subagent prompt with the understanding that the subagent has zero context from the main session. A good brief includes: goal, what's been tried, relevant constraints, expected output format, and length target.
 
-**Why it matters:** The Agent tool's documentation is explicit (sourced from `tools/AgentTool/prompt.ts`): *"Brief the agent like a smart colleague who just walked into the room — it hasn't seen this conversation, doesn't know what you've tried, doesn't understand why this task matters."* A terse directive produces shallow work because the agent has to guess at context it doesn't have.
+**Why it matters:** The Agent tool's documentation is explicit (sourced from `tools/AgentTool/prompt.ts`; provenance hedge per Skill 16): *brief the agent like a smart colleague who just walked into the room — it hasn't seen this conversation, doesn't know what you've tried, doesn't understand why this task matters*. A terse directive produces shallow work because the agent has to guess at context it doesn't have.
 
-The same source warns against a specific failure pattern: *"Never delegate understanding. Don't write 'based on your findings, fix the bug' or 'based on the research, implement it.' Those phrases push synthesis onto the agent instead of doing it yourself."* The agent does research. You synthesise it. You write the implementation prompt with the specific file, the specific line, what specifically to change.
+The same source warns against a specific failure pattern: *never delegate understanding. Don't write "based on your findings, fix the bug" or "based on the research, implement it" — those phrases push synthesis onto the agent instead of doing it yourself*. The agent does research. You synthesise it. You write the implementation prompt with the specific file, the specific line, what specifically to change.
 
 **A good brief contains:**
 1. **Goal** — what you're trying to accomplish and why
@@ -213,3 +220,60 @@ Return format:
 - List your sources (URLs) at the end
 - Total length: under 500 words
 ```
+
+---
+
+## Subagent cost shape
+
+Briefing tells you *what* the subagent does. Cost shape tells you *what each delegation actually charges* against tokens, latency, and the parent session's prompt cache. In 2026 Claude Code three mechanisms dominate.
+
+### Fork semantics (`CLAUDE_CODE_FORK_SUBAGENT=1`)
+
+The `CLAUDE_CODE_FORK_SUBAGENT=1` environment variable enables forked subagents on external builds and SDK non-interactive sessions (v2.1.117, 2026-05-05; coverage extended in v2.1.121). A *forked* subagent inherits the parent's conversation prefix as a starting state but runs its own loop from there; the parent context isn't appended to during the sub-run. When the subagent returns, only its summary lands in the parent.
+
+Practical consequence: forked subagents are restartable. Their context is disposable on return. If the work is exploratory or potentially wasted (a research sweep that may turn up nothing), fork it — the failure mode costs you a summary line, not a polluted main context.
+
+### Sub-agent prompt-cache sharing (~3× `cache_creation` reduction)
+
+As of v2.1.128 (2026-05-05), sub-agent progress summaries share the parent's prompt cache, which produces approximately a 3× reduction in `cache_creation` tokens vs. the pre-v2.1.128 behaviour. The same release fixed a separate issue where idle subagent summaries would re-fire on every parent turn; they no longer do.
+
+Practical consequence: the per-subagent fixed cost dropped meaningfully in May 2026. Designs that previously rejected delegation as "too expensive for a small task" deserve a second look. The cost-of-delegation dial moved.
+
+This matters most when you're spawning multiple subagents in a single session — parallel investigation, multi-reviewer patterns, the kind of fan-out that the `code-review` (5 agents) and `pr-review-toolkit` (6 agents) first-party plugins ship out of the box. Cache sharing is what makes those parallel-team designs economical.
+
+### Per-agent MCP servers (frontmatter `mcpServers`)
+
+Agent frontmatter supports `mcpServers` declarations as of v2.1.117 (2026-05-05). A subagent can declare exactly the MCP servers it needs — no more, no less — instead of inheriting the parent's full server list. Per-agent MCP scoping has two effects:
+
+- **Tool-list cache hygiene.** A subagent that only needs one MCP server doesn't carry the parent's twelve. The tool list it ships to the model is smaller, more stable, and cheaper to cache.
+- **Permission surface.** If the subagent shouldn't have access to (say) the production database MCP, don't declare it in the frontmatter. Scoping is mechanical, not advisory.
+
+Combine with `alwaysLoad` on the parent's stable servers (L6) and you get a system where the parent has a hot, stable tool-list cache and each subagent narrows that further to just what its task needs.
+
+### Designing for cost shape
+
+Three rules of thumb:
+
+1. **If you're going to delegate at all, fork.** The disposable-context property is almost always what you want; the parent-pollution failure mode of un-forked delegation is the bigger risk.
+2. **Match the MCP server set to the brief.** A "research the EU AI Act" subagent doesn't need your database MCP. Strip the frontmatter `mcpServers` to what the task uses.
+3. **Don't over-fan-out small tasks.** Cache sharing made fan-out cheaper, not free. Six agents reviewing a PR makes sense (different facets, real parallelism); six agents each reading one file does not (one Grep would do).
+
+---
+
+## Where this layer ends
+
+This layer ends at the boundary of the in-CLI session. Three substrates take over from here:
+
+- **Hosted Managed Agents** — sandboxed, server-side agents with their own beta header, SSE streaming, and audit semantics. The right substrate when the work outlives a CLI session, needs to run unattended, or needs an isolation boundary the in-CLI subagent can't provide. Covered in `managed-agents-memory-advisor.md`.
+- **Memory** — the persistent state primitive (file-backed, scoped, audited, exportable; public beta from 2026-04-23). The right answer when "this should survive across sessions" — the question CLAUDE.md and `~/.claude/settings.json` answer differently. Covered in `managed-agents-memory-advisor.md`.
+- **The Advisor pattern** — fast executor + strong advisor pairing (beta header `advisor-tool-2026-03-01` as of 2026-05-05). The right answer when a long-horizon executor needs occasional strong-model judgement without paying the strong-model price on every turn. Covered in `managed-agents-memory-advisor.md`.
+
+The decision rule: stay in this layer when the work fits inside one CLI session and the substrate is a delegated sub-loop. Cross into the sibling module when the substrate is hosted, persistent, or paired.
+
+---
+
+## Next
+
+L8 (Production Architecture) takes the same machinery to scale: automatic prompt caching, cache-bust hygiene around MCP and tool lists, data residency, model selection across the 2026 lineup. Where L7 is about the *shape of one delegation*, L8 is about what changes when you run thousands of them per day.
+
+The hosted-substrate sibling module — `managed-agents-memory-advisor.md` — extends this layer rather than continuing it. Read both before designing anything that spans more than a single CLI session.
