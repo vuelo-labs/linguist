@@ -1,3 +1,7 @@
+---
+course-revision: 2026-05-05
+---
+
 # Layer 1 — The Mental Model
 ## Skills 1–3
 
@@ -38,8 +42,8 @@ The model makes exactly one edit. The instruction left no room for interpretatio
 *WITH:*
 ```
 Write a BigQuery SQL query that compares 30-day activation rates between two cohorts:
-- Q3 2025 cohort: users who signed up between 2025-07-01 and 2025-09-30
-- Q4 2025 cohort: users who signed up between 2025-10-01 and 2025-12-31
+- Q3 2026 cohort: users who signed up between 2026-07-01 and 2026-09-30
+- Q4 2026 cohort: users who signed up between 2026-10-01 and 2026-12-31
 
 Activation = a row in the events table where event_name = 'onboarding_step_3_complete'
 within 30 days of the user's created_at timestamp.
@@ -77,7 +81,7 @@ The constraint ("only what differentiates Enterprise") eliminates the failure mo
 
 **What it is:** Everything the model knows about your task is in the context window. What isn't there doesn't exist. As the window fills, Claude Code automatically compacts the conversation into a summary, and the fidelity of that summary determines what survives.
 
-**Why it matters:** The compaction logic (visible in `services/compact/prompt.ts`) asks the model to summarise the full conversation into nine structured sections. Raw tool output, intermediate reasoning steps, and implicit context that was never stated are the most likely things to be lost or degraded. Once compacted, you cannot recover what was dropped.
+**Why it matters:** When the window fills, Claude Code's compaction logic asks the model to summarise the full conversation into a structured set of sections. Raw tool output, intermediate reasoning steps, and implicit context that was never stated are the most likely things to be lost or degraded. Once compacted, you cannot recover what was dropped.
 
 ---
 
@@ -141,7 +145,21 @@ I will be building this in sections. Remind me if I drift from these rules.
 
 **What it is:** The model cannot read files, run code, browse the web, or create agents without tools. Understanding which tools exist, when they fire, and what they cost lets you guide the workflow rather than letting the model choose the most expensive path by default.
 
-**Why it matters:** The tool list in Claude Code's system prompt is visible and deterministic. The model chooses tools based on how you frame the task. Vague requests trigger expensive tool chains (Agent tool, multi-file reads, bash commands) when a targeted request might need only one read. Every unnecessary tool call costs tokens and time.
+**Why it matters:** The tool list available in any given session is visible and deterministic — and in 2026 it is broader than just the built-in file/shell tools. The model chooses tools based on how you frame the task. Vague requests trigger expensive tool chains (sub-agents, multi-file searches, bash commands) when a targeted request might need only one read. Every unnecessary tool call costs tokens and time.
+
+---
+
+**The 2026 tool surface (callout)**
+
+When this course was first written, "tools" meant the built-in set Claude Code shipped with: Read, Write, Edit, Glob, Grep, Bash, WebSearch, WebFetch, Task. That set is still the backbone, but as of 2026-05-05 a Claude Code session typically exposes five *kinds* of tool, and knowing which kind you're invoking changes how you prompt:
+
+- **Built-in tools.** Read, Edit, Bash, Glob, Grep, etc. Always loaded. Cheap, deterministic, well-understood by the model.
+- **MCP tools.** Exposed by MCP servers configured in `settings.json` or per-subagent frontmatter. By default they're tool-search-deferred; servers marked `alwaysLoad` are pre-loaded into the prompt every turn (as of v2.1.128, 2026-05-05). This is the difference between "the model has to go look for it" and "the model sees it from turn one".
+- **Skills.** A Skill is a folder containing a `SKILL.md` with `name` and `description` frontmatter. The description is what the model uses to *proactively activate* the skill — the model sees a skill index and decides on its own when to load the skill body. You don't always have to ask. (Spec: agentskills.io; install via `/plugin install ...@anthropic-agent-skills`.)
+- **Deferred tools.** WebSearch and WebFetch are deferred — their full schemas aren't loaded by default and they're not callable from the first turn of a Skill unless the skill declares `context: fork` in its frontmatter (fix shipped in v2.1.126, 2026-05-05). If "use WebSearch" silently fails inside a skill, this is usually why.
+- **Sub-agent-as-tool.** A frontmatter-defined subagent (with its own system prompt and optional `mcpServers` declaration, v2.1.117) is, from the parent model's perspective, just another tool it can call. Forked subagents (`CLAUDE_CODE_FORK_SUBAGENT=1`) inherit cached context from the parent, which is how a "spawn an agent" prompt becomes cheap rather than catastrophic.
+
+The practical mental-model upgrade: when you ask Claude to do something, it isn't picking from one flat list. It's picking from a layered surface where some tools are always visible, some are gated behind activation, and some are entirely the model's choice to discover. Vague prompts let the model wander that surface; precise prompts pin it.
 
 ---
 
@@ -149,14 +167,14 @@ I will be building this in sections. Remind me if I drift from these rules.
 
 *Scenario:* A developer wants to understand how the `formatCurrency` function works before modifying it.
 
-*WITHOUT:* The developer writes `how does currency formatting work in this codebase?`. The model doesn't know the function name, so it spawns a search across the entire codebase using Glob and Grep, reads four candidate files, and eventually finds the right one. 800 tokens spent, 40 seconds elapsed.
+*WITHOUT:* The developer writes `how does currency formatting work in this codebase?`. The model doesn't know the function name, so it spawns a search across the entire codebase using Glob and Grep, reads four candidate files, and eventually finds the right one. A long chain of tool calls when one would have done.
 
 *WITH:*
 ```
 Read src/utils/currency.ts and explain the formatCurrency function.
 ```
 
-The model issues a single Read tool call. 80 tokens, 3 seconds.
+The model issues a single Read tool call. One tool call, deterministic path.
 
 ---
 
@@ -180,14 +198,16 @@ The model uses the Bash tool with the exact command. One tool call, deterministi
 
 *Scenario:* A researcher needs the current number of employees at a specific company for a market sizing model.
 
-*WITHOUT:* The researcher writes `find out how many employees Stripe has`. The model may hallucinate a number from training data, or use WebSearch with a vague query that returns a blog post with a stale figure, or launch an Agent to do extended research. The path and reliability vary.
+*WITHOUT:* The researcher writes `find out how many employees Stripe has`. The model may hallucinate a number from training data, or use WebSearch with a vague query that returns a blog post with a stale figure, or launch a sub-agent to do extended research. The path and reliability vary.
 
 *WITH:*
 ```
 Use WebSearch to find Stripe's current employee count. Search for:
-"Stripe employees 2025" site:linkedin.com OR site:crunchbase.com OR site:stripe.com
+"Stripe employees 2026" site:linkedin.com OR site:crunchbase.com OR site:stripe.com
 
 Report the number, the source URL, and the date of the source.
 ```
 
 The instruction specifies the tool, the query, the sources to prefer, and the output format. The model cannot take a shortcut.
+
+(Note: WebSearch is a *deferred* tool. If you're invoking this from inside a Skill, the skill's `SKILL.md` must declare `context: fork` for WebSearch to be available on the first turn — see the 2026 tool-surface callout above.)

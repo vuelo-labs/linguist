@@ -1,7 +1,13 @@
+---
+course-revision: 2026-05-05
+---
+
 # Layer 3 — Session Hygiene
 ## Skills 7–9
 
 These skills are about managing the structure of working sessions — where instructions live, how sessions are bounded, and the cost of corrections that arrive too late.
+
+Persistent state in 2026 Claude Code lives in three places, with three different lifetimes and audit profiles: **CLAUDE.md** (instructions loaded fresh into every session's system prompt), **settings.json** (configuration and permissions, persisted by the harness), and **Memory** (file-backed cross-session state in Managed Agents, public beta as of 2026-05-05). This module covers all three, plus the bounding mechanics — `/clear`, `/compact`, `/usage`, `claude project purge` — that decide what survives between sessions and what doesn't.
 
 ---
 
@@ -9,7 +15,9 @@ These skills are about managing the structure of working sessions — where inst
 
 **What it is:** CLAUDE.md is a markdown file loaded into the system prompt at session start. Instructions written there are available in every session without taking up conversation history. Anything you would say in every session belongs in CLAUDE.md, not in chat.
 
-**Why it matters:** CLAUDE.md files are loaded in a defined hierarchy (confirmed by `utils/claudemd.ts`): managed (system-wide), user (`~/.claude/CLAUDE.md`), project (repo-level `CLAUDE.md` and `.claude/rules/*.md`), and local (`CLAUDE.local.md`). They are read once at session start and cached. Unlike conversation messages, they don't accumulate in history or degrade through compaction — they're loaded fresh every time.
+**Why it matters:** CLAUDE.md files are loaded in a defined hierarchy — managed (system-wide), user (`~/.claude/CLAUDE.md`), project (repo-level `CLAUDE.md` and `.claude/rules/*.md`), and local (`CLAUDE.local.md`) (as of v2.1.128, 2026-05-05). They are read once at session start and cached. Unlike conversation messages, they don't accumulate in history or degrade through compaction — they're loaded fresh every time.
+
+**CLAUDE.md vs. settings.json.** CLAUDE.md is for *instructions to the model*. `settings.json` is for *configuration of the harness*: permissions, hooks, env vars, MCP servers, allowed tools. Since v2.1.119 (Apr 23, 2026), `/config` changes persist to `~/.claude/settings.json`, and managed-settings inheritance gives admins a way to ship policy down to user and project scopes. The two files coexist: a Bun-only project might pin `bun` in `package.json`, declare its style rules in `CLAUDE.md`, and allowlist `bun test` in `.claude/settings.json`. Permission tiers `allowManagedDomainsOnly` and `allowManagedReadPathsOnly` (security inheritance fix in v2.1.126) let an org constrain network and read access without trusting the project to do it. If a rule is "what the model should do", it goes in CLAUDE.md; if it's "what the harness should permit, run, or log", it goes in settings.json.
 
 **What belongs in CLAUDE.md:**
 - Tech stack constraints ("we use Bun, not Node")
@@ -101,7 +109,14 @@ Because it's in the user-level CLAUDE.md (`~/.claude/CLAUDE.md`), these rules ap
 
 **What it is:** Starting a new session (or clearing context with `/clear`) for each distinct task, rather than accumulating tasks in a single long session. One session, one purpose.
 
-**Why it matters:** Context from unrelated previous tasks is dead weight that accumulates in the context window and affects compaction. From `services/compact/prompt.ts`: the compaction model is asked to summarise "primary requests and intent", "current work", and "pending tasks". If a session contains three unrelated tasks, the summary tries to hold all three, which dilutes focus on the active one. The compaction buffer (`AUTOCOMPACT_BUFFER_TOKENS` in `autoCompact.ts`) means compaction fires before the window is fully full — so the cost of dead context arrives earlier than users expect.
+**Why it matters:** Context from unrelated previous tasks is dead weight that accumulates in the context window and affects compaction. The compaction model is asked to summarise primary intent, current work, and pending tasks; if a session contains three unrelated tasks, the summary tries to hold all three, which dilutes focus on the active one. Auto-compaction also fires before the window is fully full — a built-in buffer in the harness means the cost of dead context arrives earlier than users expect (as of v2.1.128, 2026-05-05; the v2.1.128 release also fixed a 1M-context auto-compact false-positive).
+
+**The toolkit.** Four primitives, in increasing order of force:
+
+- `/clear` — drop the current conversation; start the next turn fresh. Use between unrelated tasks in the same working day.
+- `/compact` — manually trigger compaction now, rather than waiting for the buffer. Useful when you're about to start a long sub-task and want a clean summary as the new baseline.
+- `/usage` — inspect token spend and session shape (replaces the old `/cost` and `/stats`, merged in v2.1.118). Treat it as the speedometer: if you're seeing compaction fire every few turns, the session is too broad.
+- `claude project purge [path]` — wipe all Claude Code state for a project: transcripts, tasks, file history, config (v2.1.126; supports `--dry-run`, `-y`, `-i`, `--all`). The nuclear option, for when a project's accumulated state has become a liability rather than an asset.
 
 ---
 
@@ -197,3 +212,29 @@ underestimated the work.
 Do not give me background context, framing advice, or a full prep document.
 Just the three bullets.
 ```
+
+---
+
+### Memory (Managed Agents) — public beta as of 2026-05-05
+
+**What it is:** Memory is a file-backed, cross-session state store that lives inside Claude Managed Agents (the hosted agent harness, public beta Apr 8, 2026; Memory itself entered public beta Apr 23, 2026 under the beta header `managed-agents-2026-04-01`). An agent can read and write memory entries during one session and find them again in the next, without the user re-supplying them. Memory has scoped permissions, audit logs, API export, and supports concurrent multi-agent stores.
+
+**Why it's in this module:** Memory is the third place persistent state can live, alongside CLAUDE.md and settings.json. The three are not interchangeable:
+
+| Surface | Lifetime | Audience | Audit profile |
+|---|---|---|---|
+| **CLAUDE.md** | Loaded fresh every session; edited deliberately by humans | The model | Tracked in version control; diff-reviewable |
+| **settings.json** | Persisted by the harness; edited deliberately by humans (or admins via managed settings) | The harness (permissions, hooks, env) | Tracked in version control or org policy; diff-reviewable |
+| **Memory** | Persisted by the agent itself across sessions; written *by the model* during execution | The model (next session's self) | API export + audit logs; reviewable but not git-shaped |
+
+The headline distinction is *who writes it*. CLAUDE.md and settings.json are human-authored artifacts the model and harness consume. Memory is model-authored — the agent decides what to retain. That's powerful for long-horizon work (a research agent that remembers which sources were dead ends, an ops agent that remembers which runbooks the team actually follows) and risky for everything else: anything written into Memory is a future input the user did not explicitly approve, which is why the Memory beta ships with scoped permissions and audit logs as first-class controls.
+
+**When Memory replaces CLAUDE.md:** when the rule is *learned* rather than *stated*. "We use Bun, not Node" is a CLAUDE.md rule — it's known up front, it's stable, and a human should own it. "Liam prefers code review comments grouped by file rather than by severity" is a Memory candidate — an agent could discover it from feedback over several sessions and retain it without the user maintaining a preferences file. Treat Memory as cumulative observation, CLAUDE.md as deliberate instruction.
+
+**When Memory replaces settings.json:** rarely. Permissions, hooks, and env vars are policy, and policy belongs in a reviewable file. If an agent is making per-session permission decisions, that's an `allowManagedDomainsOnly`-style problem, not a Memory problem.
+
+**Practical posture for now (public beta):** treat Memory as opt-in for individual long-running agents, not as a default for every session. Read the audit logs. Date-stamp anything you build on top of it — the spec is still moving.
+
+---
+
+**Layer 3 thesis:** persistent state across sessions is not one thing. CLAUDE.md (human-authored instructions, loaded fresh every session), settings.json (human-authored harness configuration, persisted by the tool), and Memory (model-authored cross-session state, in beta) cover three different lifetimes and three different audit profiles. Session hygiene is choosing the right surface for each piece of state — and using `/clear`, `/compact`, `/usage`, and `claude project purge` to keep the parts that don't belong out of the working session.

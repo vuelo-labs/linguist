@@ -1,3 +1,7 @@
+---
+course-revision: 2026-05-05
+---
+
 # Layer 2 — Communication Primitives
 ## Skills 4–6
 
@@ -9,7 +13,7 @@ With the mental model in place, these three skills cover the mechanics of well-f
 
 **What it is:** The imperative verb at the start of a request signals scope. `Fix`, `add`, `refactor`, `explain`, and `extract` have different blast radii. Vague verbs like `improve`, `clean up`, and `look at` have no defined ceiling.
 
-**Why it matters:** The model interprets the verb as a constraint on what it's allowed to do. `Fix` bounds the model to the specific problem. `Improve` authorises the model to decide what an improvement looks like — and it will. The system prompt in `constants/prompts.ts` explicitly instructs the model: "Don't add features, refactor code, or make improvements beyond what was asked." It can only honour that if the verb is unambiguous.
+**Why it matters:** The model interprets the verb as a constraint on what it's allowed to do. `Fix` bounds the model to the specific problem. `Improve` authorises the model to decide what an improvement looks like — and it will. Claude Code's system prompt explicitly tells the model not to add features, refactor, or make improvements beyond what was asked — but the harness can only honour that instruction if the verb you supplied is unambiguous in the first place.
 
 **Verb reference:**
 
@@ -24,6 +28,8 @@ With the mental model in place, these three skills cover the mechanics of well-f
 | `clean up` | ⚠ Ambiguous — avoid |
 | `improve` | ⚠ No ceiling — avoid unless constrained |
 | `look at` | ⚠ Not a verb — produces no defined action |
+
+> **Footnote (as of Claude Code v2.1.128, 2026-05-05).** The verb still does the work, but Claude Code 2.1.x adds two affordances that change *who chooses the verb*. **Auto mode** (Mar 25, 2026) skips per-step permission prompts inside a permitted scope, so an ambiguous verb runs further before you see it; the cost of `improve` rises accordingly. **Skills with proactive activation** (SKILL.md frontmatter) let the harness invoke a skill on a matched intent — meaning the *skill's* verbs, not yours, drive the action once it activates. In both cases the discipline is the same: be unambiguous up front, because there are fewer interrupts on the way down.
 
 ---
 
@@ -223,3 +229,23 @@ Fix only clear errors (subject-verb agreement, comma splices, apostrophes).
 ```
 
 The do-not list eliminates all the adjacent things the model might otherwise decide to "improve".
+
+---
+
+### Callout — Structured outputs vs prompt-only formatting
+
+The three skills above shape requests in *prose*. As of Feb 5, 2026, the Claude API also exposes a first-class output-shape control: the parameter formerly known as `output_format` was renamed to `output_config.format` (alongside fine-grained tool streaming GA the same day). When you need a guaranteed shape — JSON conforming to a schema, a constrained enum, a typed field — `output_config.format` is the canonical mechanism. The model is constrained at decode time, not asked nicely in the prompt.
+
+**Reach for `output_config.format` when:**
+- The output feeds a parser, schema validator, or downstream tool call.
+- You need the *shape* invariant across runs even when the *content* varies.
+- Any free-text deviation is a defect, not a stylistic choice.
+
+**Stay in prose (the Skill 4–6 mechanics) when:**
+- You're working inside Claude Code or another harness where you don't control the API call.
+- The output is human-read — a diff, an explanation, a brief — and the structure is illustrative rather than contractual.
+- You want the model to choose section ordering, emphasis, or headings based on the material.
+
+The mistake to avoid is using prose to *enforce* a schema the API can guarantee. If the consumer is a JSON parser, don't write "respond with valid JSON only, no preamble" — set `output_config.format`. Save the verb-first / target-specific / constraint-setting discipline for the work inside the shape, not the shape itself.
+
+*(API parameter renamed Feb 5, 2026; verified against the 2026-05-05 platform notes. Inside Claude Code the harness owns the request, so this callout is most directly actionable when you're calling the API yourself.)*
