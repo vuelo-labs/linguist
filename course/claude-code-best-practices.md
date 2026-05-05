@@ -4,7 +4,7 @@ course-revision: 2026-05-05
 
 # Claude Code — Best Practices
 
-Grounded in Claude Code's published system-prompt behaviour and the v2.1.x harness surface (Skills, Plugins, Hooks, MCP, auto mode, managed settings). Internal symbol citations elsewhere in the course are corroborated by reverse-engineering write-ups; treat the externally-observable surfaces below — slash commands, settings files, plugin names, beta headers — as the durable anchors.
+Grounded in Claude Code's published system-prompt behaviour and the v2.1.x harness surface (Skills, Plugins, Hooks, MCP, auto mode, managed settings). Internal symbol citations elsewhere in the course refer to module paths inside the shipped npm bundle; treat the externally-observable surfaces below — slash commands, settings files, plugin names, beta headers — as the durable anchors.
 
 ---
 

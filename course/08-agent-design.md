@@ -17,7 +17,7 @@ What this layer does **not** cover: hosted Managed Agents, the Memory store, and
 
 **What it is:** Deciding what belongs in the main session versus delegated to a subagent. The criterion from the Agent tool's own source prompt: will you need the raw output again? If no, delegate.
 
-**Why it matters:** The Agent tool's prompt (`tools/AgentTool/prompt.ts` — internal module path inside the shipped Claude Code npm bundle, not a file in the public `anthropics/claude-code` repo; corroborated by independent reverse-engineering write-ups; structure verified against v2.1.128, 2026-05-05; exact wording may have drifted) frames it directly: *fork yourself when the intermediate tool output isn't worth keeping in your context*. Subagent output that returns to the main session adds to its context. If you only need the conclusion, not the tool calls and intermediate results that produced it, delegating protects the main context window from noise.
+**Why it matters:** The Agent tool's prompt (`tools/AgentTool/prompt.ts` — internal module path inside the shipped Claude Code npm bundle; structure verified against v2.1.128, 2026-05-05; exact wording may have drifted) frames it directly: *fork yourself when the intermediate tool output isn't worth keeping in your context*. Subagent output that returns to the main session adds to its context. If you only need the conclusion, not the tool calls and intermediate results that produced it, delegating protects the main context window from noise.
 
 **The decision framework:**
 

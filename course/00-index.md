@@ -62,7 +62,7 @@ The 2026 ecosystem moved several mechanics out of "things you have to do by hand
 |-------|--------|---------|
 | **Opus 4.7** | GA (announced 2026-04-16) | `xhigh` effort, per-task token budgets, vision up to 2,576 px on long edge, multi-step self-verification |
 | **Sonnet 4.6** | GA (Feb 17, 2026) | 1M context GA, web search + programmatic tool calling GA, code execution v2 free with web search/fetch |
-| **Haiku 4.5** | GA | Fast executor in the Advisor pattern |
+| **Haiku 4.5** | GA *(announce date unconfirmed at time of release)* | Fast executor in the Advisor pattern |
 | **Opus 4.6** | GA (Feb 5, 2026) | Adaptive thinking default; Compaction API; data residency controls |
 
 Beta-header timeline relevant to the course: `context-1m-2025-08-07` retired for Sonnet 4.5 / Sonnet 4 on 2026-04-30; `managed-agents-2026-04-01` (Managed Agents + Memory) and `advisor-tool-2026-03-01` (Advisor) are public beta as of 2026-05-05.
@@ -98,4 +98,4 @@ L1–L6, L8, and L10 are skill-numbered; L7 and L9 are primitive-organised. Skil
 
 ---
 
-*Source: Claude Code internal source (v2.1.128, May 2026) — `services/compact/prompt.ts`, `constants/prompts.ts`, `utils/api.ts`, `utils/claudemd.ts`, `services/compact/autoCompact.ts`, `tools/AgentTool/prompt.ts`, `promptCacheBreakDetection.ts`. These are module paths inside the shipped npm bundle, not files in the public `anthropics/claude-code` repo (which contains only docs and install scripts). Citations are corroborated by independent reverse-engineering write-ups; structure verified against v2.1.128, exact wording may have drifted between releases. Externally observable surfaces — slash commands, settings files, plugin names, beta headers, the published 2026 model lineup — are the durable anchors.*
+*Source: Claude Code internal source (v2.1.128, May 2026) — `services/compact/prompt.ts`, `constants/prompts.ts`, `utils/api.ts`, `utils/claudemd.ts`, `services/compact/autoCompact.ts`, `tools/AgentTool/prompt.ts`. These are module paths inside the shipped npm bundle. Structure was verified against v2.1.128; exact wording may have drifted between releases. Externally observable surfaces — slash commands, settings files, plugin names, beta headers, the published 2026 model lineup — are the durable anchors.*
