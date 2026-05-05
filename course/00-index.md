@@ -1,6 +1,13 @@
+---
+course-revision: 2026-05-05
+status: pre-Wave-2.5 — modules below have moved on; index rewrite scheduled for Wave 4
+---
+
 # Prompting and AI Agent Skills — Course Index
 
 A skill stack from first use to automated agent swarm design. Grounded in Claude Code's internal source code — system prompts, compaction logic, caching architecture, and agent delegation primitives.
+
+> **Reader note (2026-05-05):** This index is stale relative to the modules. Layers 1–6 have been rewritten against the 2026 ecosystem (auto prompt caching, structured outputs, Skills/Plugins/Hooks, Memory, Compaction API, Advisor, Opus 4.7). A new Layer 6.5 (`skills-plugins-hooks.md`) sits between L6 and L7. Layers 7–8 are pending Wave 3. Treat each module's own opening as the source of truth; the rows below will be rebuilt in Wave 4.
 
 ## How this course is structured
 
@@ -53,4 +60,4 @@ Each skill follows the same structure:
 
 ---
 
-*Source: Claude Code internal source — `services/compact/prompt.ts`, `constants/prompts.ts`, `utils/api.ts`, `utils/claudemd.ts`, `services/compact/autoCompact.ts`, `tools/AgentTool/prompt.ts`*
+*Source: Claude Code internal source (v2.1.128, May 2026) — `services/compact/prompt.ts`, `constants/prompts.ts`, `utils/api.ts`, `utils/claudemd.ts`, `services/compact/autoCompact.ts`, `tools/AgentTool/prompt.ts`. These are module paths inside the shipped npm bundle, not files in the public `anthropics/claude-code` repo (which contains only docs and install scripts). Citations are corroborated by independent reverse-engineering write-ups; exact wording may have drifted between releases.*
