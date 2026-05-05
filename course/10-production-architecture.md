@@ -2,7 +2,7 @@
 course-revision: 2026-05-05
 ---
 
-# Layer 8 — Production Architecture
+# Layer 10 — Production Architecture
 ## Skill 18
 
 This layer is for builders deploying Claude on the API to multiple users. The skills here don't apply to a single Claude Code session — they apply when you're designing a system that serves thousands of requests per day across many users, regions, and models.
@@ -209,7 +209,7 @@ Three questions, in order:
 
 ## Beyond Skill 18
 
-The eight layers in this course take a person from first use to production-grade design. Three topics that previously sat outside the framework — agent swarms, stateful sessions, and instrumentation — have shipped as Anthropic primitives in 2026 and now belong inside the course rather than as forward-looking notes.
+The ten layers in this course take a person from first use to production-grade design. Three topics that previously sat outside the framework — agent swarms, stateful sessions, and instrumentation — have shipped as Anthropic primitives in 2026 and now belong inside the course rather than as forward-looking notes.
 
 **Managed Agents and Memory.** The "agent swarm" framing of 2025 — where you'd hand-roll a coordinator, dispatch to specialist agents, collect and synthesise — is now a hosted primitive. **Claude Managed Agents** (public beta, 2026-04-08, header `managed-agents-2026-04-01`) ships a sandboxed agent harness with built-in tools and SSE streaming. **Memory** (public beta, 2026-04-23) gives those agents file-backed cross-session state with scoped permissions and audit logs. The Advisor pattern (header `advisor-tool-2026-03-01`, beta as of 2026-04-09) pairs a fast executor with a stronger advisor for mid-generation strategic guidance. These are the new substrate for stateful long-horizon work, and they're covered in depth in the **Managed Agents, Memory, and the Advisor pattern** module.
 

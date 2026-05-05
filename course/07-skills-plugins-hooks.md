@@ -1,11 +1,10 @@
 ---
 course-revision: 2026-05-05
-status: standalone module (Wave 4 will renumber)
 ---
 
-# Layer 6.5 — Skills, Plugins, and Hooks
+# Layer 7 — Skills, Plugins, and Hooks
 
-This module sits between tool fluency (L6) and agent design (L7). L6 teaches you to read a request and pick the right tool from what's already loaded. L7 teaches you to design longer-horizon agents that decompose work across substrates. The layer between is about *extending* the harness: adding new instructions the model picks up on its own (Skills), bundling those plus commands and configuration into installable units (Plugins), and inserting deterministic side-effects around tool calls (Hooks). Each is a different mechanism with a different lifetime and a different activation surface, and most "how do I make Claude Code always X" questions resolve to one of the three. Picking the wrong one is how people end up with a Skill that should have been a Hook, or a Hook that should have been a Subagent.
+This module sits between tool fluency (L6) and agent design (L8). L6 teaches you to read a request and pick the right tool from what's already loaded. L8 teaches you to design longer-horizon agents that decompose work across substrates. The layer between is about *extending* the harness: adding new instructions the model picks up on its own (Skills), bundling those plus commands and configuration into installable units (Plugins), and inserting deterministic side-effects around tool calls (Hooks). Each is a different mechanism with a different lifetime and a different activation surface, and most "how do I make Claude Code always X" questions resolve to one of the three. The wrong choice produces a Skill that should have been a Hook, or a Hook that should have been a Subagent.
 
 ---
 
@@ -77,7 +76,7 @@ A plugin is a packaging format. It bundles any combination of skills, slash comm
 | `ralph-wiggum` | `/ralph-loop`, `/cancel-ralph` for self-referential AI loops |
 | `security-guidance` | PreToolUse hook monitoring 9 security patterns |
 
-Read across that table and the pattern is clear: plugins are how Anthropic ships *cross-cutting* features that are themselves combinations of the other primitives. `code-review` is six parallel subagents plus a slash command. `security-guidance` is one PreToolUse hook plus its rule set. `hookify` is the meta-plugin for authoring hooks. The plugin layer doesn't introduce new model behaviour — it introduces *bundling*.
+The pattern across that table: plugins are how Anthropic ships *cross-cutting* features that are themselves combinations of the other primitives. `code-review` is six parallel subagents plus a slash command. `security-guidance` is one PreToolUse hook plus its rule set. `hookify` is the meta-plugin for authoring hooks. The plugin layer doesn't introduce new model behaviour — it introduces *bundling*.
 
 **Plugin system features (recent):**
 
@@ -122,7 +121,7 @@ Hooks are harness-executed side-effects, not model actions. The harness fires ev
 
 Authoring is scaffolded by the `hookify` first-party plugin (`/hookify`, `/hookify:configure`, `/hookify:list`, `/hookify:help`).
 
-Reference: [docs.claude.com hooks](https://code.claude.com/docs/en/hooks).
+Reference: [docs.claude.com hooks](https://docs.claude.com/en/docs/claude-code/hooks).
 
 ---
 
@@ -174,17 +173,17 @@ The same rubric flips on a different task: *"summarise the changes in this PR"*.
 
 ---
 
-## How this composes with L6 and L7
+## How this composes with L6 and L8
 
 L6 (Tool Fluency) gives you the cost hierarchy and taxonomy of tools available *right now* in a given session. This module sits one level up: the primitives that *change what's available* and *change what happens around tool calls*. A skill adds new instructions when the model needs them. A plugin adds skills, commands, agents, and hooks together. A hook wraps tool calls with deterministic behaviour the model doesn't choose.
 
-L7 (Agent Design) goes one level further again — designing longer-horizon agents that span in-CLI subagents, hosted Managed Agents, and the Advisor pairing pattern. The decision tree in this module (Skill vs Subagent vs Hook) is L6.5's version of the question L7 asks at agent scale: *what substrate does this work belong on?* Same shape of question, different altitude.
+L8 (Agent Design) goes one level further again — designing longer-horizon agents that span in-CLI subagents, hosted Managed Agents, and the Advisor pairing pattern. The decision tree in this module (Skill vs Subagent vs Hook) is this layer's version of the question L8 asks at agent scale: *what substrate does this work belong on?* Same shape of question, different altitude.
 
 Cross-references:
 
 - Skills as a context-management primitive (`context: fork` for clean working memory): see Layer 4.
 - Plugins as a configuration-distribution mechanism (vs. CLAUDE.md and settings.json): see Layer 3.
-- Subagent design depth (frontmatter, `mcpServers`, prompt-cache sharing, fork): see Layer 7.
+- Subagent design depth (frontmatter, `mcpServers`, prompt-cache sharing, fork): see Layer 8.
 
 Canonical references:
 
@@ -192,4 +191,4 @@ Canonical references:
 - [anthropics/skills](https://github.com/anthropics/skills) — the skills marketplace.
 - [agentskills.io](http://agentskills.io) — the cross-vendor skill spec.
 - [plugins/README.md](https://github.com/anthropics/claude-code/blob/main/plugins/README.md) — official plugin index.
-- [docs.claude.com hooks](https://code.claude.com/docs/en/hooks) — hook reference.
+- [docs.claude.com hooks](https://docs.claude.com/en/docs/claude-code/hooks) — hook reference.

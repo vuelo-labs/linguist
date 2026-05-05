@@ -81,7 +81,7 @@ The constraint ("only what differentiates Enterprise") eliminates the failure mo
 
 **What it is:** Everything the model knows about your task is in the context window. What isn't there doesn't exist. As the window fills, Claude Code automatically compacts the conversation into a summary, and the fidelity of that summary determines what survives.
 
-**Why it matters:** When the window fills, Claude Code's compaction logic asks the model to summarise the full conversation into a structured set of sections. Raw tool output, intermediate reasoning steps, and implicit context that was never stated are the most likely things to be lost or degraded. Once compacted, you cannot recover what was dropped.
+**Why it matters:** When the window fills, Claude Code's compaction logic asks the model to summarise the full conversation into a structured set of sections. Raw tool output, intermediate reasoning steps, and implicit context that was never stated are the most likely things to be lost or degraded. Once compacted, you cannot recover what was dropped. (For the API counterpart, see Layer 4's Compaction API row.)
 
 ---
 
@@ -145,7 +145,7 @@ I will be building this in sections. Remind me if I drift from these rules.
 
 **What it is:** The model cannot read files, run code, browse the web, or create agents without tools. Understanding which tools exist, when they fire, and what they cost lets you guide the workflow rather than letting the model choose the most expensive path by default.
 
-**Why it matters:** The tool list available in any given session is visible and deterministic — and in 2026 it is broader than just the built-in file/shell tools. The model chooses tools based on how you frame the task. Vague requests trigger expensive tool chains (sub-agents, multi-file searches, bash commands) when a targeted request might need only one read. Every unnecessary tool call costs tokens and time.
+**Why it matters:** The tool list available in any given session is visible and deterministic — and in 2026 it is broader than just the built-in file/shell tools. The model chooses tools based on how you frame the task. Vague requests let the model wander the tool surface; precise requests pin it. Every unnecessary tool call costs tokens and time.
 
 ---
 
@@ -155,11 +155,11 @@ When this course was first written, "tools" meant the built-in set Claude Code s
 
 - **Built-in tools.** Read, Edit, Bash, Glob, Grep, etc. Always loaded. Cheap, deterministic, well-understood by the model.
 - **MCP tools.** Exposed by MCP servers configured in `settings.json` or per-subagent frontmatter. By default they're tool-search-deferred; servers marked `alwaysLoad` are pre-loaded into the prompt every turn (as of v2.1.128, 2026-05-05). This is the difference between "the model has to go look for it" and "the model sees it from turn one".
-- **Skills.** A Skill is a folder containing a `SKILL.md` with `name` and `description` frontmatter. The description is what the model uses to *proactively activate* the skill — the model sees a skill index and decides on its own when to load the skill body. You don't always have to ask. (Spec: agentskills.io; install via `/plugin install ...@anthropic-agent-skills`.)
+- **Skills.** A Skill is a folder containing a `SKILL.md` with `name` and `description` frontmatter. The description is what the model uses to *proactively activate* the skill — the model sees a skill index and decides on its own when to load the skill body. You don't always have to ask. (The user can also invoke a skill explicitly via `/skills`; covered in Layer 7.) (Spec: agentskills.io; install via `/plugin install ...@anthropic-agent-skills`.)
 - **Deferred tools.** WebSearch and WebFetch are deferred — their full schemas aren't loaded by default and they're not callable from the first turn of a Skill unless the skill declares `context: fork` in its frontmatter (fix shipped in v2.1.126, 2026-05-05). If "use WebSearch" silently fails inside a skill, this is usually why.
 - **Sub-agent-as-tool.** A frontmatter-defined subagent (with its own system prompt and optional `mcpServers` declaration, v2.1.117) is, from the parent model's perspective, just another tool it can call. Forked subagents (`CLAUDE_CODE_FORK_SUBAGENT=1`) inherit cached context from the parent, which is how a "spawn an agent" prompt becomes cheap rather than catastrophic.
 
-The practical mental-model upgrade: when you ask Claude to do something, it isn't picking from one flat list. It's picking from a layered surface where some tools are always visible, some are gated behind activation, and some are entirely the model's choice to discover. Vague prompts let the model wander that surface; precise prompts pin it.
+The practical mental-model upgrade: when you ask Claude to do something, it isn't picking from one flat list. It's picking from a layered surface where some tools are always visible, some are gated behind activation, and some are entirely the model's choice to discover. Vague prompts let the model wander that surface; precise prompts pin it. Layer 6 reprises this taxonomy with cost shape, latency, and cache impact.
 
 ---
 

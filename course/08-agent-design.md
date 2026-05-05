@@ -2,14 +2,14 @@
 course-revision: 2026-05-05
 ---
 
-# Layer 7 — Agent Design
+# Layer 8 — Agent Design
 ## Skills 16–17
 
 This layer is about designing **in-CLI subagents** — the delegated sub-loops you spawn from inside a Claude Code session. The shift from L6 is mechanical: instead of picking the right tool for the next turn, you are architecting a delegation that runs its own multi-turn loop, returns a summary, and discards everything else. The shift in 2026 is also one of cost shape: forked subagents share the parent's prompt cache, declare their own MCP servers, and run inside `CLAUDE_CODE_FORK_SUBAGENT=1` semantics that didn't exist a year ago.
 
 The fundamental value of subagents is **context isolation**. A subagent's tool outputs — file reads, grep results, bash output, web fetches — run in their own context window and never land in yours. You receive a summary. This protects your main session from being filled with intermediate output you won't need again.
 
-What this layer does **not** cover: hosted Managed Agents, the Memory store, and the Advisor pairing pattern. Those are different substrates — sandboxed harnesses, persistent state, fast-executor/strong-advisor pairings — and they live in the parallel module `managed-agents-memory-advisor.md`. When the in-CLI design decision below bumps into "should this be a hosted agent?" or "should the executor have an advisor?", the answer is in that module, not this one.
+What this layer does **not** cover: hosted Managed Agents, the Memory store, and the Advisor pairing pattern. Those are different substrates — sandboxed harnesses, persistent state, fast-executor/strong-advisor pairings — and they live in Layer 9 (`09-managed-agents-memory-advisor.md`). When the in-CLI design decision below bumps into "should this be a hosted agent?" or "should the executor have an advisor?", the answer is in that module, not this one.
 
 ---
 
@@ -33,7 +33,7 @@ What this layer does **not** cover: hosted Managed Agents, the Memory store, and
 - Searching for a specific known file or function (use Glob/Grep directly — faster)
 - Reading 2–3 files (read them directly)
 - Anything where you'll need to refer to the raw output in your next prompt
-- Anything where the right substrate is *not* an in-CLI subagent at all (long-horizon work that should live in a hosted Managed Agent; advisory pairings that should use the Advisor pattern; persistent state that belongs in Memory) — see `managed-agents-memory-advisor.md`.
+- Anything where the right substrate is *not* an in-CLI subagent at all (long-horizon work that should live in a hosted Managed Agent; advisory pairings that should use the Advisor pattern; persistent state that belongs in Memory) — see Layer 9 (`09-managed-agents-memory-advisor.md`).
 
 ---
 
@@ -235,7 +235,7 @@ Practical consequence: forked subagents are restartable. Their context is dispos
 
 ### Sub-agent prompt-cache sharing (~3× `cache_creation` reduction)
 
-As of v2.1.128 (2026-05-05), sub-agent progress summaries share the parent's prompt cache, which produces approximately a 3× reduction in `cache_creation` tokens vs. the pre-v2.1.128 behaviour. The same release fixed a separate issue where idle subagent summaries would re-fire on every parent turn; they no longer do.
+As of v2.1.128 (2026-05-05), sub-agent progress summaries share the parent's prompt cache, which produces approximately a 3× reduction in `cache_creation` tokens vs. the pre-v2.1.128 behaviour. The same release fixed a separate issue where idle subagent summaries would re-fire on every parent turn; they no longer do. (Cache-bust hygiene at fleet scale: see Layer 10, Skill 18.)
 
 Practical consequence: the per-subagent fixed cost dropped meaningfully in May 2026. Designs that previously rejected delegation as "too expensive for a small task" deserve a second look. The cost-of-delegation dial moved.
 
@@ -264,9 +264,9 @@ Three rules of thumb:
 
 This layer ends at the boundary of the in-CLI session. Three substrates take over from here:
 
-- **Hosted Managed Agents** — sandboxed, server-side agents with their own beta header, SSE streaming, and audit semantics. The right substrate when the work outlives a CLI session, needs to run unattended, or needs an isolation boundary the in-CLI subagent can't provide. Covered in `managed-agents-memory-advisor.md`.
-- **Memory** — the persistent state primitive (file-backed, scoped, audited, exportable; public beta from 2026-04-23). The right answer when "this should survive across sessions" — the question CLAUDE.md and `~/.claude/settings.json` answer differently. Covered in `managed-agents-memory-advisor.md`.
-- **The Advisor pattern** — fast executor + strong advisor pairing (beta header `advisor-tool-2026-03-01` as of 2026-05-05). The right answer when a long-horizon executor needs occasional strong-model judgement without paying the strong-model price on every turn. Covered in `managed-agents-memory-advisor.md`.
+- **Hosted Managed Agents** — sandboxed, server-side agents with their own beta header, SSE streaming, and audit semantics. The right substrate when the work outlives a CLI session, needs to run unattended, or needs an isolation boundary the in-CLI subagent can't provide. Covered in Layer 9 (`09-managed-agents-memory-advisor.md`).
+- **Memory** — the persistent state primitive (file-backed, scoped, audited, exportable; public beta from 2026-04-23). The right answer when "this should survive across sessions" — the question CLAUDE.md and `~/.claude/settings.json` answer differently. Covered in Layer 9 (`09-managed-agents-memory-advisor.md`).
+- **The Advisor pattern** — fast executor + strong advisor pairing (beta header `advisor-tool-2026-03-01` as of 2026-05-05). The right answer when a long-horizon executor needs occasional strong-model judgement without paying the strong-model price on every turn. Covered in Layer 9 (`09-managed-agents-memory-advisor.md`).
 
 The decision rule: stay in this layer when the work fits inside one CLI session and the substrate is a delegated sub-loop. Cross into the sibling module when the substrate is hosted, persistent, or paired.
 
@@ -274,6 +274,6 @@ The decision rule: stay in this layer when the work fits inside one CLI session 
 
 ## Next
 
-L8 (Production Architecture) takes the same machinery to scale: automatic prompt caching, cache-bust hygiene around MCP and tool lists, data residency, model selection across the 2026 lineup. Where L7 is about the *shape of one delegation*, L8 is about what changes when you run thousands of them per day.
+L9 (Managed Agents, Memory, and the Advisor Pattern) extends this layer to hosted, persistent, and paired substrates. L10 (Production Architecture) takes the same machinery to scale: automatic prompt caching, cache-bust hygiene around MCP and tool lists, data residency, model selection across the 2026 lineup. Where L8 is about the *shape of one delegation*, L10 is about what changes when you run thousands of them per day.
 
-The hosted-substrate sibling module — `managed-agents-memory-advisor.md` — extends this layer rather than continuing it. Read both before designing anything that spans more than a single CLI session.
+Read L9 before designing anything that spans more than a single CLI session.

@@ -1,13 +1,10 @@
 ---
 course-revision: 2026-05-05
-status: standalone module (Wave 4 will renumber)
 ---
 
 # Layer 9 — Managed Agents, Memory, and the Advisor Pattern
 
-_(Placeholder ordering. Wave 4 will slot this between Layer 7 "Agent Design" and Layer 10 "Production Architecture".)_
-
-L7 taught you to design agents inside the Claude Code CLI: subagents declared in frontmatter, `mcpServers` scoped per-agent, cache-sharing across siblings, fork semantics. That's the in-process model. It assumes one user, one machine, one conversation tree, and a session that lives until you close the terminal.
+L8 taught you to design agents inside the Claude Code CLI: subagents declared in frontmatter, `mcpServers` scoped per-agent, cache-sharing across siblings, fork semantics. That's the in-process model. It assumes one user, one machine, one conversation tree, and a session that lives until you close the terminal.
 
 This module covers the three primitives Anthropic shipped in spring 2026 for agents that live *outside* that model — hosted on Anthropic's infrastructure, persistent across sessions, or paired with a stronger reasoner mid-flight. Concretely:
 
@@ -15,9 +12,9 @@ This module covers the three primitives Anthropic shipped in spring 2026 for age
 - **Memory** — a file-backed cross-session state store inside Managed Agents (public beta as of 2026-05-05; same beta header).
 - **The Advisor pattern** — a fast executor model paired with a stronger advisor for mid-generation strategic guidance (public beta as of 2026-05-05; beta header `advisor-tool-2026-03-01`).
 
-Each is a substrate shift, not just new tactics. They change *where the agent runs*, *what it remembers between runs*, and *who decides its strategy at each step*. The eight-layer course spine is about prompting and orchestrating one model in one session well; this layer is about agents that escape both of those frames.
+Each is a substrate shift, not just new tactics. They change *where the agent runs*, *what it remembers between runs*, and *who decides its strategy at each step*. The earlier layers of the course spine are about prompting and orchestrating one model in one session well; this layer is about agents that escape both of those frames.
 
-It sits between L7 and L10 (production architecture) because the decision is no longer "how do I shape a subagent prompt" (L7) but also not yet "how do I run a fleet of these in production with residency, rate limits, and observability" (L10). It's the substrate-selection layer.
+It sits between L8 and L10 (production architecture) because the decision is no longer "how do I shape a subagent prompt" (L8) but also not yet "how do I run a fleet of these in production with residency, rate limits, and observability" (L10). It's the substrate-selection layer.
 
 ---
 
@@ -41,7 +38,7 @@ Public beta as of 2026-05-05 (announced 2026-04-08). Beta header on the API: `ma
 
 **Sandbox model.** Each session runs in an isolated environment. Filesystem, network, and tool access are scoped per-agent rather than per-user. This is the part that matters for enterprise: a subagent on a developer's laptop has whatever filesystem access the developer has; a Managed Agent has only what it was provisioned. The blast radius collapses by orders of magnitude.
 
-**Built-in tools.** The hosted environment ships standard tools (file ops, code execution, web fetch, web search) without the operator wiring them. You can layer additional MCP servers on top per agent. This makes a freshly minted Managed Agent useful in roughly the time it takes to write a system prompt — the L7 question of "which tools does my subagent need" is partially pre-answered.
+**Built-in tools.** The hosted environment ships standard tools (file ops, code execution, web fetch, web search) without the operator wiring them. You can layer additional MCP servers on top per agent. This makes a freshly minted Managed Agent useful in roughly the time it takes to write a system prompt — the L8 question of "which tools does my subagent need" is partially pre-answered.
 
 **Session lifecycle.** Sessions are addressable, resumable, and auditable. A session ID outlives the SSE stream that opened it; you can disconnect, reconnect, hand off to another operator, or (with Memory attached) continue across days. Every tool call is logged. This is the property that makes Managed Agents *the* substrate for anything that needs a paper trail — compliance reviews, customer-facing automations, anything where "what did the agent actually do" must be answerable later.
 
@@ -122,7 +119,7 @@ The load-bearing teaching of this module. Three substrates, three different ques
 
 **Question 1 — Where does this agent need to run?**
 
-- *Developer's terminal, with full local context, fast iteration loop.* → in-CLI subagent (L7).
+- *Developer's terminal, with full local context, fast iteration loop.* → in-CLI subagent (L8).
 - *Anthropic's infra, sandboxed, hosted, auditable, addressable across days.* → Managed Agent.
 
 If the answer is "I don't know yet", default to in-CLI for prototyping. Promote to Managed Agent when one of the four triggers fires: long-horizon work, multi-tenant distribution, audit requirement, untrusted operator.
@@ -188,8 +185,8 @@ Layer 9 doesn't introduce new prompting mechanics. It introduces new *substrates
 - **Layer 3 (Session Hygiene).** The three-surface state model (CLAUDE.md / settings.json / Memory) is introduced there and deepened here. If you haven't internalised L3's authorship inversion (CLAUDE.md is human-authored; Memory is model-authored), §3 of this module won't land.
 - **Layer 5 (Output Engineering).** Structured outputs and effort levels are the L5 primitives that make Advisor handoffs deterministic and the executor/advisor effort split economical. Advisor without structured outputs is workable; with them, it's robust.
 - **Layer 6 (Tool Fluency).** The tool taxonomy applies inside Managed Agents too. Built-in tools, MCP, deferred tools — same vocabulary, different sandbox.
-- **Layer 6.5 (Skills, Plugins, Hooks).** A Managed Agent can ship as a plugin's worth of skills + agent definitions. The "what's installed where" question scales up rather than disappearing.
-- **Layer 7 (in-CLI Agent Design).** The first two substrates in §5's decision tree are L7 and L9 respectively. L7 designs the in-CLI peer; this layer designs the hosted and paired peers. The decision tree here is the canonical "which substrate" reference; L7 should cross-link back to it rather than re-deriving.
+- **Layer 7 (Skills, Plugins, Hooks).** A Managed Agent can ship as a plugin's worth of skills + agent definitions. The "what's installed where" question scales up rather than disappearing.
+- **Layer 8 (in-CLI Agent Design).** The first two substrates in §5's decision tree are L8 and L9 respectively. L8 designs the in-CLI peer; this layer designs the hosted and paired peers. The decision tree here is the canonical "which substrate" reference; L8 should cross-link back to it rather than re-deriving.
 - **Layer 10 (Production Architecture).** Memory, Compaction API, residency (`inference_geo`), Rate Limits API, and the Models capabilities API together define the production surface. This module hands off there; everything from "but how do I run a fleet of these in two regions under a per-org rate limit" lives in L10.
 
 **Pointers forward.** When the L10 module goes deep on residency and observability, return to §3 of this module — the audit-log + scoped-permission framing is what makes Memory residency-compliant in the first place. When L10 covers model selection across Opus 4.7 / Sonnet 4.6 / Haiku 4.5, the executor/advisor pairing in §4 is the natural application.
@@ -205,4 +202,4 @@ Layer 9 doesn't introduce new prompting mechanics. It introduces new *substrates
 - `ant` CLI reference: [platform.claude.com/docs/en/api/sdks/cli](https://platform.claude.com/docs/en/api/sdks/cli).
 - Claude Agent SDK (Python): [github.com/anthropics/claude-agent-sdk-python](https://github.com/anthropics/claude-agent-sdk-python).
 - Opus 4.7 announcement and migration guide: [anthropic.com/news/claude-opus-4-7](https://www.anthropic.com/news/claude-opus-4-7); [platform.claude.com/docs/en/about-claude/models/migration-guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide).
-- Layer 3 (Session Hygiene), Layer 5 (Output Engineering), Layer 7 (Agent Design), Layer 10 (Production Architecture) in this course.
+- Layer 3 (Session Hygiene), Layer 5 (Output Engineering), Layer 8 (Agent Design), Layer 10 (Production Architecture) in this course.

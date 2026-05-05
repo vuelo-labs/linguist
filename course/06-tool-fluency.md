@@ -23,7 +23,7 @@ This layer is where you stop letting the model pick its own tool strategy and st
 |------|----------|------------|---------|--------------|--------------------|----------------|
 | Built-in | Read, Glob, Grep, Bash, WebFetch, WebSearch, computer use, code execution v2 | Cheap-to-moderate; tokens scale with output | Low (local) to moderate (web) | Stable list; safe for cache | Tool-level allow/deny; Bash + computer use are the broad ones | Idempotent for read tools; Bash side-effects can't be undone |
 | MCP tool | Anything served by an MCP server (per-agent `mcpServers`, v2.1.117) | Depends on server; tool-list size affects every turn | Network round-trip per call | Use `alwaysLoad` on stable servers to keep the tool list cache-stable; reconnects auto-summarise (v2.1.128) | Server-scoped; reserved `workspace` namespace; managed-settings allowlists | Server-side state — depends on the server |
-| Skill | Anything declared in `SKILL.md`; covered in detail in the **Skills/Plugins/Hooks** module | Proactive activation pulls in a SKILL.md + optionally forks context | One-shot activation cost; cheap thereafter | Activation can shift the prompt prefix — design the skill once, then it's cache-friendly | Skill-scoped; `context: fork` exposes deferred tools (WebSearch/WebFetch) on first turn | Forked context is disposable; parent session unaffected |
+| Skill | Anything declared in `SKILL.md`; covered in detail in the **Skills/Plugins/Hooks** module (see `07-skills-plugins-hooks.md`) | Proactive activation pulls in a SKILL.md + optionally forks context | One-shot activation cost; cheap thereafter | Activation can shift the prompt prefix — design the skill once, then it's cache-friendly | Skill-scoped; `context: fork` exposes deferred tools (WebSearch/WebFetch) on first turn | Forked context is disposable; parent session unaffected |
 | Deferred tool | WebSearch, WebFetch (and other tools that require fork to be available on first turn) | Same as built-in once available | Web latency | Tool-list shape depends on whether the deferred tool is currently surfaced | Same as built-in; availability gated by skill / context | Read-only; safe to retry |
 | Advisor | The Advisor pairing (executor + advisor; beta header `advisor-tool-2026-03-01` as of 2026-05-05) | One advisor call per pairing decision; usually a strong model advising a fast one | Higher per-call (strong model) but bounds the total call count | Advisor calls are typically uncached — design accordingly | Advisor sees what the executor sees | Advisory output is just text; no side effects |
 | Sub-agent-as-tool | Frontmatter agents, Task / forked sub-agents (`CLAUDE_CODE_FORK_SUBAGENT=1`); covered in the Agent Design module | Whole sub-conversation; output returns to parent | Highest — full agent loop | Sub-agent prompt-cache sharing ~3× reduction vs uncached, v2.1.128 | Per-agent `mcpServers` + tool allowlist | Forked sub-agents are restartable; their context discards on return |
@@ -112,8 +112,8 @@ Three bounded searches in a disposable context. Deferred-tool semantics handled 
 
 ---
 
-## Next: Layer 6.5 — Skills, Plugins, Hooks
+## Next: Layer 7 — Skills, Plugins, Hooks
 
 The taxonomy above tells you which kind of tool to call. The next layer tells you how to *add* new kinds (Skills), how to bundle them for distribution (Plugins), and how to wrap any tool call with deterministic behaviour the model doesn't choose (Hooks). Same axes — mechanism, lifetime, activation surface — applied one level up the stack.
 
-See `skills-plugins-hooks.md` (working title "Layer 6.5"; will be renumbered into the spine in Wave 4).
+See `07-skills-plugins-hooks.md`.

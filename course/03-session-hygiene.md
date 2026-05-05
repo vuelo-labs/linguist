@@ -17,7 +17,7 @@ Persistent state in 2026 Claude Code lives in three places, with three different
 
 **Why it matters:** CLAUDE.md files are loaded in a defined hierarchy — managed (system-wide), user (`~/.claude/CLAUDE.md`), project (repo-level `CLAUDE.md` and `.claude/rules/*.md`), and local (`CLAUDE.local.md`) (as of v2.1.128, 2026-05-05). They are read once at session start and cached. Unlike conversation messages, they don't accumulate in history or degrade through compaction — they're loaded fresh every time.
 
-**CLAUDE.md vs. settings.json.** CLAUDE.md is for *instructions to the model*. `settings.json` is for *configuration of the harness*: permissions, hooks, env vars, MCP servers, allowed tools. Since v2.1.119 (Apr 23, 2026), `/config` changes persist to `~/.claude/settings.json`, and managed-settings inheritance gives admins a way to ship policy down to user and project scopes. The two files coexist: a Bun-only project might pin `bun` in `package.json`, declare its style rules in `CLAUDE.md`, and allowlist `bun test` in `.claude/settings.json`. Permission tiers `allowManagedDomainsOnly` and `allowManagedReadPathsOnly` (security inheritance fix in v2.1.126) let an org constrain network and read access without trusting the project to do it. If a rule is "what the model should do", it goes in CLAUDE.md; if it's "what the harness should permit, run, or log", it goes in settings.json.
+**CLAUDE.md vs. settings.json.** CLAUDE.md is for *instructions to the model*. `settings.json` is for *configuration of the harness*: permissions, hooks (covered in Layer 7), env vars, MCP servers, allowed tools. Since v2.1.119 (Apr 23, 2026), `/config` changes persist to `~/.claude/settings.json`, and managed-settings inheritance gives admins a way to ship policy down to user and project scopes. The two files coexist: a Bun-only project might pin `bun` in `package.json`, declare its style rules in `CLAUDE.md`, and allowlist `bun test` in `.claude/settings.json`. Permission tiers `allowManagedDomainsOnly` and `allowManagedReadPathsOnly` (security inheritance fix in v2.1.126) let an org constrain network and read access without trusting the project to do it. If a rule is "what the model should do", it goes in CLAUDE.md; if it's "what the harness should permit, run, or log", it goes in settings.json.
 
 **What belongs in CLAUDE.md:**
 - Tech stack constraints ("we use Bun, not Node")
@@ -223,7 +223,7 @@ Just the three bullets.
 
 | Surface | Lifetime | Audience | Audit profile |
 |---|---|---|---|
-| **CLAUDE.md** | Loaded fresh every session; edited deliberately by humans | The model | Tracked in version control; diff-reviewable |
+| **CLAUDE.md** | Loaded fresh every session (at any level — managed/user/project/local); edited deliberately by humans | The model | Tracked in version control; diff-reviewable |
 | **settings.json** | Persisted by the harness; edited deliberately by humans (or admins via managed settings) | The harness (permissions, hooks, env) | Tracked in version control or org policy; diff-reviewable |
 | **Memory** | Persisted by the agent itself across sessions; written *by the model* during execution | The model (next session's self) | API export + audit logs; reviewable but not git-shaped |
 
