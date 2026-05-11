@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Run a Tea &amp; Tech morning in your town — Tea & Tech</title>
+  <meta name="description" content="Tea & Tech: a free Tuesday morning for people over 65 who'd like to get the hang of AI, in a library, with tea and a bun.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-links { display: flex; align-items: center; gap: 1rem; }
+    .site-header-link {
+      font-family: var(--sans); font-size: 0.82rem;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-link--active { color: var(--w-text); }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+    }
+
+    .doc-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .doc {
+      padding: var(--space-xl) 0 var(--space-2xl);
+    }
+
+    .doc h1 {
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc .lede {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.15rem;
+      margin-bottom: var(--space-xl);
+      max-width: 60ch;
+    }
+
+    .doc h2 {
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-md);
+      font-weight: 500;
+    }
+
+    .doc h3 {
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc p, .doc li {
+      font-size: 1.05rem;
+    }
+
+    .doc ul, .doc ol {
+      margin: 0 0 var(--space-md) 0;
+      padding-left: 1.5rem;
+    }
+
+    .doc li {
+      margin-bottom: 0.4rem;
+      max-width: 65ch;
+    }
+
+    .doc li::marker { color: var(--w-accent); }
+
+    .doc blockquote {
+      margin: var(--space-md) 0;
+      padding: 1rem 1.5rem;
+      background: var(--w-accent-light);
+      border-left: 2px solid var(--w-accent);
+      font-style: italic;
+      max-width: 65ch;
+    }
+    .doc blockquote p { max-width: none; }
+    .doc blockquote p:last-child { margin-bottom: 0; }
+
+    .doc strong { font-weight: 600; }
+
+    .doc table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: var(--space-md) 0;
+      font-size: 0.95rem;
+    }
+    .doc th, .doc td {
+      border-bottom: 1px solid var(--w-border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .doc th {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--w-bg-card);
+      border-bottom: 2px solid var(--w-accent);
+    }
+
+    .doc hr {
+      border: none;
+      height: 28px;
+      margin: var(--space-xl) 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 28' preserveAspectRatio='none'><path d='M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14' fill='none' stroke='%236B5540' stroke-width='1' opacity='0.5'/></svg>");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .doc pre {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--w-bg-card);
+      padding: 1rem;
+      border-radius: 3px;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: var(--space-md) 0;
+      max-width: 100%;
+    }
+    .doc code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: var(--w-bg-card);
+      padding: 0 0.25em;
+      border-radius: 2px;
+    }
+    .doc pre code { background: none; padding: 0; }
+
+    .doc-footer {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-faint);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .doc-footer a {
+      color: var(--w-faint);
+      text-decoration: none;
+    }
+    .doc-footer a:hover { color: var(--w-accent); }
+
+    @media print {
+      .site-header, .doc-footer { display: none; }
+      .doc { padding: 0; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/community" class="site-header-link site-header-link--active">Community</a>
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/manifesto" class="site-header-link">Manifesto</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="doc">
+      <div class="container">
+        <p class="doc-eyebrow">For libraries &amp; community hosts</p>
+        <h1 id="how-to-run-a-tea-tech-morning-in-your-town">How to run a
+        Tea &amp; Tech morning in your town</h1>
+        <p>A one-pager for a librarian, parish secretary, community
+        development officer, ETB tutor, or any decent neighbour who
+        reads it and thinks <em>“yeah, we could do that.”</em></p>
+        <p>This is the artefact that lets Tea &amp; Tech happen in
+        places its founders will never visit.</p>
+        <hr />
+        <h2 id="what-it-is">What it is</h2>
+        <p>A Tuesday morning for people over 65 who’d like to get the
+        hang of the AI everyone’s talking about — without feeling like
+        they’re back in school. Tea, scones, and a patient hand. 90
+        minutes. By the end, every person in the room can talk to Claude
+        on their own phone.</p>
+        <p>It’s run, not taught. The host is a friendly neighbour, not a
+        teacher.</p>
+        <hr />
+        <h2 id="where-it-happens-the-library-ideally">Where it happens —
+        the library, ideally</h2>
+        <p>The local library is the natural home for Tea &amp; Tech.</p>
+        <ul>
+        <li><strong>Religiously and politically neutral.</strong> Anyone
+        walks in, no hesitation at the door.</li>
+        <li><strong>Librarians are professional helpers</strong> and
+        already run digital skills sessions under Libraries Ireland’s
+        <em>Right to Read</em> and <em>Healthy Ireland at your
+        Library</em> programmes. Tea &amp; Tech slots in naturally.</li>
+        <li><strong>The over-65 demographic already uses the
+        library.</strong> The poster on the noticeboard reaches the
+        right people without trying to.</li>
+        <li><strong>Wifi, insurance, accessibility, and
+        safeguarding</strong> are already in place to a public-service
+        standard.</li>
+        <li><strong>Libraries open every week on a fixed
+        timetable.</strong> That makes a recurring weekly morning
+        genuinely sustainable.</li>
+        </ul>
+        <p><strong>Fallback venues</strong> if the library isn’t an
+        option: parish hall, GAA clubhouse, Family Resource Centre,
+        Active Retirement Ireland branch room. All work. The library is
+        just first among equals.</p>
+        <p><strong>One thing to check at the library:</strong> food and
+        drink rules vary by branch. Some are fine in the meeting room,
+        some prefer it in the foyer. A 5-minute call with the branch
+        librarian sorts it.</p>
+        <hr />
+        <h2 id="how-it-pays-for-itself">How it pays for itself</h2>
+        <p>A jar by the door. <strong>€1 if you’d like — covers the
+        scones.</strong> Coin only, no card reader, no names against
+        payments.</p>
+        <p>15 attendees × €1 = €15. The library room is free. Tea, milk,
+        and a tray of buns from the local bakery cost about €15.
+        <strong>It pays for itself.</strong></p>
+        <p>The €1 isn’t really about the money. It’s about the social
+        contract: people who paid feel allowed to ask the question
+        that’s bothering them. People who turned up free hold back. The
+        euro flips it.</p>
+        <p>A local sponsor (credit union, SuperValu, the pharmacy) is
+        optional — useful for printed booklets or to pay a host for
+        their time, but not load-bearing. Sponsor pack available if you
+        want it.</p>
+        <hr />
+        <h2 id="what-you-need">What you need</h2>
+        <p><strong>A room.</strong> Library meeting room, ideally.
+        Tables, chairs, a kettle, wifi. 8–15 people is the right
+        size.</p>
+        <p><strong>A host.</strong> Someone comfortable using Claude on
+        their own phone, comfortable speaking to a small group, and
+        comfortable when wifi breaks. Doesn’t need to be a tech person.
+        Often the best hosts aren’t.</p>
+        <p><strong>A rover or two.</strong> One extra pair of hands per
+        six learners. TY students are excellent at this. So are the
+        host’s own family, and library staff.</p>
+        <p><strong>A jar and €15 worth of buns.</strong> That’s the
+        budget.</p>
+        <p><strong>The pack.</strong> Host script, booklet PDF, poster
+        PDF. Free. Email [contact] and we’ll send it.</p>
+        <hr />
+        <h2 id="what-you-dont-need">What you don’t need</h2>
+        <ul>
+        <li>Sponsor money for a first run.</li>
+        <li>Anyone who knows about AI.</li>
+        <li>A booking system. People just turn up.</li>
+        <li>A budget approval. €1 jars don’t need one.</li>
+        <li>Faith that the wifi will work. (It won’t, sometimes. The
+        host pack tells you what to do.)</li>
+        </ul>
+        <hr />
+        <h2 id="how-a-morning-runs">How a morning runs</h2>
+        <p>15 mins tea and chat. 5 mins welcome. 60 mins of guided
+        learning, broken into four short bits with the host narrating
+        slowly and the rovers helping. 10 mins wrap and a one-page cheat
+        sheet to take home. 15 mins of refills and lingering questions —
+        the most important fifteen minutes of the morning.</p>
+        <p>Full script in the host pack. You don’t have to write a
+        word.</p>
+        <hr />
+        <h2 id="what-people-leave-with">What people leave with</h2>
+        <ul>
+        <li>Claude on their phone, and the confidence to talk to
+        it.</li>
+        <li>A booklet to put on the kitchen table.</li>
+        <li>A cheat sheet for the fridge.</li>
+        <li>A reason to come back next Tuesday.</li>
+        </ul>
+        <hr />
+        <h2 id="why-it-works">Why it works</h2>
+        <p>Older adults rely on family for the small tech questions —
+        <em>what is this email, is this a scam, how do I do X on my
+        phone?</em> — and family is busy until the weekend. Tea &amp;
+        Tech is a place to bring the question on a Tuesday morning, with
+        a bun, in a room of people in the same boat.</p>
+        <p>The AI part isn’t the headline. The not-waiting is.</p>
+        <hr />
+        <h2 id="ground-rules">Ground rules</h2>
+        <ul>
+        <li>No sign-up form on the poster. People just turn up.</li>
+        <li>No photos of faces without explicit permission.</li>
+        <li>No PPS numbers, card numbers, or passwords entered into
+        anything, ever. The host watches for this and steps in
+        gently.</li>
+        <li>No teacher voice. If it starts feeling like a class, you’ve
+        drifted.</li>
+        <li>The €1 is voluntary. If anyone forgets or can’t, nobody
+        mentions it.</li>
+        </ul>
+        <hr />
+        <h2 id="to-start-your-first-morning">To start your first
+        morning</h2>
+        <ol type="1">
+        <li>Email [contact]. We’ll send you the pack.</li>
+        <li>Ring your local library. Ask if they have a free meeting
+        room on a Tuesday morning.</li>
+        <li>Pick a date four weeks out. 10:30am works for most.</li>
+        <li>Print 20 posters. Five for the library noticeboard, the rest
+        for shop windows in town the week before.</li>
+        <li>On the day, turn up half an hour early. Boil the kettle. Put
+        a jar on the table.</li>
+        </ol>
+        <p>That’s it.</p>
+        <hr />
+        <p><em>Tea &amp; Tech is made by Linguist. We don’t run it. You
+        do. We just made the pack.</em></p>
+        <div class="doc-footer">
+          <span>Tea &amp; Tech · <em>Pop in if you don't want to wait til the weekend.</em></span>
+          <span><a href="/community/tea-and-tech">All Tea &amp; Tech docs</a> · <a href="/">Linguist</a></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

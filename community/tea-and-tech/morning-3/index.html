@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writing the things you've been putting off — Tea & Tech</title>
+  <meta name="description" content="Tea & Tech: a free Tuesday morning for people over 65 who'd like to get the hang of AI, in a library, with tea and a bun.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-links { display: flex; align-items: center; gap: 1rem; }
+    .site-header-link {
+      font-family: var(--sans); font-size: 0.82rem;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-link--active { color: var(--w-text); }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+    }
+
+    .doc-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .doc {
+      padding: var(--space-xl) 0 var(--space-2xl);
+    }
+
+    .doc h1 {
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc .lede {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.15rem;
+      margin-bottom: var(--space-xl);
+      max-width: 60ch;
+    }
+
+    .doc h2 {
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-md);
+      font-weight: 500;
+    }
+
+    .doc h3 {
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc p, .doc li {
+      font-size: 1.05rem;
+    }
+
+    .doc ul, .doc ol {
+      margin: 0 0 var(--space-md) 0;
+      padding-left: 1.5rem;
+    }
+
+    .doc li {
+      margin-bottom: 0.4rem;
+      max-width: 65ch;
+    }
+
+    .doc li::marker { color: var(--w-accent); }
+
+    .doc blockquote {
+      margin: var(--space-md) 0;
+      padding: 1rem 1.5rem;
+      background: var(--w-accent-light);
+      border-left: 2px solid var(--w-accent);
+      font-style: italic;
+      max-width: 65ch;
+    }
+    .doc blockquote p { max-width: none; }
+    .doc blockquote p:last-child { margin-bottom: 0; }
+
+    .doc strong { font-weight: 600; }
+
+    .doc table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: var(--space-md) 0;
+      font-size: 0.95rem;
+    }
+    .doc th, .doc td {
+      border-bottom: 1px solid var(--w-border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .doc th {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--w-bg-card);
+      border-bottom: 2px solid var(--w-accent);
+    }
+
+    .doc hr {
+      border: none;
+      height: 28px;
+      margin: var(--space-xl) 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 28' preserveAspectRatio='none'><path d='M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14' fill='none' stroke='%236B5540' stroke-width='1' opacity='0.5'/></svg>");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .doc pre {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--w-bg-card);
+      padding: 1rem;
+      border-radius: 3px;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: var(--space-md) 0;
+      max-width: 100%;
+    }
+    .doc code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: var(--w-bg-card);
+      padding: 0 0.25em;
+      border-radius: 2px;
+    }
+    .doc pre code { background: none; padding: 0; }
+
+    .doc-footer {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-faint);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .doc-footer a {
+      color: var(--w-faint);
+      text-decoration: none;
+    }
+    .doc-footer a:hover { color: var(--w-accent); }
+
+    @media print {
+      .site-header, .doc-footer { display: none; }
+      .doc { padding: 0; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/community" class="site-header-link site-header-link--active">Community</a>
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/manifesto" class="site-header-link">Manifesto</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="doc">
+      <div class="container">
+        <p class="doc-eyebrow">Host Pack · Morning 3</p>
+        <h1 id="tea-tech-morning-3-host-pack">Tea &amp; Tech — Morning 3
+        Host Pack</h1>
+        <p><strong>Title for the poster:</strong> <em>Tea &amp; Tech —
+        Morning 3: Writing the Things You’ve Been Putting Off</em>
+        <strong>Standing tagline:</strong> <em>Pop in if you don’t want
+        to wait til the weekend.</em> <strong>Length:</strong> 90
+        minutes.</p>
+        <p>Assumes Mornings 1 and 2 are familiar. Where the mechanic is
+        the same, follow those packs.</p>
+        <hr />
+        <h2 id="what-this-morning-is-for">What this morning is for</h2>
+        <p>By the end of 90 minutes, every person in the room can:</p>
+        <ol type="1">
+        <li><strong>Dictate a rough draft</strong> of a message — even a
+        grumpy one — and have Claude tidy it into something they’re
+        happy to send.</li>
+        <li><strong>Iterate on it</strong> — “shorter”, “less formal”,
+        “warmer”, “more direct” — until it sounds like them.</li>
+        <li><strong>Read it back carefully before sending.</strong>
+        Names, dates, amounts.</li>
+        <li><strong>Use Claude as a draft partner, not a
+        ghostwriter.</strong> They are still the author.</li>
+        </ol>
+        <hr />
+        <h2 id="why-this-morning-matters">Why this morning matters</h2>
+        <p>Most people in the room have at least one message they’ve
+        been meaning to write for weeks. A complaint they don’t know how
+        to start politely. A condolence note they keep putting off. A
+        thank-you they feel awkward about. A reply to the bank that they
+        don’t trust themselves to word right.</p>
+        <p>The morning’s success is measured in those messages getting
+        written and sent.</p>
+        <hr />
+        <h2 id="timing">Timing</h2>
+        <table>
+        <thead>
+        <tr>
+        <th>Time</th>
+        <th>What happens</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>0:00</td>
+        <td>Tea, scones, newcomers caught up</td>
+        </tr>
+        <tr>
+        <td>0:15</td>
+        <td>Welcome and the frame</td>
+        </tr>
+        <tr>
+        <td>0:20</td>
+        <td>The grumpy email made polite — worked example</td>
+        </tr>
+        <tr>
+        <td>0:35</td>
+        <td>Iterating — shorter, warmer, less formal</td>
+        </tr>
+        <tr>
+        <td>0:50</td>
+        <td>The message you’ve been putting off (one-to-one)</td>
+        </tr>
+        <tr>
+        <td>1:15</td>
+        <td>Filling a form together — worked example</td>
+        </tr>
+        <tr>
+        <td>1:25</td>
+        <td>Wrap and read-back drill</td>
+        </tr>
+        <tr>
+        <td>1:30</td>
+        <td>Lingering</td>
+        </tr>
+        </tbody>
+        </table>
+        <hr />
+        <h2 id="the-script">The script</h2>
+        <h3 id="welcome-5-mins">0:15 — Welcome (5 mins)</h3>
+        <blockquote>
+        <p>“Welcome back. Today is the morning we get the things off
+        your chest that have been sitting there. The complaint to the
+        ESB you haven’t sent. The thank-you to the neighbour who minded
+        the cat. The condolence card to the woman from down the road.
+        The letter back to the bank.</p>
+        <p>The trick today is simple: <strong>you talk, Claude writes,
+        you fix it until it sounds like you.</strong> You’re still the
+        author. Claude is the friend who’s good at words, sitting beside
+        you with a pen.”</p>
+        </blockquote>
+        <h3 id="the-grumpy-email-made-polite-15-mins">0:20 — The grumpy
+        email made polite (15 mins)</h3>
+        <p>A worked example. The host has one ready, dictated live.</p>
+        <blockquote>
+        <p>“Right. I’ve been overcharged on my electricity bill for the
+        last three months and nobody’s ringing me back. I’m raging.
+        Watch what I do.”</p>
+        </blockquote>
+        <p>Press the microphone. Speak naturally — properly grumpy.</p>
+        <blockquote>
+        <p><em>“I’m absolutely sick of this. I’ve rung your customer
+        service three times this month and every single time I’m left on
+        hold for forty minutes and then nobody can help me. My bill is
+        wrong, it’s been wrong since February, and I want it sorted
+        before I move to another supplier. Tell me you’re going to fix
+        this.”</em></p>
+        </blockquote>
+        <p>Then ask Claude:</p>
+        <blockquote>
+        <p><em>“Can you turn that into a polite but firm complaint email
+        I can send to ESB customer service?”</em></p>
+        </blockquote>
+        <p>Read Claude’s answer aloud. Compare it to the rant.</p>
+        <blockquote>
+        <p>“See what happened. The frustration is still in there. The
+        facts are still in there — three calls, since February,
+        considering switching. But it’s an email I’d actually be willing
+        to send under my own name. That’s the trick.</p>
+        <p>And — important — <strong>I’m still the one who decides
+        whether to send it.</strong> I read it back. If a sentence
+        doesn’t sound like me, I change it or I ask Claude to change
+        it.”</p>
+        </blockquote>
+        <h3 id="iterating-15-mins">0:35 — Iterating (15 mins)</h3>
+        <blockquote>
+        <p>“Now the bit that turns this from a party trick into a proper
+        skill. You don’t have to take the first answer. Watch.”</p>
+        </blockquote>
+        <p>Same rant, same email — but now ask Claude in turn:</p>
+        <ul>
+        <li><em>“Make it shorter.”</em></li>
+        <li><em>“Make it warmer — less stiff.”</em></li>
+        <li><em>“Make it more direct.”</em></li>
+        <li><em>“Take the bit out about switching supplier — I don’t
+        want to threaten them yet.”</em></li>
+        </ul>
+        <p>Each time, read the new version aloud.</p>
+        <blockquote>
+        <p>“Four little instructions, four different emails, all from
+        the same rant. <strong>You pick the one that sounds like
+        you.</strong> Or you mix and match — ‘use the warm opening from
+        the second one and the firm ending from the first.’ Claude’ll do
+        that too.”</p>
+        </blockquote>
+        <p>Then practise together with a friendlier example: <em>“Write
+        a short thank-you to my neighbour Margaret who minded the cat
+        last weekend.”</em> Iterate it: shorter, warmer, mention the cat
+        by name, mention you’ll bring her some scones.</p>
+        <h3 id="the-message-youve-been-putting-off-25-mins">0:50 — The
+        message you’ve been putting off (25 mins)</h3>
+        <p>The heart of the morning.</p>
+        <blockquote>
+        <p>“Right. Have a think — what’s the message you’ve been meaning
+        to write? It can be small. It can be hard. It can be one you
+        don’t know how to start.</p>
+        <p>Press the microphone. Tell Claude what the message is for,
+        who it’s to, and what you want it to say in your own words —
+        even if those words are messy. Then make it sound like you.</p>
+        <p>Your rover is here if you get stuck.”</p>
+        </blockquote>
+        <p>Rovers circulate. <strong>This is the segment that matters
+        most. Don’t lecture from the front.</strong></p>
+        <p><strong>What to watch for:</strong></p>
+        <ul>
+        <li><strong>Condolence notes.</strong> These are often the
+        message someone has been putting off for months. Sit with them
+        gently. Don’t rush. Don’t read it aloud unless they offer.</li>
+        <li><strong>Difficult family messages.</strong> Estranged
+        sibling, awkward grandchild, falling-out with a neighbour. Same
+        — quietly, at the side, no audience.</li>
+        <li><strong>Anyone trying to dictate something they shouldn’t
+        send when angry.</strong> A blistering letter to a son-in-law, a
+        furious reply to a relative. Don’t refuse — it can be very
+        useful to write the angry version and then ask Claude for the
+        calmer one. <strong>But:</strong> suggest they sleep on it
+        before sending. Make a habit of it: <em>“Write it today. Sit on
+        it. Send it tomorrow.”</em></li>
+        <li><strong>Anyone about to send something with a wrong name,
+        wrong date, wrong amount.</strong> That’s what the read-back
+        drill at the end is for, but flag it now too.</li>
+        </ul>
+        <h3 id="filling-a-form-together-10-mins">1:15 — Filling a form
+        together (10 mins)</h3>
+        <p>A lighter segment to bring the energy back up after the
+        one-to-ones.</p>
+        <blockquote>
+        <p>“One last thing. Forms. The MyGovID renewal, the medical card
+        form, Fair Deal. The kind of form where you read a question
+        three times and still don’t know what they want.</p>
+        <p>The trick: photograph the question, or read it aloud, and ask
+        Claude <strong>‘what is this question actually asking
+        me?’</strong> Then you write your own answer in your own
+        words.”</p>
+        </blockquote>
+        <p>Worked example: a real form question that’s needlessly
+        bureaucratic. Read it. Ask Claude. Compare the plain English to
+        the original.</p>
+        <blockquote>
+        <p>“<strong>Important.</strong> Claude doesn’t fill the form for
+        you. You fill it. Claude tells you what the question means.”</p>
+        </blockquote>
+        <h3 id="wrap-and-read-back-drill-5-mins">1:25 — Wrap and
+        read-back drill (5 mins)</h3>
+        <blockquote>
+        <p>“Before we go — the read-back drill. <strong>Every
+        time</strong> you’re about to send a message Claude helped you
+        write, before you press send, look at:</p>
+        <ol type="1">
+        <li><strong>The names.</strong> Right person? Right
+        spelling?</li>
+        <li><strong>The dates.</strong> Right day? Right month?</li>
+        <li><strong>The amounts.</strong> Right number? Right
+        euros?</li>
+        </ol>
+        <p>Claude is brilliant at sounding like you. It is not always
+        brilliant at the small details. The read-back is your job, not
+        Claude’s.</p>
+        <p>Cheat sheet on the back page as always. Same time next
+        [week/fortnight].”</p>
+        </blockquote>
+        <h3 id="lingering">1:30 — Lingering</h3>
+        <p>Some of the messages people drafted today won’t get sent in
+        the room. They’ll get sent on the bus home, or on the kitchen
+        table that evening. The lingering segment is where people
+        quietly ask the host <em>“do you think this is alright to
+        send?”</em> — say yes when it is, and offer one small change
+        when it isn’t.</p>
+        <hr />
+        <h2 id="booklet-for-morning-3">Booklet for Morning 3</h2>
+        <ol type="1">
+        <li>Cover — <em>Morning 3: Writing the Things You’ve Been
+        Putting Off</em></li>
+        <li>The trick — talk, Claude writes, you fix it</li>
+        <li>Four ways to iterate — shorter, warmer, less formal, more
+        direct</li>
+        <li>A worked example — the ESB rant, then the polite
+        version</li>
+        <li>A worked example — the thank-you to Margaret</li>
+        <li>Forms — Claude explains, you write</li>
+        <li>The read-back drill — names, dates, amounts</li>
+        <li>Back cover / cheat sheet</li>
+        </ol>
+        <hr />
+        <h2 id="risks-what-to-do">Risks &amp; what to do</h2>
+        <table>
+        <colgroup>
+        <col style="width: 40%" />
+        <col style="width: 59%" />
+        </colgroup>
+        <thead>
+        <tr>
+        <th>Risk</th>
+        <th>What to do</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>Learner sends a message they’ll regret</td>
+        <td>“Write it today. Sit on it. Send it tomorrow.” Make it a
+        habit.</td>
+        </tr>
+        <tr>
+        <td>Learner becomes upset writing a sensitive note</td>
+        <td>Sit with them. Tea. No pressure to finish today.</td>
+        </tr>
+        <tr>
+        <td>Claude writes something that doesn’t sound like them</td>
+        <td>Coach the iteration. “Tell it ‘less stiff’, or ‘use the word
+        X.’”</td>
+        </tr>
+        <tr>
+        <td>Wrong name / date / amount slips through</td>
+        <td>Read-back drill. Drill it every morning, not just the
+        wrap.</td>
+        </tr>
+        <tr>
+        <td>Form question Claude misexplains</td>
+        <td>“Confirm with Citizens Information if it’s a form that
+        matters.”</td>
+        </tr>
+        </tbody>
+        </table>
+        <div class="doc-footer">
+          <span>Tea &amp; Tech · <em>Pop in if you don't want to wait til the weekend.</em></span>
+          <span><a href="/community/tea-and-tech">All Tea &amp; Tech docs</a> · <a href="/">Linguist</a></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

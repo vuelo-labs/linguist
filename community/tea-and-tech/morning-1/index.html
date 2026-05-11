@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Claude on your phone — Tea & Tech</title>
+  <meta name="description" content="Tea & Tech: a free Tuesday morning for people over 65 who'd like to get the hang of AI, in a library, with tea and a bun.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-links { display: flex; align-items: center; gap: 1rem; }
+    .site-header-link {
+      font-family: var(--sans); font-size: 0.82rem;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-link--active { color: var(--w-text); }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+    }
+
+    .doc-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .doc {
+      padding: var(--space-xl) 0 var(--space-2xl);
+    }
+
+    .doc h1 {
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc .lede {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.15rem;
+      margin-bottom: var(--space-xl);
+      max-width: 60ch;
+    }
+
+    .doc h2 {
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-md);
+      font-weight: 500;
+    }
+
+    .doc h3 {
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc p, .doc li {
+      font-size: 1.05rem;
+    }
+
+    .doc ul, .doc ol {
+      margin: 0 0 var(--space-md) 0;
+      padding-left: 1.5rem;
+    }
+
+    .doc li {
+      margin-bottom: 0.4rem;
+      max-width: 65ch;
+    }
+
+    .doc li::marker { color: var(--w-accent); }
+
+    .doc blockquote {
+      margin: var(--space-md) 0;
+      padding: 1rem 1.5rem;
+      background: var(--w-accent-light);
+      border-left: 2px solid var(--w-accent);
+      font-style: italic;
+      max-width: 65ch;
+    }
+    .doc blockquote p { max-width: none; }
+    .doc blockquote p:last-child { margin-bottom: 0; }
+
+    .doc strong { font-weight: 600; }
+
+    .doc table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: var(--space-md) 0;
+      font-size: 0.95rem;
+    }
+    .doc th, .doc td {
+      border-bottom: 1px solid var(--w-border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .doc th {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--w-bg-card);
+      border-bottom: 2px solid var(--w-accent);
+    }
+
+    .doc hr {
+      border: none;
+      height: 28px;
+      margin: var(--space-xl) 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 28' preserveAspectRatio='none'><path d='M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14' fill='none' stroke='%236B5540' stroke-width='1' opacity='0.5'/></svg>");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .doc pre {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--w-bg-card);
+      padding: 1rem;
+      border-radius: 3px;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: var(--space-md) 0;
+      max-width: 100%;
+    }
+    .doc code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: var(--w-bg-card);
+      padding: 0 0.25em;
+      border-radius: 2px;
+    }
+    .doc pre code { background: none; padding: 0; }
+
+    .doc-footer {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-faint);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .doc-footer a {
+      color: var(--w-faint);
+      text-decoration: none;
+    }
+    .doc-footer a:hover { color: var(--w-accent); }
+
+    @media print {
+      .site-header, .doc-footer { display: none; }
+      .doc { padding: 0; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/community" class="site-header-link site-header-link--active">Community</a>
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/manifesto" class="site-header-link">Manifesto</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="doc">
+      <div class="container">
+        <p class="doc-eyebrow">Host Pack · Morning 1</p>
+        <h1 id="tea-tech-morning-1-host-pack">Tea &amp; Tech — Morning 1
+        Host Pack</h1>
+        <p><strong>Title for the poster:</strong> <em>Tea &amp; Tech —
+        Morning 1: Getting Claude on Your Phone</em> <strong>Standing
+        tagline (every poster):</strong> <em>Pop in if you don’t want to
+        wait til the weekend.</em> <strong>Launch tagline (first poster
+        in a new town):</strong> <em>Pop in if you don’t want to wait
+        for your son to call.</em> <strong>Length:</strong> 90 minutes,
+        plus 15 mins setup and 15 mins clear-up. <strong>Group
+        size:</strong> 8–15 learners, 1 host, 1 rover per ~6
+        learners.</p>
+        <hr />
+        <h2 id="what-the-morning-is-for">What the morning is for</h2>
+        <p>By the end of 90 minutes, every person in the room can:</p>
+        <ol type="1">
+        <li>Open Claude on their own phone.</li>
+        <li>Ask it a question by <strong>speaking, not
+        typing</strong>.</li>
+        <li>Tell when the answer looks wrong, and ask again.</li>
+        <li>Name one thing they will never paste in (PPS, card numbers,
+        passwords).</li>
+        </ol>
+        <p>That is the entire success criterion. Anything else is a
+        bonus.</p>
+        <hr />
+        <h2 id="the-room">The room</h2>
+        <p><strong>Venue checklist</strong> — confirm the day
+        before:</p>
+        <ul class="task-list">
+        <li><label><input type="checkbox" />Wifi password written large
+        on a sheet of A4 on the wall. Test it on your own
+        phone.</label></li>
+        <li><label><input type="checkbox" /><strong>Backup
+        hotspot</strong> on the host’s phone, in case the venue wifi
+        dies. This will happen at least once.</label></li>
+        <li><label><input type="checkbox" />Power strip and 4 charging
+        cables (Lightning + USB-C, both). Half the room will arrive on
+        12% battery.</label></li>
+        <li><label><input type="checkbox" />Tables in a horseshoe or
+        small clusters of 4. <strong>Not</strong> rows. People help each
+        other in clusters; rows make it a classroom.</label></li>
+        <li><label><input type="checkbox" />Tea, coffee, milk, sugar,
+        biscuits, scones or buns from the local bakery. Sponsor’s logo
+        visible on the table.</label></li>
+        <li><label><input type="checkbox" />Name badges (first names
+        only, big writing).</label></li>
+        <li><label><input type="checkbox" />Printed booklets, one per
+        person, plus 5 spares.</label></li>
+        <li><label><input type="checkbox" />A spare smartphone on the
+        table (cheap Android is fine) for anyone who forgot theirs or
+        whose phone won’t cooperate.</label></li>
+        </ul>
+        <p><strong>The one thing that will go wrong:</strong> wifi. The
+        hotspot is not optional.</p>
+        <hr />
+        <h2 id="timing">Timing</h2>
+        <table>
+        <thead>
+        <tr>
+        <th>Time</th>
+        <th>What happens</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>0:00</td>
+        <td>Tea, scones, name badges, chat</td>
+        </tr>
+        <tr>
+        <td>0:15</td>
+        <td>Welcome and the one rule</td>
+        </tr>
+        <tr>
+        <td>0:20</td>
+        <td>Installing Claude (rovers help)</td>
+        </tr>
+        <tr>
+        <td>0:35</td>
+        <td>Signing in (rovers help)</td>
+        </tr>
+        <tr>
+        <td>0:50</td>
+        <td>The first question — by voice</td>
+        </tr>
+        <tr>
+        <td>1:05</td>
+        <td>“Try your own thing”</td>
+        </tr>
+        <tr>
+        <td>1:20</td>
+        <td>Wrap, cheat sheet, what’s next</td>
+        </tr>
+        <tr>
+        <td>1:30</td>
+        <td>Tea refills, lingering, one-to-one questions</td>
+        </tr>
+        </tbody>
+        </table>
+        <p>The first 15 minutes are not filler. People arrive flustered
+        (parking, the bus, finding the room). Tea first, learning
+        second.</p>
+        <hr />
+        <h2 id="the-script">The script</h2>
+        <h3 id="welcome-5-mins">0:15 — Welcome (5 mins)</h3>
+        <blockquote>
+        <p>“You’re very welcome. I’m [name]. This is Tea &amp; Tech. The
+        deal is simple: we drink tea, we eat scones, and by the time you
+        go home you’ll be able to talk to Claude on your own phone — by
+        talking to it, not typing. There’s no exam. There’s no stupid
+        question. If you get stuck, put your hand up and [rover names]
+        will come over.</p>
+        <p>One rule for the morning: <strong>if you don’t understand
+        something, say so.</strong> If I’m going too fast, tell me. If a
+        word makes no sense, ask. The only way this morning fails is if
+        you go home pretending you followed and you didn’t.</p>
+        <p>Thank you to <strong>[sponsor]</strong> who paid for the
+        scones and the booklet you’ve got in front of you. [Sponsor
+        representative says hello, 60 seconds max.]”</p>
+        </blockquote>
+        <h3 id="installing-claude-15-mins">0:20 — Installing Claude (15
+        mins)</h3>
+        <p>Rovers fan out. Host stays at the front, narrating
+        slowly.</p>
+        <blockquote>
+        <p>“Pick up your phone. Find the <strong>App Store</strong> if
+        you have an iPhone, or the <strong>Play Store</strong> if you
+        have an Android. Don’t worry if you don’t know which you have —
+        hold it up and a rover will tell you.”</p>
+        </blockquote>
+        <p>Walk through, slowly:</p>
+        <ol type="1">
+        <li>Open the store.</li>
+        <li>Tap the search box.</li>
+        <li>Type — or <strong>dictate</strong> — the word “Claude”.
+        <em>(First voice moment: “see the little microphone? Press it
+        and say ‘Claude’.”)</em> This is the first taste of dictation,
+        before they know they’re learning it.</li>
+        <li>Find the one with the orange/cream icon, made by
+        Anthropic.</li>
+        <li>Tap <strong>Get</strong> or <strong>Install</strong>. It
+        will ask for your Apple/Google password or a fingerprint. That’s
+        normal.</li>
+        <li>Wait for it to download.</li>
+        </ol>
+        <p><strong>Branches the rovers will hit:</strong></p>
+        <ul>
+        <li><em>“It’s asking for my Apple ID password and I don’t know
+        it.”</em> → Don’t try to fix this in the room. Note their name,
+        offer to help one-to-one at 1:30, move them to the spare phone
+        for now.</li>
+        <li><em>“My phone is too full to install.”</em> → Same. Spare
+        phone.</li>
+        <li><em>“It installed but won’t open.”</em> → Usually a restart.
+        Hold the side button, slide to power off.</li>
+        </ul>
+        <h3 id="signing-in-15-mins">0:35 — Signing in (15 mins)</h3>
+        <blockquote>
+        <p>“Open Claude. It’ll ask you to sign in. Use your email — the
+        one you actually check. If you sign in with Google or Apple,
+        it’s one tap. If you use a password, you’ll need to know
+        it.”</p>
+        </blockquote>
+        <p>Rovers help. Host narrates the screens out loud as they
+        appear.</p>
+        <p><strong>The one warning, said clearly:</strong></p>
+        <blockquote>
+        <p>“Claude will ask if you want notifications. <strong>Say no
+        for today.</strong> You can turn them on later if you want. We
+        don’t want your phone buzzing for the next ninety minutes.”</p>
+        </blockquote>
+        <h3 id="the-first-question-by-voice-15-mins">0:50 — The first
+        question, by voice (15 mins)</h3>
+        <p>This is the heart of the morning. Slow down.</p>
+        <blockquote>
+        <p>“Right. Everybody should now have Claude open, with a box at
+        the bottom that says ‘Message Claude’ or similar. See the
+        <strong>microphone icon</strong>? That’s the whole point of
+        today. We’re not going to type. We’re going to talk.</p>
+        <p>Press the microphone. Wait for the little wave to appear.
+        Then say, clearly: <strong>‘Tell me a joke about
+        Kerry.’</strong> Don’t worry about sounding silly — everybody’s
+        about to do it.</p>
+        <p>When you’ve finished talking, press the microphone again, or
+        the arrow. Claude will think for a moment, then write back.”</p>
+        </blockquote>
+        <p>Pause. Let the room try it. Laughter is good — it means it
+        worked.</p>
+        <blockquote>
+        <p>“Now look at what it wrote. Two things to notice.
+        <strong>One:</strong> it might have got your words slightly
+        wrong at the top — that’s fine, you can fix it.
+        <strong>Two:</strong> the joke might be terrible. Also fine. If
+        you don’t like the answer, press the microphone again and say
+        <strong>‘try another one’</strong> or <strong>‘shorter’</strong>
+        or <strong>‘I don’t get it, explain it.’</strong> That’s the
+        trick. It’s a conversation, not a search.”</p>
+        </blockquote>
+        <p>Three more practice prompts together:</p>
+        <ol type="1">
+        <li>“Give me three dinner ideas using chicken and
+        potatoes.”</li>
+        <li>“Explain what a podcast is, like I’ve never heard the
+        word.”</li>
+        <li>“Write a short message wishing my sister a happy birthday —
+        her name is [name].”</li>
+        </ol>
+        <p>After each one: <em>“Did it get it right? If not, say so out
+        loud — what would you ask it next?”</em></p>
+        <h3 id="try-your-own-thing-15-mins">1:05 — Try your own thing
+        (15 mins)</h3>
+        <blockquote>
+        <p>“Now the fun bit. Have a think — is there something you’ve
+        been meaning to ask, or write, or understand? A letter you got.
+        A recipe you wanted to adjust. A question you’d be embarrassed
+        to ask anyone else. Try it. If you can’t think of one, your
+        rover will give you a suggestion.”</p>
+        </blockquote>
+        <p>Rovers circulate, one-to-one. <strong>Do not lecture from the
+        front during this segment.</strong> This is where learning
+        sticks.</p>
+        <p><strong>The one thing to watch for:</strong> anyone about to
+        dictate their PPS number, card number, or a password. Step in
+        gently and explain why we don’t do that. This is a teaching
+        moment; don’t make them feel told off.</p>
+        <h3 id="wrap-10-mins">1:20 — Wrap (10 mins)</h3>
+        <blockquote>
+        <p>“Open the back page of your booklet. This is your cheat
+        sheet. Three things on it:</p>
+        <ol type="1">
+        <li>How to start voice — press the microphone, wait for the
+        wave, talk, press it again.</li>
+        <li>Three good ways to ask: <strong>‘explain it like I’m new to
+        this’</strong>, <strong>‘make it shorter’</strong>, <strong>‘try
+        again, that wasn’t quite right.’</strong></li>
+        <li>Three things never to share: <strong>PPS number, card
+        numbers, passwords.</strong></li>
+        </ol>
+        <p>That’s it. Stick it on the fridge.</p>
+        <p>Homework, if you want it: <strong>next letter that arrives
+        that confuses you, before you do anything else, take a
+        photograph of it and ask Claude what it says.</strong> That’s
+        Morning 2 — but you can try it this week.</p>
+        <p>Same time next [week/fortnight]? Bring a friend.”</p>
+        </blockquote>
+        <h3 id="lingering-15-mins">1:30 — Lingering (15 mins)</h3>
+        <p>Tea refills. The most important 15 minutes for the people who
+        didn’t put their hand up. Rovers and host stay available. This
+        is when the real questions come.</p>
+        <hr />
+        <h2 id="whats-in-the-booklet-morning-1-edition">What’s in the
+        booklet (Morning 1 edition)</h2>
+        <p>8 pages, A5, large type (minimum 14pt body, 18pt headings),
+        spiral-bound or saddle-stitched.</p>
+        <ol type="1">
+        <li><strong>Cover</strong> — Tea &amp; Tech logo, “Morning 1:
+        Getting Claude on Your Phone”, sponsor logo.</li>
+        <li><strong>What is Claude?</strong> — one paragraph, plain
+        English. Not the internet. Not Google. Not a person. A patient
+        assistant that reads and writes.</li>
+        <li><strong>Installing Claude</strong> — screenshots, iPhone
+        left page, Android right page.</li>
+        <li><strong>Signing in</strong> — screenshots, the “I forgot my
+        password” branch flagged with a phone number for the local
+        library/host.</li>
+        <li><strong>Talking to Claude</strong> — the microphone, the
+        wave, the arrow. Big pictures.</li>
+        <li><strong>Three good ways to ask</strong> — explain it like
+        I’m new, make it shorter, try again.</li>
+        <li><strong>Three things never to share</strong> — PPS, card
+        numbers, passwords. Why, in one sentence each.</li>
+        <li><strong>Back cover / cheat sheet</strong> — the fridge page.
+        Sponsor logo at bottom.</li>
+        </ol>
+        <hr />
+        <h2
+        id="sponsor-pack-one-page-given-to-the-sponsor-before-the-morning">Sponsor
+        pack (one page, given to the sponsor before the morning)</h2>
+        <ul>
+        <li>What Tea &amp; Tech is, in 3 sentences.</li>
+        <li>What you get for €[X]: logo on the booklet (8 pages, 15
+        copies), logo on the table sign, 60-second hello at the start of
+        the morning, named in the thank-you at the end.</li>
+        <li>What you don’t get: a sales pitch to the room, attendee
+        contact details, anything that would feel like a stitch-up.
+        <em>Be explicit about this — it’s why people come
+        back.</em></li>
+        <li>Photo permissions: ask once, at the start. Anyone who
+        doesn’t want to be in photos sits at the table furthest from the
+        camera. Don’t post faces without explicit permission.</li>
+        </ul>
+        <hr />
+        <h2 id="risks-what-to-do">Risks &amp; what to do</h2>
+        <table>
+        <colgroup>
+        <col style="width: 38%" />
+        <col style="width: 61%" />
+        </colgroup>
+        <thead>
+        <tr>
+        <th>Risk</th>
+        <th>What to do</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>Wifi dies</td>
+        <td>Switch to host hotspot. Practised in advance.</td>
+        </tr>
+        <tr>
+        <td>Someone can’t sign in (forgotten Apple ID)</td>
+        <td>Spare phone for the morning. One-to-one at 1:30. Don’t hold
+        up the room.</td>
+        </tr>
+        <tr>
+        <td>Someone gets upset / overwhelmed</td>
+        <td>Rover sits with them, away from the front. Tea. No pressure
+        to continue.</td>
+        </tr>
+        <tr>
+        <td>Someone tries to paste a PPS or card number</td>
+        <td>Step in immediately, gently. Use as a teaching moment for
+        the whole room.</td>
+        </tr>
+        <tr>
+        <td>Claude gives a confidently wrong answer</td>
+        <td>Good. Use it. “This is why we never trust it on money,
+        medicine, or law.”</td>
+        </tr>
+        <tr>
+        <td>Sponsor tries to pitch</td>
+        <td>Have agreed the 60-second limit in writing in advance. Cut
+        in if needed.</td>
+        </tr>
+        <tr>
+        <td>Someone dominates the room with questions</td>
+        <td>“Great question — let’s pick that up at 1:30 so everyone
+        gets a turn.”</td>
+        </tr>
+        <tr>
+        <td>A learner brings a real, sensitive letter</td>
+        <td>One-to-one with rover, at the side of the room. Don’t read
+        it aloud.</td>
+        </tr>
+        </tbody>
+        </table>
+        <hr />
+        <h2 id="after-the-morning">After the morning</h2>
+        <ul>
+        <li>10-minute debrief between host and rovers. <strong>What
+        broke? What surprised us? Who needs follow-up?</strong></li>
+        <li>One sentence in a shared log per attendee who needs
+        follow-up (forgotten password, sensitive letter, follow-up
+        question).</li>
+        <li>Thank-you note to the sponsor by end of day. Photo of the
+        room (no faces unless permitted) attached.</li>
+        <li>One thing to change for Morning 2.</li>
+        </ul>
+        <hr />
+        <h2 id="open-questions-for-liam-before-this-is-final">Open
+        questions for Liam before this is final</h2>
+        <ol type="1">
+        <li><strong>Sponsor price point</strong> — €100? €150? Depends
+        on venue cost and biscuit ambition.</li>
+        <li><strong>Booklet print run</strong> — local print shop or one
+        national supplier across all venues? Affects whether the booklet
+        template is locked or editable per town.</li>
+        <li><strong>Rover recruitment</strong> — TY students, library
+        staff, family members of attendees? Each has different training
+        needs.</li>
+        <li><strong>Photo / consent form</strong> — do we need a written
+        one, or is verbal at the start enough? Worth a 10-minute call
+        with someone who runs Active Retirement Ireland to find out
+        what’s normal.</li>
+        </ol>
+        <div class="doc-footer">
+          <span>Tea &amp; Tech · <em>Pop in if you don't want to wait til the weekend.</em></span>
+          <span><a href="/community/tea-and-tech">All Tea &amp; Tech docs</a> · <a href="/">Linguist</a></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

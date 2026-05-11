@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$title$ — Tea & Tech</title>
+  <meta name="description" content="Tea & Tech: a free Tuesday morning for people over 65 who'd like to get the hang of AI, in a library, with tea and a bun.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-links { display: flex; align-items: center; gap: 1rem; }
+    .site-header-link {
+      font-family: var(--sans); font-size: 0.82rem;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-link--active { color: var(--w-text); }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+    }
+
+    .doc-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .doc {
+      padding: var(--space-xl) 0 var(--space-2xl);
+    }
+
+    .doc h1 {
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc .lede {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.15rem;
+      margin-bottom: var(--space-xl);
+      max-width: 60ch;
+    }
+
+    .doc h2 {
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-md);
+      font-weight: 500;
+    }
+
+    .doc h3 {
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc p, .doc li {
+      font-size: 1.05rem;
+    }
+
+    .doc ul, .doc ol {
+      margin: 0 0 var(--space-md) 0;
+      padding-left: 1.5rem;
+    }
+
+    .doc li {
+      margin-bottom: 0.4rem;
+      max-width: 65ch;
+    }
+
+    .doc li::marker { color: var(--w-accent); }
+
+    .doc blockquote {
+      margin: var(--space-md) 0;
+      padding: 1rem 1.5rem;
+      background: var(--w-accent-light);
+      border-left: 2px solid var(--w-accent);
+      font-style: italic;
+      max-width: 65ch;
+    }
+    .doc blockquote p { max-width: none; }
+    .doc blockquote p:last-child { margin-bottom: 0; }
+
+    .doc strong { font-weight: 600; }
+
+    .doc table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: var(--space-md) 0;
+      font-size: 0.95rem;
+    }
+    .doc th, .doc td {
+      border-bottom: 1px solid var(--w-border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .doc th {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--w-bg-card);
+      border-bottom: 2px solid var(--w-accent);
+    }
+
+    .doc hr {
+      border: none;
+      height: 28px;
+      margin: var(--space-xl) 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 28' preserveAspectRatio='none'><path d='M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14' fill='none' stroke='%236B5540' stroke-width='1' opacity='0.5'/></svg>");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .doc pre {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--w-bg-card);
+      padding: 1rem;
+      border-radius: 3px;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: var(--space-md) 0;
+      max-width: 100%;
+    }
+    .doc code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: var(--w-bg-card);
+      padding: 0 0.25em;
+      border-radius: 2px;
+    }
+    .doc pre code { background: none; padding: 0; }
+
+    .doc-footer {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-faint);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .doc-footer a {
+      color: var(--w-faint);
+      text-decoration: none;
+    }
+    .doc-footer a:hover { color: var(--w-accent); }
+
+    @media print {
+      .site-header, .doc-footer { display: none; }
+      .doc { padding: 0; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/community" class="site-header-link site-header-link--active">Community</a>
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/manifesto" class="site-header-link">Manifesto</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="doc">
+      <div class="container">
+        <p class="doc-eyebrow">$subtitle$</p>
+        $body$
+        <div class="doc-footer">
+          <span>Tea &amp; Tech · <em>Pop in if you don't want to wait til the weekend.</em></span>
+          <span><a href="/community/tea-and-tech">All Tea &amp; Tech docs</a> · <a href="/">Linguist</a></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

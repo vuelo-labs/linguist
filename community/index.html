@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community — Linguist</title>
+<meta name="description" content="Linguist Community: programmes you can run in your own town. Tea & Tech, and more to come.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<style>
+  .site-header { position: sticky; top: 0; z-index: 10; background: var(--w-bg); border-bottom: 1px solid var(--w-border); display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; }
+  .site-logo { font-family: var(--sans); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--w-muted); text-decoration: none; }
+  .site-header-links { display: flex; align-items: center; gap: 1rem; }
+  .site-header-link { font-family: var(--sans); font-size: 0.82rem; color: var(--w-muted); text-decoration: none; }
+  .site-header-link:hover { color: var(--w-text); }
+  .site-header-link--active { color: var(--w-text); }
+  .hero { padding: var(--space-xl) 0 var(--space-lg); }
+  .hero .eyebrow { font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--w-faint); margin-bottom: 0.75rem; }
+  .hero h1 { font-weight: 500; margin-bottom: var(--space-sm); }
+  .hero .tagline { font-style: italic; color: var(--w-muted); font-size: 1.2rem; margin-bottom: var(--space-md); max-width: 55ch; }
+  .hero p { font-size: 1.05rem; max-width: 62ch; }
+  .programmes { padding: var(--space-lg) 0 var(--space-2xl); }
+  .programme {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding: var(--space-lg) 0;
+    border-top: 1px solid var(--w-border);
+    transition: background 0.15s;
+  }
+  .programme:last-child { border-bottom: 1px solid var(--w-border); }
+  .programme:hover .programme-title { color: var(--w-accent); }
+  .programme-eyebrow { font-family: var(--sans); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--w-faint); margin-bottom: 0.5rem; }
+  .programme-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 500; margin-bottom: 0.5rem; transition: color 0.15s; }
+  .programme-tagline { font-family: var(--serif); font-style: italic; color: var(--w-muted); margin-bottom: 0.75rem; }
+  .programme-blurb { font-family: var(--serif); color: var(--w-text); max-width: 60ch; margin-bottom: 0.75rem; }
+  .programme-meta { font-family: var(--sans); font-size: 0.82rem; color: var(--w-faint); }
+  .programme-meta span { margin-right: 1.25rem; }
+  .placeholder {
+    padding: var(--space-lg) 0;
+    border-top: 1px solid var(--w-border);
+    color: var(--w-faint);
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a href="/" class="site-logo">Linguist</a>
+  <div class="site-header-links">
+    <a href="/community" class="site-header-link site-header-link--active">Community</a>
+    <a href="/course" class="site-header-link">Course</a>
+    <a href="/manifesto" class="site-header-link">Manifesto</a>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">Community</p>
+      <h1>Programmes you can run in your own town.</h1>
+      <p class="tagline">Linguist makes the pack. You run the room. We don't franchise, we don't charge, we don't take a cut.</p>
+      <p>Some kinds of AI learning don't happen on a website. They happen in a library meeting room, with tea and a bun, between neighbours. These are the programmes we've designed for that — free to use, free to adapt, made to be hosted by someone in town who's not us.</p>
+    </div>
+  </section>
+
+  <section class="programmes">
+    <div class="container">
+
+      <a class="programme" href="/community/tea-and-tech/">
+        <div class="programme-eyebrow">Programme · Pilot</div>
+        <div class="programme-title">Tea &amp; Tech →</div>
+        <div class="programme-tagline">Pop in if you don't want to wait til the weekend.</div>
+        <div class="programme-blurb">A free Tuesday morning for people over 65 who'd like to get the hang of the AI everyone's talking about — without feeling like they're back in school. Four 90-minute mornings, run by a library, parish, or any decent neighbour. Tea, scones, and a patient hand.</div>
+        <div class="programme-meta">
+          <span>For ages 65+</span>
+          <span>Hosted at libraries</span>
+          <span>€1 jar funded</span>
+          <span>4 mornings + ongoing</span>
+        </div>
+      </a>
+
+      <div class="placeholder">More programmes in the works. If you'd like to host one or propose one, get in touch.</div>
+
+    </div>
+  </section>
+</main>
+</body>
+</html>

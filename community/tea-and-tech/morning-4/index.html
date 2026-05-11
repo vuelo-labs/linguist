@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your family history, with a research
+assistant — Tea & Tech</title>
+  <meta name="description" content="Tea & Tech: a free Tuesday morning for people over 65 who'd like to get the hang of AI, in a library, with tea and a bun.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-links { display: flex; align-items: center; gap: 1rem; }
+    .site-header-link {
+      font-family: var(--sans); font-size: 0.82rem;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-link--active { color: var(--w-text); }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+    }
+
+    .doc-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .doc {
+      padding: var(--space-xl) 0 var(--space-2xl);
+    }
+
+    .doc h1 {
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc .lede {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.15rem;
+      margin-bottom: var(--space-xl);
+      max-width: 60ch;
+    }
+
+    .doc h2 {
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-md);
+      font-weight: 500;
+    }
+
+    .doc h3 {
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc p, .doc li {
+      font-size: 1.05rem;
+    }
+
+    .doc ul, .doc ol {
+      margin: 0 0 var(--space-md) 0;
+      padding-left: 1.5rem;
+    }
+
+    .doc li {
+      margin-bottom: 0.4rem;
+      max-width: 65ch;
+    }
+
+    .doc li::marker { color: var(--w-accent); }
+
+    .doc blockquote {
+      margin: var(--space-md) 0;
+      padding: 1rem 1.5rem;
+      background: var(--w-accent-light);
+      border-left: 2px solid var(--w-accent);
+      font-style: italic;
+      max-width: 65ch;
+    }
+    .doc blockquote p { max-width: none; }
+    .doc blockquote p:last-child { margin-bottom: 0; }
+
+    .doc strong { font-weight: 600; }
+
+    .doc table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: var(--space-md) 0;
+      font-size: 0.95rem;
+    }
+    .doc th, .doc td {
+      border-bottom: 1px solid var(--w-border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .doc th {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--w-bg-card);
+      border-bottom: 2px solid var(--w-accent);
+    }
+
+    .doc hr {
+      border: none;
+      height: 28px;
+      margin: var(--space-xl) 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 28' preserveAspectRatio='none'><path d='M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14' fill='none' stroke='%236B5540' stroke-width='1' opacity='0.5'/></svg>");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .doc pre {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--w-bg-card);
+      padding: 1rem;
+      border-radius: 3px;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: var(--space-md) 0;
+      max-width: 100%;
+    }
+    .doc code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: var(--w-bg-card);
+      padding: 0 0.25em;
+      border-radius: 2px;
+    }
+    .doc pre code { background: none; padding: 0; }
+
+    .doc-footer {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-faint);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .doc-footer a {
+      color: var(--w-faint);
+      text-decoration: none;
+    }
+    .doc-footer a:hover { color: var(--w-accent); }
+
+    @media print {
+      .site-header, .doc-footer { display: none; }
+      .doc { padding: 0; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/community" class="site-header-link site-header-link--active">Community</a>
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/manifesto" class="site-header-link">Manifesto</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="doc">
+      <div class="container">
+        <p class="doc-eyebrow">Host Pack · Morning 4</p>
+        <h1 id="tea-tech-morning-4-host-pack">Tea &amp; Tech — Morning 4
+        Host Pack</h1>
+        <p><strong>Title for the poster:</strong> <em>Tea &amp; Tech —
+        Morning 4: Your Family History, with a Research Assistant</em>
+        <strong>Standing tagline:</strong> <em>Pop in if you don’t want
+        to wait til the weekend.</em> <strong>Length:</strong> 90
+        minutes — though many learners will want to stay longer. Plan
+        for it.</p>
+        <p>Assumes Mornings 1, 2, 3 are familiar.</p>
+        <hr />
+        <h2 id="what-this-morning-is-for">What this morning is for</h2>
+        <p>By the end of 90 minutes, every person in the room can:</p>
+        <ol type="1">
+        <li><strong>Tell Claude what they already know</strong> — names,
+        dates, parishes, places — and have it organised into something
+        they can build on.</li>
+        <li><strong>Photograph an old record</strong> — a baptism entry,
+        a census page, a grave inscription — and have Claude transcribe
+        and translate it.</li>
+        <li><strong>Know where to look next</strong> — Irish
+        Genealogy.ie, the National Archives, local parish records —
+        without expecting Claude to do the searching for them.</li>
+        <li><strong>Start the family story</strong> that grandchildren
+        might actually read.</li>
+        </ol>
+        <p>This is the morning that gives them a reason to keep using
+        Claude <em>after</em> the course ends. Saturdays well spent.</p>
+        <hr />
+        <h2 id="why-this-morning-is-different">Why this morning is
+        different</h2>
+        <p>The first three mornings were defensive — staying safe,
+        understanding letters, getting things off the chest.
+        <strong>Morning 4 is the first time the learner is using Claude
+        for something that’s purely for them.</strong> Curiosity, not
+        necessity. The energy in the room is different — slower, more
+        absorbed, more “show me yours and I’ll show you mine.”</p>
+        <p>Plan accordingly:</p>
+        <ul>
+        <li><strong>The 1:30 lingering will run long.</strong> Block 30
+        minutes, not 15. The genealogy conversations between attendees
+        are themselves part of the morning.</li>
+        <li><strong>Bring printed examples.</strong> A baptism entry in
+        Latin, an 1851 census page, a Griffith’s Valuation page. People
+        who don’t have records yet need something to practise on.</li>
+        <li><strong>Have the websites bookmarked on the spare
+        phone.</strong> Irish Genealogy.ie, the National Archives
+        1901/1911 census, the National Library parish registers. Some
+        learners will want to go further the same morning.</li>
+        </ul>
+        <hr />
+        <h2 id="timing">Timing</h2>
+        <table>
+        <thead>
+        <tr>
+        <th>Time</th>
+        <th>What happens</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>0:00</td>
+        <td>Tea, scones, newcomers caught up</td>
+        </tr>
+        <tr>
+        <td>0:15</td>
+        <td>Welcome and the frame</td>
+        </tr>
+        <tr>
+        <td>0:25</td>
+        <td>What you already know — dictating a starting point</td>
+        </tr>
+        <tr>
+        <td>0:45</td>
+        <td>Reading old records — photo, transcribe, translate</td>
+        </tr>
+        <tr>
+        <td>1:05</td>
+        <td>Where to look next — Claude as research partner</td>
+        </tr>
+        <tr>
+        <td>1:15</td>
+        <td>Writing the story — turning notes into a page</td>
+        </tr>
+        <tr>
+        <td>1:25</td>
+        <td>Wrap and the awkward questions</td>
+        </tr>
+        <tr>
+        <td>1:30</td>
+        <td>Lingering (long)</td>
+        </tr>
+        </tbody>
+        </table>
+        <hr />
+        <h2 id="the-script">The script</h2>
+        <h3 id="welcome-and-the-frame-10-mins">0:15 — Welcome and the
+        frame (10 mins)</h3>
+        <blockquote>
+        <p>“Welcome back. This is the last morning of the four — though
+        there’s no rule that says we can’t keep meeting if you’d like
+        to.</p>
+        <p>Today is the morning that’s just for you. The first three
+        were about staying safe and getting things off your chest. Today
+        is about <strong>what you’d like to know.</strong> Most of us in
+        this room have wondered about a great-grandfather who emigrated,
+        or a parish someone came from, or a grave we’ve never found.
+        Today we make a start on it.</p>
+        <p>I want to say one thing up front. <strong>Claude is not a
+        genealogist.</strong> It’s not a search engine for the records.
+        What it’s brilliant at is helping you read what you find,
+        organise what you know, and tell you where to look next. The
+        looking is still your Saturday afternoon.”</p>
+        </blockquote>
+        <h3 id="what-you-already-know-20-mins">0:25 — What you already
+        know (20 mins)</h3>
+        <blockquote>
+        <p>“Open Claude. Press the microphone. Tell it everything you
+        already know about one branch of your family — a
+        great-grandparent, a side that interests you. Names, dates,
+        places, parishes, anything. It can be messy. It can be ‘I think
+        it was around 1880, my mother said it was Mayo but it might have
+        been Galway.’ Just talk.”</p>
+        </blockquote>
+        <p>Worked example, dictated by the host:</p>
+        <blockquote>
+        <p><em>“My great-grandfather on my father’s side was Patrick
+        Walsh. I think he was born around 1865 in County Cork —
+        somewhere near Bandon, my father said. He emigrated to Boston
+        before the turn of the century, married a woman called Bridget
+        Murphy from Clonakilty, and they had six children. He came back
+        to visit once, in the 1920s. That’s about all I know.”</em></p>
+        </blockquote>
+        <p>Then ask:</p>
+        <blockquote>
+        <p><em>“Can you organise that into a starting family tree, with
+        the gaps marked clearly so I know what to look for?”</em></p>
+        </blockquote>
+        <p>Read Claude’s answer aloud. <strong>Notice the gaps.</strong>
+        Patrick’s exact date of birth. The name of the parish. The ship
+        he sailed on. The names of the six children.</p>
+        <blockquote>
+        <p>“See what it did. It didn’t pretend to know things it
+        doesn’t. It marked the gaps. <strong>Those gaps are your
+        shopping list.</strong> That’s the homework.”</p>
+        </blockquote>
+        <p>Let the room try with their own families. Rovers help.
+        <strong>The energy will pick up here — let it.</strong></p>
+        <h3 id="reading-old-records-20-mins">0:45 — Reading old records
+        (20 mins)</h3>
+        <blockquote>
+        <p>“Now the trick that genuinely surprises people. Old records —
+        baptism entries, census pages, gravestones — are often hard to
+        read. Old handwriting. Latin. Faded ink. Photograph one, give it
+        to Claude, and ask <strong>‘can you transcribe this and
+        translate it into plain English?’</strong>”</p>
+        </blockquote>
+        <p>Worked examples on the table — printed, A4. Pass them
+        around.</p>
+        <ol type="1">
+        <li><strong>A Latin baptism entry</strong> from a parish
+        register. Photograph it through Claude. Ask: <em>“What does this
+        say, in English?”</em> Read the answer aloud. <em>“Patrick, son
+        of Michael Walsh and Mary Murphy of Bandon parish, baptised 14
+        March 1865, sponsors John Walsh and Catherine Murphy.”</em></li>
+        <li><strong>A page from the 1901 census.</strong> Photograph it.
+        Ask: <em>“Who lived in this house?”</em> Claude reads the
+        columns — names, ages, occupations, religion, language.</li>
+        <li><strong>A gravestone photograph.</strong> Same trick. Often
+        these are weathered and unreadable to the eye but legible to
+        Claude.</li>
+        </ol>
+        <blockquote>
+        <p>“Three things to notice. <strong>One:</strong> Claude can
+        read handwriting that you can’t. That’s the win.
+        <strong>Two:</strong> it’s not always perfectly accurate — names
+        get misread, dates get misread. So if a record matters,
+        <strong>double-check the date and the name</strong> against
+        another source. <strong>Three:</strong> the Latin trick isn’t
+        just for genealogy. Old letters, old prayer cards, old documents
+        — same trick.”</p>
+        </blockquote>
+        <h3 id="where-to-look-next-10-mins">1:05 — Where to look next
+        (10 mins)</h3>
+        <blockquote>
+        <p>“Now you’ve got a starting tree with gaps in it. The next
+        question is <em>where do I look?</em> Claude can help with this
+        too — but it’s a research assistant, not a researcher. It tells
+        you the door; you walk through it.</p>
+        <p>Press the microphone. Say: <strong>‘I’m looking for the
+        baptism record of Patrick Walsh, born around 1865 near Bandon in
+        County Cork. Where would I look?’</strong>”</p>
+        </blockquote>
+        <p>Read the answer aloud. Claude should suggest:</p>
+        <ul>
+        <li><strong>Irish Genealogy.ie</strong> — free, the National
+        Archives’ civil and parish register search.</li>
+        <li><strong>National Library of Ireland parish
+        registers</strong> — free online, by parish.</li>
+        <li><strong>Roots Ireland</strong> — paid, but covers parishes
+        the others miss.</li>
+        <li><strong>The 1901 and 1911 censuses</strong> — National
+        Archives, free.</li>
+        <li><strong>Griffith’s Valuation</strong> (askaboutireland.ie) —
+        for property and land, mid-1800s.</li>
+        </ul>
+        <blockquote>
+        <p>“<strong>Important.</strong> Some of these things Claude
+        might be confidently wrong about — a website might have changed,
+        or a record collection might be smaller than it says. Always
+        check by going to the actual website. Treat Claude’s suggestions
+        as starting points, not gospel.”</p>
+        </blockquote>
+        <p>The bookmarked spare phone is here for anyone who wants to
+        try Irish Genealogy.ie in the room.</p>
+        <h3 id="writing-the-story-10-mins">1:15 — Writing the story (10
+        mins)</h3>
+        <blockquote>
+        <p>“Last bit. You can ask Claude to take everything you’ve told
+        it — and everything it’s read from your photographs — and turn
+        it into a one-page family story that a grandchild would actually
+        read. Not a research paper. A story.</p>
+        <p>Press the microphone. Say: <strong>‘Can you turn what we’ve
+        talked about into a one-page family story I could give to my
+        grandson, written warmly but factually, marking clearly anything
+        we’re not sure of?’</strong>”</p>
+        </blockquote>
+        <p>Read an example aloud. Notice that Claude marks uncertainty
+        plainly: <em>“family tradition says…”, “we believe but have not
+        confirmed…”, “the parish is not yet known.”</em></p>
+        <blockquote>
+        <p>“That last bit is the gold. Claude marking the difference
+        between what’s known and what’s family lore. That’s what makes
+        this a story your grandson can trust.”</p>
+        </blockquote>
+        <h3 id="the-awkward-questions-5-mins">1:25 — The awkward
+        questions (5 mins)</h3>
+        <blockquote>
+        <p>“One last thing before we wrap. Family history is sometimes
+        hard. Emigration that broke families. Children who went into
+        mother and baby homes. Magdalene laundries. Workhouses. Names
+        that changed for reasons people didn’t talk about. Illegitimacy.
+        Suicide. The Famine itself.</p>
+        <p>Claude is a non-judgmental sounding board for these. You can
+        ask it the questions you couldn’t ask your own mother. It won’t
+        be shocked. It’ll help you understand the context, the records,
+        the choices people had and didn’t have.</p>
+        <p>But — and this matters — what you find may be heavy. If a
+        piece of family history hits you hard, talk to someone. Your GP,
+        a friend, the parish priest if that’s your way. Don’t sit alone
+        with something you’ve discovered. Ring me, even, if you can’t
+        think who else.”</p>
+        </blockquote>
+        <h3 id="lingering-30-mins">1:30 — Lingering (30+ mins)</h3>
+        <p>The genealogy conversations between attendees often run for
+        an hour. Let them. The host and rovers stay available.
+        <strong>This is also when people ask for help on the harder
+        family stories</strong> — the things they didn’t want to bring
+        up at the front of the room.</p>
+        <hr />
+        <h2 id="booklet-for-morning-4">Booklet for Morning 4</h2>
+        <p>Larger than the others — <strong>12 pages instead of
+        8</strong>, because there are more worked examples and more
+        reference material.</p>
+        <ol type="1">
+        <li>Cover — <em>Morning 4: Your Family History, with a Research
+        Assistant</em></li>
+        <li>The four things Claude is good at — organise, read, suggest,
+        write</li>
+        <li>The one thing it isn’t — a search engine for the
+        records</li>
+        <li>Telling Claude what you already know — example dictation,
+        example response</li>
+        <li>Reading old records — photographing, transcribing,
+        translating</li>
+        <li>A worked example — Latin baptism entry, with Claude’s
+        translation</li>
+        <li>A worked example — 1901 census page, with Claude’s
+        reading</li>
+        <li>Where to look next — the five Irish sources, with web
+        addresses</li>
+        <li>Writing the story — one-page family history example</li>
+        <li>The awkward questions — permission to ask, plus where to
+        turn for support</li>
+        <li>The next steps — joining a local genealogy society, the
+        National Archives reading room</li>
+        <li>Back cover / cheat sheet — and a thank-you, because it’s the
+        last morning</li>
+        </ol>
+        <hr />
+        <h2 id="risks-what-to-do">Risks &amp; what to do</h2>
+        <table>
+        <colgroup>
+        <col style="width: 41%" />
+        <col style="width: 58%" />
+        </colgroup>
+        <thead>
+        <tr>
+        <th>Risk</th>
+        <th>What to do</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>Claude misreads a name in a record</td>
+        <td>Drill the double-check habit. Real research means
+        cross-referencing.</td>
+        </tr>
+        <tr>
+        <td>Claude invents a record that doesn’t exist</td>
+        <td>This happens. <em>“If a website Claude mentioned doesn’t
+        have what it said it had, it was wrong. Trust the website, not
+        Claude.”</em></td>
+        </tr>
+        <tr>
+        <td>A learner discovers something distressing</td>
+        <td>Sit with them. Suggest someone to talk to. Follow up next
+        week.</td>
+        </tr>
+        <tr>
+        <td>A learner wants to keep going past 90 mins</td>
+        <td>Good problem. Hosts and rovers stay if they can. Suggest
+        meeting again.</td>
+        </tr>
+        <tr>
+        <td>The room divides into “lots of records” and “no
+        records”</td>
+        <td>Pair them. The ones with records mentor the ones
+        without.</td>
+        </tr>
+        <tr>
+        <td>Someone wants to use Claude on a sensitive document</td>
+        <td>Same as Morning 2 — cover the sensitive bits with a
+        thumb.</td>
+        </tr>
+        </tbody>
+        </table>
+        <hr />
+        <h2 id="after-morning-4-the-question-that-matters">After Morning
+        4 — the question that matters</h2>
+        <p>This is the last morning of the planned four. Before everyone
+        leaves:</p>
+        <blockquote>
+        <p>“These are the four mornings we planned. The question for
+        you, before you go: <strong>do you want to keep
+        meeting?</strong> Same time, every [week/fortnight]. Bring
+        whatever question you’ve got. There’s no curriculum any more —
+        just tea, scones, and patient hands.</p>
+        <p>Have a think on the way home. Tell me on Tuesday.”</p>
+        </blockquote>
+        <p>Most rooms will say yes. The pack for what comes after
+        Morning 4 — call it <strong>The Standing Morning</strong> — is
+        the next thing to write, but it’s much smaller: no curriculum,
+        just facilitation. That’s a separate document.</p>
+        <div class="doc-footer">
+          <span>Tea &amp; Tech · <em>Pop in if you don't want to wait til the weekend.</em></span>
+          <span><a href="/community/tea-and-tech">All Tea &amp; Tech docs</a> · <a href="/">Linguist</a></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

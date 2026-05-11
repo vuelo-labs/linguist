@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Is this a scam? — Tea & Tech</title>
+  <meta name="description" content="Tea & Tech: a free Tuesday morning for people over 65 who'd like to get the hang of AI, in a library, with tea and a bun.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--w-bg);
+      border-bottom: 1px solid var(--w-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .site-logo {
+      font-family: var(--sans);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-links { display: flex; align-items: center; gap: 1rem; }
+    .site-header-link {
+      font-family: var(--sans); font-size: 0.82rem;
+      color: var(--w-muted); text-decoration: none;
+    }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-link--active { color: var(--w-text); }
+    @media (max-width: 480px) {
+      .site-header { padding: 0.85rem 1rem; }
+      .site-header-link { display: none; }
+    }
+
+    .doc-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--w-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .doc {
+      padding: var(--space-xl) 0 var(--space-2xl);
+    }
+
+    .doc h1 {
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc .lede {
+      font-style: italic;
+      color: var(--w-muted);
+      font-size: 1.15rem;
+      margin-bottom: var(--space-xl);
+      max-width: 60ch;
+    }
+
+    .doc h2 {
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-md);
+      font-weight: 500;
+    }
+
+    .doc h3 {
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+
+    .doc p, .doc li {
+      font-size: 1.05rem;
+    }
+
+    .doc ul, .doc ol {
+      margin: 0 0 var(--space-md) 0;
+      padding-left: 1.5rem;
+    }
+
+    .doc li {
+      margin-bottom: 0.4rem;
+      max-width: 65ch;
+    }
+
+    .doc li::marker { color: var(--w-accent); }
+
+    .doc blockquote {
+      margin: var(--space-md) 0;
+      padding: 1rem 1.5rem;
+      background: var(--w-accent-light);
+      border-left: 2px solid var(--w-accent);
+      font-style: italic;
+      max-width: 65ch;
+    }
+    .doc blockquote p { max-width: none; }
+    .doc blockquote p:last-child { margin-bottom: 0; }
+
+    .doc strong { font-weight: 600; }
+
+    .doc table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: var(--space-md) 0;
+      font-size: 0.95rem;
+    }
+    .doc th, .doc td {
+      border-bottom: 1px solid var(--w-border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .doc th {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--w-bg-card);
+      border-bottom: 2px solid var(--w-accent);
+    }
+
+    .doc hr {
+      border: none;
+      height: 28px;
+      margin: var(--space-xl) 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 28' preserveAspectRatio='none'><path d='M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14' fill='none' stroke='%236B5540' stroke-width='1' opacity='0.5'/></svg>");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .doc pre {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--w-bg-card);
+      padding: 1rem;
+      border-radius: 3px;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: var(--space-md) 0;
+      max-width: 100%;
+    }
+    .doc code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: var(--w-bg-card);
+      padding: 0 0.25em;
+      border-radius: 2px;
+    }
+    .doc pre code { background: none; padding: 0; }
+
+    .doc-footer {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--w-border);
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--w-faint);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .doc-footer a {
+      color: var(--w-faint);
+      text-decoration: none;
+    }
+    .doc-footer a:hover { color: var(--w-accent); }
+
+    @media print {
+      .site-header, .doc-footer { display: none; }
+      .doc { padding: 0; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/community" class="site-header-link site-header-link--active">Community</a>
+      <a href="/course" class="site-header-link">Course</a>
+      <a href="/manifesto" class="site-header-link">Manifesto</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="doc">
+      <div class="container">
+        <p class="doc-eyebrow">Host Pack · Morning 2</p>
+        <h1 id="tea-tech-morning-2-host-pack">Tea &amp; Tech — Morning 2
+        Host Pack</h1>
+        <p><strong>Title for the poster:</strong> <em>Tea &amp; Tech —
+        Morning 2: Is This a Scam, and Other Letters You Didn’t Ask
+        For</em> <strong>Standing tagline:</strong> <em>Pop in if you
+        don’t want to wait til the weekend.</em>
+        <strong>Length:</strong> 90 minutes, plus 15 mins setup and 15
+        mins clear-up. <strong>Group size:</strong> 8–15 learners, mix
+        of returners and newcomers.</p>
+        <p>This pack assumes you’ve run Morning 1. Where it differs from
+        Morning 1, the differences are flagged. Where it doesn’t, follow
+        the Morning 1 pack.</p>
+        <hr />
+        <h2 id="what-this-morning-is-for">What this morning is for</h2>
+        <p>By the end of 90 minutes, every person in the room can:</p>
+        <ol type="1">
+        <li><strong>Photograph a letter</strong> with their phone and
+        ask Claude to explain it in plain English.</li>
+        <li><strong>Paste or dictate a suspicious text</strong> and ask
+        Claude whether it looks legitimate.</li>
+        <li>Name two things Claude <strong>won’t</strong> do for them —
+        ring the bank, log in anywhere, pay a bill.</li>
+        <li>Name when to ignore Claude entirely — anything involving
+        money, medicine, or legal deadlines, confirm with a person.</li>
+        </ol>
+        <p>That’s the whole job.</p>
+        <hr />
+        <h2 id="the-newcomer-problem">The newcomer problem</h2>
+        <p>Some people will arrive at Morning 2 having missed Morning 1.
+        <strong>Don’t make them feel left behind, and don’t slow the
+        room down for them.</strong> The fix:</p>
+        <ul>
+        <li>A rover spends the first 15 minutes (the tea segment)
+        installing Claude and signing them in, away from the front. By
+        the time the morning starts, they’re caught up enough to
+        follow.</li>
+        <li>The Morning 1 booklet is on the table for them to take
+        home.</li>
+        <li>One-to-one at 1:30 if they need more.</li>
+        </ul>
+        <hr />
+        <h2 id="whats-different-from-morning-1">What’s different from
+        Morning 1</h2>
+        <ul>
+        <li><strong>Photos as input.</strong> This is the new mechanic.
+        Make space for it.</li>
+        <li><strong>Real letters from learners’ actual lives.</strong>
+        This is the bit that lands. Encourage attendees in the poster
+        and on the way out of Morning 1 to <em>bring a letter that
+        confused them</em>.</li>
+        <li><strong>The boundary conversation</strong> — what Claude
+        does and doesn’t do — is more important here than in Morning 1,
+        because the stakes are higher (real letters, real bills).</li>
+        </ul>
+        <hr />
+        <h2 id="timing">Timing</h2>
+        <table>
+        <thead>
+        <tr>
+        <th>Time</th>
+        <th>What happens</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>0:00</td>
+        <td>Tea, scones, name badges, chat. Newcomers caught up.</td>
+        </tr>
+        <tr>
+        <td>0:15</td>
+        <td>Welcome and a quick recap</td>
+        </tr>
+        <tr>
+        <td>0:20</td>
+        <td>Spotting a dodgy text — worked example, then their own</td>
+        </tr>
+        <tr>
+        <td>0:40</td>
+        <td>Photographing a letter — worked example</td>
+        </tr>
+        <tr>
+        <td>0:55</td>
+        <td>Bring your own letter (one-to-one with rovers)</td>
+        </tr>
+        <tr>
+        <td>1:15</td>
+        <td>What Claude won’t do, and when to ignore it</td>
+        </tr>
+        <tr>
+        <td>1:25</td>
+        <td>Wrap and homework</td>
+        </tr>
+        <tr>
+        <td>1:30</td>
+        <td>Tea refills, lingering, one-to-one</td>
+        </tr>
+        </tbody>
+        </table>
+        <hr />
+        <h2 id="the-script">The script</h2>
+        <h3 id="welcome-and-recap-5-mins">0:15 — Welcome and recap (5
+        mins)</h3>
+        <blockquote>
+        <p>“Welcome back. If you were here for Morning 1, you already
+        know how to talk to Claude on your phone. If you weren’t, [rover
+        name] has caught you up over tea, and you’re grand.</p>
+        <p>Today is the morning everybody tells their neighbour about.
+        We’re going to do two things. <strong>One:</strong> the next
+        time a strange text or letter arrives — the kind that makes you
+        wonder whether it’s a scam — you’ll know what to do.
+        <strong>Two:</strong> the next time a letter arrives that you’ve
+        read three times and still don’t know what it’s asking, you’ll
+        know what to do with that too.</p>
+        <p>Same rule as last time. If I’m going too fast, say so.”</p>
+        </blockquote>
+        <h3 id="spotting-a-dodgy-text-20-mins">0:20 — Spotting a dodgy
+        text (20 mins)</h3>
+        <blockquote>
+        <p>“Open Claude on your phone. Press the microphone. Say:
+        <strong>‘I just got this text and I’m not sure if it’s real. Can
+        you tell me if it looks like a scam?’</strong> Then read the
+        text out loud, exactly as it’s written.”</p>
+        </blockquote>
+        <p>The host has a worked example ready. Read it from a piece of
+        paper:</p>
+        <blockquote>
+        <p><em>“An Post: Your parcel could not be delivered due to
+        unpaid customs charges of €2.99. Pay now to reschedule:
+        anpost-delivery-rescheduling.com/pay”</em></p>
+        </blockquote>
+        <p>Let the room try it. Compare answers — Claude should flag the
+        suspicious URL, the urgency, the small amount designed to feel
+        harmless.</p>
+        <blockquote>
+        <p>“Notice what Claude pointed at. The web address —
+        anpost-delivery-rescheduling-dot-com — isn’t anpost.ie. The
+        small amount, €2.99, is designed to feel too small to worry
+        about. The urgency. These are the patterns. Once you’ve seen
+        Claude name them once or twice, you start spotting them
+        yourself.”</p>
+        </blockquote>
+        <p><strong>Then:</strong> invite anyone who has had a suspicious
+        text recently to read it out. Three or four examples is plenty.
+        <strong>The room learns more from each other’s real ones than
+        from any worked example.</strong></p>
+        <blockquote>
+        <p>“One important thing. <strong>Claude can be wrong.</strong>
+        It might tell you something is fine when it isn’t, or scary when
+        it isn’t. So the rule is: if Claude says it’s a scam, trust
+        that. If Claude says it’s probably fine but you still feel
+        uneasy — trust that too. Don’t click the link. Ring the company
+        yourself, on a number you find in the phone book or on a real
+        letter.”</p>
+        </blockquote>
+        <h3 id="photographing-a-letter-15-mins">0:40 — Photographing a
+        letter (15 mins)</h3>
+        <blockquote>
+        <p>“Now the new trick. You can take a photograph of a letter and
+        ask Claude what it says.</p>
+        <p>I have a letter here. [Hold it up — a worked example, e.g. a
+        real-feeling HSE appointment letter or Revenue notice,
+        redacted.] I’m going to take a photograph of it inside Claude,
+        and ask, <strong>‘What is this letter asking me to
+        do?’</strong>”</p>
+        </blockquote>
+        <p>Show them, slowly, on a phone projected if possible (or held
+        up). The mechanic:</p>
+        <ol type="1">
+        <li>Open Claude.</li>
+        <li>Tap the <strong>+</strong> or <strong>paperclip</strong>
+        beside the message box.</li>
+        <li>Choose <strong>Camera</strong> (or <strong>Photo
+        Library</strong> if it’s already photographed).</li>
+        <li>Take the photo. Hold steady, good light.</li>
+        <li>Speak the question: <em>“What is this letter asking me to
+        do?”</em></li>
+        </ol>
+        <p>Read Claude’s answer aloud.</p>
+        <blockquote>
+        <p>“Notice it doesn’t just read the letter back to you. It tells
+        you what to <em>do</em> with it. The appointment is on the 14th.
+        You need to ring this number to confirm. Bring your medical
+        card. That’s the bit that matters.”</p>
+        </blockquote>
+        <h3 id="bring-your-own-letter-20-mins">0:55 — Bring your own
+        letter (20 mins)</h3>
+        <p>This is the heart of the morning.</p>
+        <blockquote>
+        <p>“Anyone who brought a letter, now’s the time. If you didn’t
+        bring one but there’s one at home you’ve been meaning to ask
+        about, take a photograph of it next time and try this. For now,
+        your rover will give you one to practise on.”</p>
+        </blockquote>
+        <p>Rovers circulate, one-to-one. <strong>Sensitive letters
+        happen at the side of the room, not the front.</strong> Don’t
+        read anyone’s letter aloud unless they offer.</p>
+        <p><strong>What to watch for:</strong></p>
+        <ul>
+        <li>Anyone about to dictate or photograph a letter that contains
+        their PPS number, full bank details, or a medical diagnosis they
+        may not want shared. Step in gently. <em>“You can ask Claude
+        what this is asking you to do without showing it the bit at the
+        top with your PPS number — cover that with your thumb when you
+        take the photo.”</em></li>
+        <li>Anyone whose letter is genuinely distressing — a bereavement
+        notice, a serious diagnosis, a solicitor’s letter about a
+        dispute. Sit with them. The morning isn’t a substitute for
+        Citizens Information or a real solicitor; the host’s job here is
+        to recognise that and say so kindly.</li>
+        </ul>
+        <h3 id="what-claude-wont-do-10-mins">1:15 — What Claude won’t do
+        (10 mins)</h3>
+        <blockquote>
+        <p>“Before we wrap up, the most important thing of the morning.
+        Claude will explain a letter. It will help you write a reply.
+        <strong>It will not</strong> ring the bank for you. <strong>It
+        will not</strong> log into anything for you. <strong>It will
+        not</strong> pay a bill. <strong>It will not</strong> sign a
+        form. You do all of that yourself, with the explanation Claude
+        gave you in your back pocket.</p>
+        <p>And there are three things you should never trust Claude on
+        without checking with a real person:</p>
+        <p><strong>Money.</strong> If a letter is about a bill, a
+        refund, a deadline, or a debt — ring the company on a number
+        from a real letter or the phone book.</p>
+        <p><strong>Medicine.</strong> If a letter is about a
+        prescription, a dose, a diagnosis, a side effect — ring your GP
+        or pharmacist. Citizens Information for medical card
+        questions.</p>
+        <p><strong>Law.</strong> If a letter is from a solicitor, the
+        courts, the Revenue Commissioners, or anything threatening legal
+        action — Citizens Information first, then a solicitor.</p>
+        <p>Claude is a brilliant first reader. It is not the last
+        word.”</p>
+        </blockquote>
+        <h3 id="wrap-5-mins">1:25 — Wrap (5 mins)</h3>
+        <blockquote>
+        <p>“Open the back of today’s booklet. Three things on it:</p>
+        <ol type="1">
+        <li>How to photograph a letter — paperclip, camera, take the
+        photo, ask the question.</li>
+        <li>Three signs of a scam — wrong web address, false urgency,
+        asking for money or numbers.</li>
+        <li>Three things to confirm with a real person — money,
+        medicine, law.</li>
+        </ol>
+        <p>Homework: this week, when a letter or a text arrives that
+        confuses you, don’t ring your son. Try Claude first. Then ring
+        your son if you still want to. He’ll be glad of the shorter
+        call.</p>
+        <p>Same time next [week/fortnight].”</p>
+        </blockquote>
+        <h3 id="lingering-15-mins">1:30 — Lingering (15 mins)</h3>
+        <p>As Morning 1. The sensitive letters that didn’t come up at
+        the front often come up here.</p>
+        <hr />
+        <h2 id="booklet-for-morning-2">Booklet for Morning 2</h2>
+        <p>Same shape as Morning 1’s booklet — A5, 8 pages, large type,
+        cream paper. Pages:</p>
+        <ol type="1">
+        <li>Cover — <em>Morning 2: Is This a Scam, and Other Letters You
+        Didn’t Ask For</em></li>
+        <li>The new trick — photographing a letter (3 screenshots)</li>
+        <li>The three signs of a scam — wrong address, urgency, money or
+        numbers</li>
+        <li>A worked example — the An Post text, with Claude’s answer
+        alongside</li>
+        <li>A worked example — a letter, photographed, with Claude’s
+        answer alongside</li>
+        <li>What Claude <strong>won’t</strong> do — ring, log in, pay,
+        sign</li>
+        <li>When to confirm with a real person — money, medicine, law
+        (with the actual numbers: Citizens Information, HSE Live, the
+        Garda non-emergency line)</li>
+        <li>Back cover / cheat sheet — the fridge page</li>
+        </ol>
+        <hr />
+        <h2 id="risks-what-to-do">Risks &amp; what to do</h2>
+        <p>In addition to the Morning 1 risk table:</p>
+        <table>
+        <colgroup>
+        <col style="width: 39%" />
+        <col style="width: 60%" />
+        </colgroup>
+        <thead>
+        <tr>
+        <th>Risk</th>
+        <th>What to do</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>Learner photographs a letter with PPS visible</td>
+        <td>Step in gently. Reshoot with thumb covering the sensitive
+        bits.</td>
+        </tr>
+        <tr>
+        <td>Learner brings a genuinely distressing letter</td>
+        <td>One-to-one at the side. Recognise the limits of the morning.
+        Suggest CIC.</td>
+        </tr>
+        <tr>
+        <td>Claude misidentifies a real letter as a scam</td>
+        <td>Use it. “This is why we always confirm with the real number,
+        both ways.”</td>
+        </tr>
+        <tr>
+        <td>Claude misses a real scam</td>
+        <td>Worse failure mode. Worth flagging in the wrap: trust your
+        unease too.</td>
+        </tr>
+        <tr>
+        <td>Returner has lost their login since Morning 1</td>
+        <td>Spare phone. One-to-one at 1:30. Same as Morning 1
+        forgotten-Apple-ID.</td>
+        </tr>
+        <tr>
+        <td>Newcomer feels lost despite the 15-min catch-up</td>
+        <td>Pair them with a returner at the same table, not the front
+        of the room.</td>
+        </tr>
+        </tbody>
+        </table>
+        <hr />
+        <h2 id="after-the-morning">After the morning</h2>
+        <p>Same as Morning 1 — debrief with rovers, one sentence per
+        attendee needing follow-up, thank-you to the sponsor.</p>
+        <p><strong>One extra:</strong> if any scam example came up
+        that’s circulating widely in town (a new fake text doing the
+        rounds), worth a quick note to the local Garda community officer
+        or the credit union. They often want to know.</p>
+        <div class="doc-footer">
+          <span>Tea &amp; Tech · <em>Pop in if you don't want to wait til the weekend.</em></span>
+          <span><a href="/community/tea-and-tech">All Tea &amp; Tech docs</a> · <a href="/">Linguist</a></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
