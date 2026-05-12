@@ -99,11 +99,38 @@
     <div id="list-body"></div>
   </div>
 
+  <!-- Scored sessions -->
+  <div class="card" id="reports-card">
+    <div class="toolbar">
+      <h2 style="margin:0;">Scored sessions</h2>
+      <button class="btn ghost small" onclick="loadReports()">Refresh</button>
+    </div>
+    <div id="reports-status" class="status"></div>
+    <div id="reports-body"></div>
+  </div>
+
 </div>
+
+<style>
+  .verdict-pill {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 0.78rem; font-weight: 600;
+  }
+  .verdict-pill.shortlist  { background: #e3fcef; color: #006644; }
+  .verdict-pill.borderline { background: #fff4e5; color: #974f0c; }
+  .verdict-pill.pass       { background: #ffebe6; color: #bf2600; }
+  .report-links a {
+    display: inline-block; margin-right: 8px; font-size: 0.82rem;
+    color: var(--w-text); text-decoration: none; border-bottom: 1px dotted var(--w-muted);
+  }
+  .report-links a:hover { color: var(--w-border-focus); }
+  .headline-snippet { color: var(--w-muted); font-size: 0.82rem; font-style: italic; }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   loadTokens();
+  loadReports();
 });
 
 async function api(path, opts = {}) {
@@ -218,6 +245,69 @@ async function revokeToken(token) {
 
 function escapeHtml(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+async function loadReports() {
+  const r = await api('/cyborg/reports', { method: 'GET' });
+  if (r.status === 401) { location.reload(); return; }
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    const s = document.getElementById('reports-status');
+    s.className = 'status err';
+    s.textContent = d.error || `Error (${r.status}).`;
+    return;
+  }
+  renderReports(await r.json());
+}
+
+function renderReports(payload) {
+  const reports = (payload && payload.reports) || [];
+  const body = document.getElementById('reports-body');
+  if (reports.length === 0) {
+    body.innerHTML = '<div class="empty">No scored sessions yet.</div>';
+    return;
+  }
+  const rows = reports.map(r => {
+    const scored = r.scored_at ? new Date(r.scored_at).toLocaleString('en-GB') : '—';
+    const cost   = r.cost_usd != null ? `$${Number(r.cost_usd).toFixed(4)}` : '—';
+    const dur    = r.duration_ms != null ? `${(r.duration_ms/1000).toFixed(1)}s` : '—';
+    const statusPill = `<span class="pill ${r.status}">${escapeHtml(r.status)}</span>`;
+    const verdictPill = r.verdict
+      ? `<span class="verdict-pill ${r.verdict}">${escapeHtml(r.verdict)}</span>`
+      : '—';
+    const labelOrToken = r.candidate_label
+      ? `<strong>${escapeHtml(r.candidate_label)}</strong><br><code style="font-size:0.74rem;color:var(--w-muted);">${escapeHtml(r.candidate_token)}</code>`
+      : `<code>${escapeHtml(r.candidate_token)}</code>`;
+    const signed = r.signed || {};
+    const links = ['candidate','manager','technical','recruiter','master']
+      .filter(t => signed[t])
+      .map(t => `<a href="${escapeHtml(signed[t])}" target="_blank" rel="noopener">${t}</a>`)
+      .join('');
+    const errCell = r.error
+      ? `<div style="color:#bf2600;font-size:0.78rem;font-family:var(--c-mono);max-width:340px;overflow-wrap:break-word;">${escapeHtml(r.error)}</div>`
+      : `<div class="headline-snippet">${escapeHtml(r.headline_snippet || '')}</div>`;
+    return `
+      <tr>
+        <td>${statusPill}</td>
+        <td>${labelOrToken}</td>
+        <td>${scored}</td>
+        <td>${dur}</td>
+        <td>${cost}</td>
+        <td>${verdictPill}</td>
+        <td class="report-links">${links}</td>
+      </tr>
+      <tr><td colspan="7" style="padding-top:0;padding-bottom:14px;">${errCell}</td></tr>
+    `;
+  }).join('');
+  body.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Status</th><th>Candidate</th><th>Scored</th><th>Duration</th>
+        <th>Cost</th><th>Verdict</th><th>View</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
 }
 </script>
 
