@@ -111,6 +111,24 @@
 
 </div>
 
+<!-- Report viewer modal -->
+<div id="report-modal" class="rm-overlay hidden" onclick="closeReportModal(event)">
+  <div class="rm-frame" onclick="event.stopPropagation()">
+    <div class="rm-bar">
+      <div class="rm-tabs" id="rm-tabs">
+        <button class="rm-tab" data-tier="candidate" onclick="switchTier('candidate')">candidate</button>
+        <button class="rm-tab" data-tier="manager"   onclick="switchTier('manager')">manager</button>
+        <button class="rm-tab" data-tier="technical" onclick="switchTier('technical')">technical</button>
+        <button class="rm-tab" data-tier="recruiter" onclick="switchTier('recruiter')">recruiter</button>
+        <button class="rm-tab" data-tier="master"    onclick="switchTier('master')">master</button>
+      </div>
+      <div class="rm-meta" id="rm-meta"></div>
+      <button class="rm-close" onclick="closeReportModal()" aria-label="Close">×</button>
+    </div>
+    <iframe id="rm-iframe" sandbox="allow-same-origin"></iframe>
+  </div>
+</div>
+
 <style>
   .verdict-pill {
     display: inline-block; padding: 2px 8px; border-radius: 10px;
@@ -119,12 +137,58 @@
   .verdict-pill.shortlist  { background: #e3fcef; color: #006644; }
   .verdict-pill.borderline { background: #fff4e5; color: #974f0c; }
   .verdict-pill.pass       { background: #ffebe6; color: #bf2600; }
-  .report-links a {
+  .report-links a, .report-links button.tier-link {
     display: inline-block; margin-right: 8px; font-size: 0.82rem;
     color: var(--w-text); text-decoration: none; border-bottom: 1px dotted var(--w-muted);
+    background: none; border-top: none; border-left: none; border-right: none;
+    cursor: pointer; padding: 0; font-family: inherit;
   }
-  .report-links a:hover { color: var(--w-border-focus); }
+  .report-links a:hover, .report-links button.tier-link:hover { color: var(--w-border-focus); }
   .headline-snippet { color: var(--w-muted); font-size: 0.82rem; font-style: italic; }
+
+  /* Report viewer modal */
+  .rm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px; z-index: 1000;
+  }
+  .rm-overlay.hidden { display: none; }
+  .rm-frame {
+    background: var(--w-bg, #fff);
+    width: 100%; max-width: 980px; height: 100%; max-height: 92vh;
+    border-radius: 10px; overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .rm-bar {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 14px; border-bottom: 1px solid var(--w-border, #eee);
+    background: var(--w-bg-card, #f7f6f3);
+  }
+  .rm-tabs { display: flex; gap: 4px; }
+  .rm-tab {
+    background: transparent; border: 1px solid transparent;
+    padding: 5px 12px; border-radius: 6px;
+    font-size: 0.82rem; font-family: inherit; cursor: pointer;
+    color: var(--w-muted, #666);
+  }
+  .rm-tab:hover { background: var(--w-bg-input, #fff); color: var(--w-text); }
+  .rm-tab.active {
+    background: var(--w-bg-input, #fff); border-color: var(--w-border, #ddd);
+    color: var(--w-text); font-weight: 600;
+  }
+  .rm-meta {
+    flex: 1; text-align: right; font-size: 0.78rem; color: var(--w-muted);
+    font-family: var(--c-mono);
+  }
+  .rm-close {
+    background: none; border: none; font-size: 1.6rem;
+    color: var(--w-muted); cursor: pointer; line-height: 1; padding: 0 4px;
+  }
+  .rm-close:hover { color: var(--w-text); }
+  #rm-iframe {
+    flex: 1; width: 100%; border: none; background: #fff;
+  }
 </style>
 
 <script>
@@ -247,16 +311,54 @@ function escapeHtml(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
+let currentModal = { submissionId: null, tier: null, label: null };
+
+function openReportModal(submissionId, tier, label) {
+  currentModal = { submissionId, tier, label };
+  document.getElementById('rm-meta').textContent = `${label} · submission #${submissionId}`;
+  document.getElementById('report-modal').classList.remove('hidden');
+  switchTier(tier);
+  document.addEventListener('keydown', onEscClose);
+}
+
+function closeReportModal(ev) {
+  if (ev && ev.target.id !== 'report-modal') return;
+  document.getElementById('report-modal').classList.add('hidden');
+  document.getElementById('rm-iframe').src = 'about:blank';
+  document.removeEventListener('keydown', onEscClose);
+}
+
+function onEscClose(e) {
+  if (e.key === 'Escape') closeReportModal();
+}
+
+function switchTier(tier) {
+  currentModal.tier = tier;
+  document.querySelectorAll('#rm-tabs .rm-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tier === tier);
+  });
+  const url = `/cyborg/admin/report?submission=${encodeURIComponent(currentModal.submissionId)}&tier=${encodeURIComponent(tier)}`;
+  document.getElementById('rm-iframe').src = url;
+}
+
 async function loadReports() {
-  const r = await api('/cyborg/reports', { method: 'GET' });
-  if (r.status === 401) { location.reload(); return; }
-  if (!r.ok) {
-    const d = await r.json().catch(() => ({}));
-    const s = document.getElementById('reports-status');
+  const s = document.getElementById('reports-status');
+  s.className = 'status'; s.textContent = 'Loading…';
+  let r;
+  try {
+    r = await api('/cyborg/admin/reports', { method: 'GET' });
+  } catch (e) {
     s.className = 'status err';
-    s.textContent = d.error || `Error (${r.status}).`;
+    s.textContent = `Network error: ${e.message || e}`;
     return;
   }
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    s.className = 'status err';
+    s.textContent = d.error || d.reason || `Error (${r.status}). Open browser console for details.`;
+    return;
+  }
+  s.className = 'status'; s.textContent = '';
   renderReports(await r.json());
 }
 
@@ -278,10 +380,9 @@ function renderReports(payload) {
     const labelOrToken = r.candidate_label
       ? `<strong>${escapeHtml(r.candidate_label)}</strong><br><code style="font-size:0.74rem;color:var(--w-muted);">${escapeHtml(r.candidate_token)}</code>`
       : `<code>${escapeHtml(r.candidate_token)}</code>`;
-    const signed = r.signed || {};
-    const links = ['candidate','manager','technical','recruiter','master']
-      .filter(t => signed[t])
-      .map(t => `<a href="${escapeHtml(signed[t])}" target="_blank" rel="noopener">${t}</a>`)
+    const tiers = ['candidate','manager','technical','recruiter','master'];
+    const links = tiers
+      .map(t => `<button class="tier-link" onclick="openReportModal(${r.submission_id}, '${t}', '${escapeHtml(r.candidate_label || r.candidate_token)}')">${t}</button>`)
       .join('');
     const errCell = r.error
       ? `<div style="color:#bf2600;font-size:0.78rem;font-family:var(--c-mono);max-width:340px;overflow-wrap:break-word;">${escapeHtml(r.error)}</div>`

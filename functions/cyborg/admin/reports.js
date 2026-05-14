@@ -1,11 +1,12 @@
-// GET /cyborg/reports — admin-only listing of recent scored sessions.
+// GET /cyborg/admin/reports — admin-only listing of recent scored sessions.
 //
 // Returns the most recent ~50 rows from the reports table with signed
-// URLs (1 hour expiry) for each tier's rendered HTML. CF Access JWT
-// gating piggybacks on the same admin route as token listing.
+// URLs (1 hour expiry) for each tier's rendered HTML. Lives under the
+// /cyborg/admin* path so it inherits the existing CF Access wildcard
+// without needing a new application hostname entry.
 
 import { createClient } from '@supabase/supabase-js';
-import { verifyAccessJwt } from './_access.js';
+import { verifyAccessJwt } from '../_access.js';
 
 const SIGNED_URL_TTL_SECONDS = 60 * 60;       // 1 hour
 const TIERS = ['master', 'candidate', 'manager', 'technical', 'recruiter'];
