@@ -57,17 +57,19 @@
 
 <div class="wrap">
 
-  <h1>Sign up for the assessment</h1>
+  <h1>Request access to the assessment</h1>
   <p class="lede">
-    A 7-day analyst-at-Veralux simulation. Fill in your details below and we'll email you a single
-    link to launch the workspace — no install, no token to remember. Runs in your browser.
+    A 7-day analyst-at-Veralux simulation. Fill in your details below — we review requests
+    individually (usually within a day) and email you a launch link if you're a fit.
+    No install, no token to remember. Runs in your browser.
   </p>
 
   <div class="card">
     <h2>What happens next</h2>
     <ol class="steps">
       <li>You submit the form.</li>
-      <li>We email you a launch link (usually within a minute).</li>
+      <li>We review your request — usually within a working day.</li>
+      <li>If approved, we email you a launch link.</li>
       <li>Click the link → your workspace boots in ~30 seconds → you start working.</li>
       <li>You have <strong>7 days to fit in 8 hours of active work</strong>. Pause the workspace when you step away — your work-time clock stops with it.</li>
       <li>Submit when you're done; you'll get a written feedback report.</li>
@@ -118,8 +120,8 @@
       </div>
 
       <div class="row-actions">
-        <button type="submit" class="btn" id="submit-btn">Send me my launch link</button>
-        <span style="font-size:0.86rem; color:var(--w-muted);">Usually within a minute.</span>
+        <button type="submit" class="btn" id="submit-btn">Request access</button>
+        <span style="font-size:0.86rem; color:var(--w-muted);">Reviewed within a day.</span>
       </div>
 
       <div class="status" id="status"></div>
@@ -168,7 +170,13 @@ form.addEventListener('submit', async e => {
     const d = await r.json();
     if (d.ok) {
       status.className = 'status ok';
-      status.innerHTML = `Done. Check <strong>${escapeHtml(payload.email)}</strong> for your launch link in the next minute. Watch your spam folder just in case.`;
+      if (d.status === 'pending' || d.status === 'approved') {
+        status.innerHTML = (d.status === 'approved')
+          ? `You've already been approved on <strong>${escapeHtml(payload.email)}</strong> — check that inbox for the launch link (and your spam folder).`
+          : `Request received. We'll review it and email <strong>${escapeHtml(payload.email)}</strong> if you're a fit — usually within a working day.`;
+      } else {
+        status.innerHTML = `Request received. We'll be in touch by email — usually within a working day.`;
+      }
       form.reset();
       btn.textContent = 'Sent';
     } else {
@@ -176,14 +184,17 @@ form.addEventListener('submit', async e => {
       status.textContent = ({
         'missing_fields':    'Please fill in your name and email.',
         'bad_email':         'That email doesn\'t look right — double-check it.',
+        'disposable_email':  'Please use a non-disposable email address.',
         'too_large':         'Message is too long. Trim it and try again.',
         'not_configured':    'Sorry — registration isn\'t wired up yet. Email the assessment owner directly.',
         'turnstile_failed':  'Verification failed. Refresh the page and try again.',
         'missing_turnstile': 'Please complete the verification challenge above.',
-        'mint_failed':       'Could not issue your token. Try again or email the owner.',
+        'rate_limited':      'Too many requests from this address recently. Please try again in an hour.',
+        'daily_cap_reached': 'We\'re at capacity for new requests today. Please try again tomorrow.',
+        'forward_failed':    'Couldn\'t send your request right now. Please try again in a few minutes.',
       }[d.reason] || 'Could not send your registration. Try again or email the owner.');
       if (window.turnstile) window.turnstile.reset();
-      btn.disabled = false; btn.textContent = 'Send me my launch link';
+      btn.disabled = false; btn.textContent = 'Request access';
     }
   } catch (e) {
     status.className = 'status err';

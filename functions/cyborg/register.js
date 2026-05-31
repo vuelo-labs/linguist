@@ -1,29 +1,48 @@
-// POST /cyborg/register — self-serve registration + auto-mint.
+// POST /cyborg/register — public registration request, **manual approval required**.
 //
-// Different from /cyborg/request-token: no manual approval step. The candidate
-// fills the form, the token is minted immediately, and the existing Tines
-// flow (event_type: 'cyborg_approval') emails them the launch link.
+// 2026-05-31 hardened: previously self-serve auto-mint. Switched to manual-
+// approval flow after the cost-amplification surface was reviewed — a single
+// auto-minted token can spin a Fly machine + trigger a scoring run before any
+// human eyes the request. Manual approval means owner sees every request
+// before any compute/LLM cost is incurred.
 //
-// Why this is reasonable abuse-safety-wise:
-//   • Turnstile gate (same as request-token.js)
-//   • Honeypot field (same as request-token.js)
-//   • Cost-cap: each token spins one shared-2x Fly machine that auto-stops
-//     on submit; abandoned machines cost ~$0.40/day until 7-day expiry
-//   • Per-email throttle: one active (unused, non-revoked, non-expired) token
-//     per email at a time — re-registers reuse the existing token
+// Defense layers (in order):
+//   1. Turnstile gate (Cloudflare siteverify, server-enforced)
+//   2. Honeypot field — bots that fill the hidden 'website' input are silently dropped
+//   3. Disposable-email blocklist — known throwaway domains rejected
+//   4. Per-IP rate limit — max 3 submissions per IP per hour
+//   5. Global daily cap — max 50 new requests across all IPs per UTC day
+//   6. Manual approval — request lands in cyborg_token_requests with status='pending';
+//      owner clicks approve in Tines email; token only minted on approval click
+//
+// Cost surface after all gates: $0 until owner approves. Each approved candidate
+// is ~$0.23 all-in.
 
 import { createClient } from '@supabase/supabase-js';
-import { generateToken, jsonResponse, originFromRequest } from './_lib.js';
+import { hmacHex, jsonResponse, originFromRequest } from './_lib.js';
 
 const MAX_NAME    = 200;
 const MAX_EMAIL   = 320;
 const MAX_NOTES   = 2000;
 const MAX_BODY_KB = 8;
-const TOKEN_DAYS  = 8;          // 7-day window + 1-day grace
+
+// Defense parameters
+const IP_RATE_LIMIT_PER_HOUR = 3;
+const DAILY_CAP_PER_UTC_DAY  = 50;
+
+// Disposable-email domains — a small starter list. Add more as observed.
+const DISPOSABLE_DOMAINS = new Set([
+  'mailinator.com', 'tempmail.com', 'temp-mail.org', '10minutemail.com',
+  'guerrillamail.com', 'guerrillamailblock.com', 'sharklasers.com',
+  'getnada.com', 'maildrop.cc', 'yopmail.com', 'trashmail.com',
+  'throwawaymail.com', 'mailnesia.com', 'dispostable.com', 'fakeinbox.com',
+  'spambox.us', 'mintemail.com', 'mytemp.email', 'mohmal.com',
+]);
 
 export async function onRequestPost({ request, env }) {
   if (!env.TINES_REQUEST_WEBHOOK) return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
   if (!env.TURNSTILE_SECRET)      return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
+  if (!env.ADMIN_SECRET)          return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
 
   const ctype = request.headers.get('content-type') || '';
   if (!ctype.includes('application/json')) return jsonResponse({ ok: false, reason: 'bad_content_type' }, 415);
@@ -39,20 +58,29 @@ export async function onRequestPost({ request, env }) {
   const notes = clean(body.notes, MAX_NOTES);
   const hp    = (body.website || '').toString();           // honeypot
 
-  if (hp)              return jsonResponse({ ok: true });   // silent drop
+  if (hp)              return jsonResponse({ ok: true });   // silent drop bots
   if (!name || !email) return jsonResponse({ ok: false, reason: 'missing_fields' }, 400);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     return jsonResponse({ ok: false, reason: 'bad_email' }, 400);
 
-  // ── Turnstile verification ──────────────────────────────────────────────
+  // ── Layer 3: disposable-email blocklist ────────────────────────────────
+  const emailDomain = email.split('@')[1]?.toLowerCase() || '';
+  if (DISPOSABLE_DOMAINS.has(emailDomain)) {
+    return jsonResponse({ ok: false, reason: 'disposable_email' }, 403);
+  }
+
+  const ip      = request.headers.get('cf-connecting-ip') || '';
+  const country = request.headers.get('cf-ipcountry')     || '';
+  const ua      = (request.headers.get('user-agent')      || '').slice(0, 300);
+
+  // ── Layer 1: Turnstile verification ────────────────────────────────────
   const turnstileToken = (body.turnstileToken || '').toString();
   if (!turnstileToken) return jsonResponse({ ok: false, reason: 'missing_turnstile' }, 400);
 
-  const tsIp = request.headers.get('cf-connecting-ip') || '';
   const tsForm = new FormData();
   tsForm.append('secret',   env.TURNSTILE_SECRET);
   tsForm.append('response', turnstileToken);
-  if (tsIp) tsForm.append('remoteip', tsIp);
+  if (ip) tsForm.append('remoteip', ip);
 
   try {
     const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
@@ -69,96 +97,96 @@ export async function onRequestPost({ request, env }) {
   }
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
-  const origin   = originFromRequest(request);
   const nowIso   = new Date().toISOString();
 
-  // ── Per-email throttle: re-registration with the same email returns the
-  // existing active token (silent idempotency). Avoids one candidate burning
-  // many machines if they re-submit the form.
-  const { data: existing } = await supabase
-    .from('cyborg_tokens')
-    .select('token, expires_at, candidate_label')
-    .ilike('candidate_label', `%${email}%`)
-    .is('used_at', null)
-    .is('revoked_at', null)
-    .not('approved_at', 'is', null)
-    .gt('expires_at', nowIso)
-    .order('issued_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  let token, expiresAt;
-  if (existing) {
-    token     = existing.token;
-    expiresAt = existing.expires_at;
-  } else {
-    token     = generateToken();
-    expiresAt = new Date(Date.now() + TOKEN_DAYS * 86400000).toISOString();
-
-    const { error: insertErr } = await supabase.from('cyborg_tokens').insert({
-      token,
-      candidate_label: `${name} (${email})`,
-      expires_at:      expiresAt,
-      approved_at:     nowIso,                  // self-approve at mint time
-      notes:           notes || null,
-    });
-    if (insertErr) {
-      console.error('mint failed:', insertErr.message);
-      return jsonResponse({ ok: false, reason: 'mint_failed' }, 500);
+  // ── Layer 4: per-IP rate limit (3 / hour) ──────────────────────────────
+  // Counts ALL requests (pending/approved/rejected) from this IP in the last hour.
+  if (ip) {
+    const sinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: ipRecentCount, error: ipErr } = await supabase
+      .from('cyborg_token_requests')
+      .select('request_id', { count: 'exact', head: true })
+      .eq('ip', ip)
+      .gt('created_at', sinceIso);
+    if (!ipErr && (ipRecentCount || 0) >= IP_RATE_LIMIT_PER_HOUR) {
+      console.warn(`rate-limit: ip=${ip} count=${ipRecentCount}`);
+      return jsonResponse({ ok: false, reason: 'rate_limited' }, 429);
     }
   }
 
-  const installUrl = `${origin}/cyborg/?t=${encodeURIComponent(token)}`;
+  // ── Layer 5: global daily cap (50 / UTC day) ───────────────────────────
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+  const { count: dailyCount, error: dailyErr } = await supabase
+    .from('cyborg_token_requests')
+    .select('request_id', { count: 'exact', head: true })
+    .gt('created_at', todayStart.toISOString());
+  if (!dailyErr && (dailyCount || 0) >= DAILY_CAP_PER_UTC_DAY) {
+    console.warn(`daily-cap: count=${dailyCount}`);
+    return jsonResponse({ ok: false, reason: 'daily_cap_reached' }, 503);
+  }
 
-  // ── Tines webhook — same `cyborg_approval` event the existing approve-flow
-  // emits, so the candidate email goes out via the already-wired Tines story.
-  // (event_type reused intentionally; payload shape matches approve.js.)
+  // ── Per-email idempotency: same email re-submitting gets a friendly response
+  // without creating a duplicate pending row. Open requests + open tokens both
+  // count — re-registers don't queue new approvals.
+  const { data: existingPending } = await supabase
+    .from('cyborg_token_requests')
+    .select('request_id, status, created_at')
+    .eq('email', email)
+    .in('status', ['pending', 'approved'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (existingPending) {
+    return jsonResponse({ ok: true, status: existingPending.status, message: 'existing_request' });
+  }
+
+  // ── Layer 6: insert as PENDING. No token minted until owner approves. ─
+  const { data: inserted, error: insertErr } = await supabase
+    .from('cyborg_token_requests')
+    .insert({ name, email, notes, ip, country, user_agent: ua, status: 'pending' })
+    .select('request_id, created_at')
+    .single();
+
+  if (insertErr || !inserted) {
+    console.error('insert request failed:', insertErr?.message);
+    return jsonResponse({ ok: false, reason: 'db_error' }, 500);
+  }
+
+  const requestId  = inserted.request_id;
+  const origin     = originFromRequest(request);
+  const approveSig = await hmacHex(env.ADMIN_SECRET, `${requestId}:approve`);
+  const rejectSig  = await hmacHex(env.ADMIN_SECRET, `${requestId}:reject`);
+  const approveUrl = `${origin}/cyborg/approve?req=${requestId}&decision=approve&sig=${approveSig}`;
+  const rejectUrl  = `${origin}/cyborg/approve?req=${requestId}&decision=reject&sig=${rejectSig}`;
+
+  // Tines webhook — reuses the existing 'cyborg_token_request' event type
+  // that powers the owner-notification email with approve/reject links.
   try {
     const r = await fetch(env.TINES_REQUEST_WEBHOOK, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({
-        event_type:   'cyborg_approval',
-        request_id:   null,
-        name,
-        email,
-        token,
-        expires_at:   expiresAt,
-        install_url:  installUrl,
-        install_cmd:  `curl -fsSL https://raw.githubusercontent.com/vuelo-labs/cyborg_versions/main/install.sh | bash -s ${token}`,
-        source:       'self_register',
+        type:         'cyborg_token_request',
+        event_type:   'cyborg_token_request',
+        request_id:   requestId,
+        submitted_at: inserted.created_at,
+        name, email, notes,
+        request_meta: { ip, country, user_agent: ua, source: 'self_register' },
+        approve_url:  approveUrl,
+        reject_url:   rejectUrl,
       }),
     });
     if (!r.ok) {
-      console.error('Tines forward returned', r.status);
-      // Don't fail the user-facing request — the token exists in Supabase,
-      // owner can manually resend the email from there.
+      console.error('Tines webhook returned', r.status);
+      return jsonResponse({ ok: false, reason: 'forward_failed' }, 502);
     }
   } catch (e) {
-    console.error('Tines forward error', e);
+    console.error('Tines webhook error', e);
+    return jsonResponse({ ok: false, reason: 'forward_error' }, 502);
   }
 
-  // Light owner-side audit ping (best-effort, separate event so it doesn't
-  // collide with the candidate-email Tines route).
-  try {
-    await fetch(env.TINES_REQUEST_WEBHOOK, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({
-        event_type:    'cyborg_self_register_audit',
-        name, email, notes,
-        request_meta:  {
-          ip:         request.headers.get('cf-connecting-ip')  || '',
-          country:    request.headers.get('cf-ipcountry')      || '',
-          user_agent: (request.headers.get('user-agent')       || '').slice(0, 300),
-        },
-        token,
-        is_re_register: !!existing,
-      }),
-    });
-  } catch (_) { /* audit-only; ignore */ }
-
-  return jsonResponse({ ok: true, email });
+  return jsonResponse({ ok: true, status: 'pending', message: 'awaiting_approval' });
 }
 
 function clean(v, max) {
