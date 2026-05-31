@@ -38,10 +38,22 @@ export async function onRequestGet({ request, env }) {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'private, max-age=60',
-      // Allow embedding from this same Pages origin (the admin page) but
-      // refuse third-party embeds.
+      // Defence in depth: candidate-supplied content is escaped server-side
+      // via scoring/report.py _esc, but lock the iframe down too. Reports
+      // are static HTML+CSS only — no scripts, no XHR, no images other than
+      // inline data: URIs, no embedding except by the parent admin page.
       'X-Frame-Options': 'SAMEORIGIN',
-      'Content-Security-Policy': "frame-ancestors 'self'",
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'no-referrer',
+      'Content-Security-Policy': [
+        "default-src 'none'",
+        "style-src 'self' 'unsafe-inline'",   // reports embed <style> blocks
+        "img-src 'self' data:",                // sparklines and inline data: imgs
+        "font-src 'self' data:",
+        "frame-ancestors 'self'",              // only the parent admin page
+        "base-uri 'none'",
+        "form-action 'none'",
+      ].join('; '),
     },
   });
 }
