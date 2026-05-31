@@ -7,7 +7,8 @@
 // to the candidate-facing email.
 
 import { createClient } from '@supabase/supabase-js';
-import { hmacHex, timingSafeEqual, generateToken, htmlPage, fetchDadJokes, originFromRequest } from './_lib.js';
+import { hmacHex, timingSafeEqual, generateToken, htmlPage, fetchDadJokes, originFromRequest,
+         writeAuditLog, requestMeta } from './_lib.js';
 
 const TOKEN_DAYS = 8;       // 7-day window + 1-day grace
 
@@ -24,12 +25,18 @@ export async function onRequestGet({ request, env }) {
     return htmlPage(400, 'Bad request', 'Missing or invalid parameters.');
   }
 
+  const meta = requestMeta(request);
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+
   const expected = await hmacHex(env.ADMIN_SECRET, `${requestId}:${decision}`);
   if (!timingSafeEqual(sig, expected)) {
+    await writeAuditLog(supabase, {
+      actorEmail: '(hmac-invalid)', action: `${decision}_request`,
+      target: requestId, success: false,
+      detail: { reason: 'invalid_signature' }, ...meta,
+    });
     return htmlPage(403, 'Invalid signature', 'This approval link is not valid.');
   }
-
-  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
   // Atomic claim: only the first click for a pending request wins.
   const finalStatus = decision === 'approve' ? 'approved' : 'rejected';
@@ -76,6 +83,11 @@ export async function onRequestGet({ request, env }) {
         .update({ status: 'pending', decided_at: null })
         .eq('request_id', requestId);
       console.error('token mint failed:', tokenErr.message);
+      await writeAuditLog(supabase, {
+        actorEmail: 'hmac:approve-link', action: 'approve_request',
+        target: requestId, success: false,
+        detail: { error: tokenErr.message, email: claimed.email }, ...meta,
+      });
       return htmlPage(500, 'Could not mint token', 'Approval rolled back. Try again.');
     }
 
@@ -83,6 +95,12 @@ export async function onRequestGet({ request, env }) {
     await supabase.from('cyborg_token_requests')
       .update({ token })
       .eq('request_id', requestId);
+
+    await writeAuditLog(supabase, {
+      actorEmail: 'hmac:approve-link', action: 'approve_request',
+      target: requestId, success: true,
+      detail: { token, email: claimed.email, expires_at: expiresAt }, ...meta,
+    });
 
     const origin = originFromRequest(request);
     const installUrl = `${origin}/cyborg/?t=${encodeURIComponent(token)}`;
@@ -107,6 +125,12 @@ export async function onRequestGet({ request, env }) {
   await supabase.from('cyborg_token_requests')
     .update({ rejection_jokes: jokes })
     .eq('request_id', requestId);
+
+  await writeAuditLog(supabase, {
+    actorEmail: 'hmac:reject-link', action: 'reject_request',
+    target: requestId, success: true,
+    detail: { email: claimed.email }, ...meta,
+  });
 
   await forwardToTines(env, {
     event_type:   'cyborg_rejection',

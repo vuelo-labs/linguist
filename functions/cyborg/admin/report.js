@@ -11,12 +11,21 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyAccessJwt } from '../_access.js';
+import { writeAuditLog, requestMeta } from '../_lib.js';
 
 const TIERS = new Set(['master', 'candidate', 'manager', 'technical', 'recruiter']);
 
 export async function onRequestGet({ request, env }) {
+  const meta = requestMeta(request);
   const access = await verifyAccessJwt(request, env);
-  if (!access.ok) return new Response('Unauthorized', { status: 401 });
+  if (!access.ok) {
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+    await writeAuditLog(supabase, {
+      actorEmail: '(unauthenticated)', action: 'view_report',
+      success: false, detail: { reason: access.reason }, ...meta,
+    });
+    return new Response('Unauthorized', { status: 401 });
+  }
 
   const url = new URL(request.url);
   const submission = parseInt(url.searchParams.get('submission'), 10);
@@ -29,8 +38,19 @@ export async function onRequestGet({ request, env }) {
   const objectPath = `${submission}/${tier}.html`;
   const { data, error } = await supabase.storage.from('reports').download(objectPath);
   if (error || !data) {
+    await writeAuditLog(supabase, {
+      actorEmail: access.email, action: 'view_report',
+      target: `${submission}/${tier}`, success: false,
+      detail: { reason: 'not_found', objectPath, error: error?.message }, ...meta,
+    });
     return new Response(`not found: ${objectPath}`, { status: 404 });
   }
+
+  await writeAuditLog(supabase, {
+    actorEmail: access.email, action: 'view_report',
+    target: `${submission}/${tier}`, success: true,
+    detail: { tier, submission_id: submission }, ...meta,
+  });
 
   const html = await data.text();
   return new Response(html, {

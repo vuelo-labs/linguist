@@ -3,13 +3,20 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyAccessJwt } from './_access.js';
+import { writeAuditLog, requestMeta } from './_lib.js';
 
 const DEFAULT_DAYS = 8;  // assessment is 7 days; +1 day grace
 
 export async function onRequestPost({ request, env }) {
+  const meta = requestMeta(request);
   const access = await verifyAccessJwt(request, env);
   if (!access.ok) {
     console.error(`mint 401: ${access.reason}`);
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+    await writeAuditLog(supabase, {
+      actorEmail: '(unauthenticated)', action: 'mint',
+      success: false, detail: { reason: access.reason }, ...meta,
+    });
     return json({ error: 'Unauthorized', reason: access.reason }, 401);
   }
 
@@ -33,8 +40,19 @@ export async function onRequestPost({ request, env }) {
   });
   if (error) {
     console.error('mint insert error:', error.message);
+    await writeAuditLog(supabase, {
+      actorEmail: access.email, action: 'mint',
+      target: label, success: false,
+      detail: { error: error.message }, ...meta,
+    });
     return json({ error: 'Failed to mint token.' }, 500);
   }
+
+  await writeAuditLog(supabase, {
+    actorEmail: access.email, action: 'mint',
+    target: token, success: true,
+    detail: { label, days, expires_at: expiresAt }, ...meta,
+  });
 
   return json({
     ok:          true,

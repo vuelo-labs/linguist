@@ -7,13 +7,22 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyAccessJwt } from '../_access.js';
+import { writeAuditLog, requestMeta } from '../_lib.js';
 
 const SIGNED_URL_TTL_SECONDS = 60 * 60;       // 1 hour
 const TIERS = ['master', 'candidate', 'manager', 'technical', 'recruiter'];
 
 export async function onRequestGet({ request, env }) {
+  const meta = requestMeta(request);
   const access = await verifyAccessJwt(request, env);
-  if (!access.ok) return json({ error: 'Unauthorized', reason: access.reason }, 401);
+  if (!access.ok) {
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+    await writeAuditLog(supabase, {
+      actorEmail: '(unauthenticated)', action: 'list_reports',
+      success: false, detail: { reason: access.reason }, ...meta,
+    });
+    return json({ error: 'Unauthorized', reason: access.reason }, 401);
+  }
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
@@ -63,6 +72,11 @@ export async function onRequestGet({ request, env }) {
     // page only needs verdict + snippet, and audience_views is ~10KB per row.
     delete r.audience_views;
   }
+
+  await writeAuditLog(supabase, {
+    actorEmail: access.email, action: 'list_reports',
+    success: true, detail: { row_count: reports.length }, ...meta,
+  });
 
   return json({ ok: true, reports });
 }

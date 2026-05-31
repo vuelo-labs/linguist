@@ -151,3 +151,41 @@ export async function findOpenRequestByEmail(supabase, email) {
   if (error) return null;
   return data || null;
 }
+
+// ── Admin audit log helpers (V5 security) ───────────────────────────────
+// Every privileged admin action writes a row to cyborg_admin_audit. The
+// table is append-only at the trigger layer — UPDATE/DELETE raise an
+// exception even when called via service-role. This is the foundation for
+// compliance pitch + post-incident forensics.
+//
+// Fire-and-forget by default: a failed audit write should never block the
+// underlying admin action. Errors logged to console but not surfaced.
+
+export async function writeAuditLog(supabase, args) {
+  const row = {
+    actor_email: args.actorEmail || '(unknown)',
+    action:      args.action,
+    target:      args.target || null,
+    success:     args.success !== false,
+    detail:      args.detail || null,
+    ip:          args.ip || null,
+    country:     args.country || null,
+    user_agent:  args.userAgent ? String(args.userAgent).slice(0, 500) : null,
+  };
+  try {
+    const { error } = await supabase.from('cyborg_admin_audit').insert(row);
+    if (error) console.error('audit log insert failed:', error.message, 'action:', args.action);
+  } catch (e) {
+    console.error('audit log exception:', e?.message || e, 'action:', args.action);
+  }
+}
+
+// Extract IP / country / user_agent from a request — same pattern used
+// across the abuse-defence helpers.
+export function requestMeta(request) {
+  return {
+    ip:        request.headers.get('cf-connecting-ip') || '',
+    country:   request.headers.get('cf-ipcountry')     || '',
+    userAgent: request.headers.get('user-agent')        || '',
+  };
+}
