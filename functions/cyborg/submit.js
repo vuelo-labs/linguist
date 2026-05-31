@@ -8,9 +8,22 @@ import { createClient } from '@supabase/supabase-js';
 const REQUIRED_FIELDS = ['candidateToken', 'submittedAt'];
 const FLY_API_BASE = 'https://api.machines.dev/v1';
 
+// Match the cyborg-submit Edge Function's ceiling. Bounds workspace upload
+// payload size to limit DB row size / scoring-worker memory. One submission
+// per token via the atomic used_at claim + UNIQUE constraint already prevents
+// repeat-abuse; this is the per-submission cap.
+const MAX_PAYLOAD_BYTES = 2 * 1024 * 1024;
+
 export async function onRequestPost({ request, env }) {
+  // Read raw text first so we can size-check before parsing. Parsing a
+  // huge JSON blob is itself a DoS vector.
+  const rawText = await request.text();
+  if (rawText.length > MAX_PAYLOAD_BYTES) {
+    return json({ error: 'payload_too_large', bytes: rawText.length, max_bytes: MAX_PAYLOAD_BYTES }, 413);
+  }
+
   let body;
-  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+  try { body = JSON.parse(rawText); } catch { return json({ error: 'Invalid JSON' }, 400); }
 
   for (const field of REQUIRED_FIELDS) {
     if (!body[field]) return json({ error: `Missing field: ${field}` }, 400);

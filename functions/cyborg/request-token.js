@@ -2,9 +2,16 @@
 // Records the request in Supabase, mints HMAC-signed approve/reject URLs,
 // and forwards the package to the Tines webhook (env.TINES_REQUEST_WEBHOOK).
 // The token itself is NOT minted yet — that happens at approval time.
+//
+// 2026-05-31 hardened: same defence layers as /cyborg/register —
+// disposable-email blocklist, per-IP rate limit, daily cap, per-email
+// idempotency. Defends against inbox-flood from automated form submissions.
 
 import { createClient } from '@supabase/supabase-js';
-import { hmacHex, jsonResponse, originFromRequest } from './_lib.js';
+import {
+  hmacHex, jsonResponse, originFromRequest,
+  isDisposableEmail, checkIpRateLimit, checkDailyCap, findOpenRequestByEmail,
+} from './_lib.js';
 
 const MAX_NAME    = 200;
 const MAX_EMAIL   = 320;
@@ -33,6 +40,11 @@ export async function onRequestPost({ request, env }) {
   if (!name || !email) return jsonResponse({ ok: false, reason: 'missing_fields' }, 400);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     return jsonResponse({ ok: false, reason: 'bad_email' }, 400);
+
+  // ── Disposable-email blocklist ─────────────────────────────────────────
+  if (isDisposableEmail(email)) {
+    return jsonResponse({ ok: false, reason: 'disposable_email' }, 403);
+  }
 
   // ── Turnstile verification ──────────────────────────────────────────────
   const turnstileToken = (body.turnstileToken || '').toString();
@@ -65,6 +77,24 @@ export async function onRequestPost({ request, env }) {
   const ua      = (request.headers.get('user-agent')      || '').slice(0, 300);
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+
+  // ── Per-IP rate limit (3 / hour) + global daily cap (50 / UTC day) ────
+  const ipCheck = await checkIpRateLimit(supabase, ip);
+  if (!ipCheck.ok) {
+    console.warn(`rate-limit: ip=${ip} count=${ipCheck.count}`);
+    return jsonResponse({ ok: false, reason: 'rate_limited' }, 429);
+  }
+  const dailyCheck = await checkDailyCap(supabase);
+  if (!dailyCheck.ok) {
+    console.warn(`daily-cap: count=${dailyCheck.count}`);
+    return jsonResponse({ ok: false, reason: 'daily_cap_reached' }, 503);
+  }
+
+  // ── Per-email idempotency: existing pending/approved → silent reuse ────
+  const existing = await findOpenRequestByEmail(supabase, email);
+  if (existing) {
+    return jsonResponse({ ok: true, status: existing.status, message: 'existing_request' });
+  }
 
   const { data, error } = await supabase
     .from('cyborg_token_requests')

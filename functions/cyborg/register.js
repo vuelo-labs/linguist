@@ -19,25 +19,15 @@
 // is ~$0.23 all-in.
 
 import { createClient } from '@supabase/supabase-js';
-import { hmacHex, jsonResponse, originFromRequest } from './_lib.js';
+import {
+  hmacHex, jsonResponse, originFromRequest,
+  isDisposableEmail, checkIpRateLimit, checkDailyCap, findOpenRequestByEmail,
+} from './_lib.js';
 
 const MAX_NAME    = 200;
 const MAX_EMAIL   = 320;
 const MAX_NOTES   = 2000;
 const MAX_BODY_KB = 8;
-
-// Defense parameters
-const IP_RATE_LIMIT_PER_HOUR = 3;
-const DAILY_CAP_PER_UTC_DAY  = 50;
-
-// Disposable-email domains — a small starter list. Add more as observed.
-const DISPOSABLE_DOMAINS = new Set([
-  'mailinator.com', 'tempmail.com', 'temp-mail.org', '10minutemail.com',
-  'guerrillamail.com', 'guerrillamailblock.com', 'sharklasers.com',
-  'getnada.com', 'maildrop.cc', 'yopmail.com', 'trashmail.com',
-  'throwawaymail.com', 'mailnesia.com', 'dispostable.com', 'fakeinbox.com',
-  'spambox.us', 'mintemail.com', 'mytemp.email', 'mohmal.com',
-]);
 
 export async function onRequestPost({ request, env }) {
   if (!env.TINES_REQUEST_WEBHOOK) return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
@@ -64,8 +54,7 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse({ ok: false, reason: 'bad_email' }, 400);
 
   // ── Layer 3: disposable-email blocklist ────────────────────────────────
-  const emailDomain = email.split('@')[1]?.toLowerCase() || '';
-  if (DISPOSABLE_DOMAINS.has(emailDomain)) {
+  if (isDisposableEmail(email)) {
     return jsonResponse({ ok: false, reason: 'disposable_email' }, 403);
   }
 
@@ -100,43 +89,22 @@ export async function onRequestPost({ request, env }) {
   const nowIso   = new Date().toISOString();
 
   // ── Layer 4: per-IP rate limit (3 / hour) ──────────────────────────────
-  // Counts ALL requests (pending/approved/rejected) from this IP in the last hour.
-  if (ip) {
-    const sinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count: ipRecentCount, error: ipErr } = await supabase
-      .from('cyborg_token_requests')
-      .select('request_id', { count: 'exact', head: true })
-      .eq('ip', ip)
-      .gt('created_at', sinceIso);
-    if (!ipErr && (ipRecentCount || 0) >= IP_RATE_LIMIT_PER_HOUR) {
-      console.warn(`rate-limit: ip=${ip} count=${ipRecentCount}`);
-      return jsonResponse({ ok: false, reason: 'rate_limited' }, 429);
-    }
+  const ipCheck = await checkIpRateLimit(supabase, ip);
+  if (!ipCheck.ok) {
+    console.warn(`rate-limit: ip=${ip} count=${ipCheck.count}`);
+    return jsonResponse({ ok: false, reason: 'rate_limited' }, 429);
   }
 
   // ── Layer 5: global daily cap (50 / UTC day) ───────────────────────────
-  const todayStart = new Date();
-  todayStart.setUTCHours(0, 0, 0, 0);
-  const { count: dailyCount, error: dailyErr } = await supabase
-    .from('cyborg_token_requests')
-    .select('request_id', { count: 'exact', head: true })
-    .gt('created_at', todayStart.toISOString());
-  if (!dailyErr && (dailyCount || 0) >= DAILY_CAP_PER_UTC_DAY) {
-    console.warn(`daily-cap: count=${dailyCount}`);
+  const dailyCheck = await checkDailyCap(supabase);
+  if (!dailyCheck.ok) {
+    console.warn(`daily-cap: count=${dailyCheck.count}`);
     return jsonResponse({ ok: false, reason: 'daily_cap_reached' }, 503);
   }
 
   // ── Per-email idempotency: same email re-submitting gets a friendly response
-  // without creating a duplicate pending row. Open requests + open tokens both
-  // count — re-registers don't queue new approvals.
-  const { data: existingPending } = await supabase
-    .from('cyborg_token_requests')
-    .select('request_id, status, created_at')
-    .eq('email', email)
-    .in('status', ['pending', 'approved'])
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // without creating a duplicate pending row.
+  const existingPending = await findOpenRequestByEmail(supabase, email);
   if (existingPending) {
     return jsonResponse({ ok: true, status: existingPending.status, message: 'existing_request' });
   }

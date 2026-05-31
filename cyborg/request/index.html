@@ -143,12 +143,15 @@ form.addEventListener('submit', async e => {
     } else {
       status.className = 'status err';
       status.textContent = ({
-        'missing_fields': 'Please fill in your name and email.',
-        'bad_email':      'That email doesn\'t look right — double-check it.',
-        'too_large':      'Message is too long. Trim it and try again.',
-        'not_configured': 'Sorry — request handling isn\'t wired up yet. Email the assessment owner directly.',
-        'turnstile_failed': 'Verification failed. Refresh the page and try again.',
+        'missing_fields':    'Please fill in your name and email.',
+        'bad_email':         'That email doesn\'t look right — double-check it.',
+        'disposable_email':  'Please use a non-disposable email address.',
+        'too_large':         'Message is too long. Trim it and try again.',
+        'not_configured':    'Sorry — request handling isn\'t wired up yet. Email the assessment owner directly.',
+        'turnstile_failed':  'Verification failed. Refresh the page and try again.',
         'missing_turnstile': 'Please complete the verification challenge above.',
+        'rate_limited':      'Too many requests from this address recently. Please try again in an hour.',
+        'daily_cap_reached': 'We\'re at capacity for new requests today. Please try again tomorrow.',
       }[d.reason] || 'Could not send your request. Try again or email the assessment owner directly.');
       if (window.turnstile) window.turnstile.reset();
       btn.disabled = false; btn.textContent = 'Send request';

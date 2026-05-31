@@ -72,3 +72,82 @@ export function originFromRequest(request) {
   const u = new URL(request.url);
   return `${u.protocol}//${u.host}`;
 }
+
+// ── Abuse-defence helpers — shared by /cyborg/register and /cyborg/request-token.
+// Centralised so the rule set doesn't drift between the two public registration
+// surfaces.
+
+// Disposable / throwaway-email domain blocklist. Add observed offenders here.
+// Lowercase, no leading '@'.
+export const DISPOSABLE_DOMAINS = new Set([
+  'mailinator.com', 'tempmail.com', 'temp-mail.org', '10minutemail.com',
+  'guerrillamail.com', 'guerrillamailblock.com', 'sharklasers.com',
+  'getnada.com', 'maildrop.cc', 'yopmail.com', 'trashmail.com',
+  'throwawaymail.com', 'mailnesia.com', 'dispostable.com', 'fakeinbox.com',
+  'spambox.us', 'mintemail.com', 'mytemp.email', 'mohmal.com',
+  'inboxbear.com', 'fakemail.net', 'tmail.io', 'mail-temp.com',
+  'tempinbox.com', 'emailondeck.com', 'spam4.me', 'tempmailaddress.com',
+]);
+
+// Rate-limit + cap thresholds. Tuned for cohort-1 scale (~5 users); pre-launch
+// the daily cap is well above legitimate inflow but well below "real money lost"
+// in any abuse scenario.
+export const IP_RATE_LIMIT_PER_HOUR = 3;
+export const DAILY_CAP_PER_UTC_DAY  = 50;
+
+export function isDisposableEmail(email) {
+  const domain = (email || '').split('@')[1]?.toLowerCase() || '';
+  return DISPOSABLE_DOMAINS.has(domain);
+}
+
+// Returns { ok: true } if the IP is under the per-hour limit, or
+// { ok: false, count, limit } if it has hit / exceeded the limit.
+// Counts ALL cyborg_token_requests rows from this IP in the last hour, so
+// pending/approved/rejected all count toward the limit (an attacker churning
+// rejected requests can still flood the inbox).
+export async function checkIpRateLimit(supabase, ip) {
+  if (!ip) return { ok: true };
+  const sinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count, error } = await supabase
+    .from('cyborg_token_requests')
+    .select('request_id', { count: 'exact', head: true })
+    .eq('ip', ip)
+    .gt('created_at', sinceIso);
+  if (error) return { ok: true };  // fail-open on lookup error; logged at caller
+  if ((count || 0) >= IP_RATE_LIMIT_PER_HOUR) {
+    return { ok: false, count, limit: IP_RATE_LIMIT_PER_HOUR };
+  }
+  return { ok: true };
+}
+
+// Returns { ok: true } if today's count is under the global cap, or
+// { ok: false, count, limit } if at / over.
+export async function checkDailyCap(supabase) {
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+  const { count, error } = await supabase
+    .from('cyborg_token_requests')
+    .select('request_id', { count: 'exact', head: true })
+    .gt('created_at', todayStart.toISOString());
+  if (error) return { ok: true };
+  if ((count || 0) >= DAILY_CAP_PER_UTC_DAY) {
+    return { ok: false, count, limit: DAILY_CAP_PER_UTC_DAY };
+  }
+  return { ok: true };
+}
+
+// Returns the most-recent open (pending/approved) request for this email, or
+// null if none. Used to make registration idempotent: a candidate re-submitting
+// shouldn't queue another approval ping or another row.
+export async function findOpenRequestByEmail(supabase, email) {
+  const { data, error } = await supabase
+    .from('cyborg_token_requests')
+    .select('request_id, status, created_at')
+    .eq('email', email)
+    .in('status', ['pending', 'approved'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) return null;
+  return data || null;
+}
