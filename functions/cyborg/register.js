@@ -130,19 +130,31 @@ export async function onRequestPost({ request, env }) {
 
   // Tines webhook — reuses the existing 'cyborg_token_request' event type
   // that powers the owner-notification email with approve/reject links.
+  // X-Cyborg-Webhook-Secret is a defence-in-depth second factor alongside
+  // the URL-embedded Tines secret: even if TINES_REQUEST_WEBHOOK leaks, an
+  // attacker can't trigger the flow without also knowing this header value.
+  // Tines flow has a matching filter on this header.
   try {
     const r = await fetch(env.TINES_REQUEST_WEBHOOK, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type':            'application/json',
+        'X-Cyborg-Webhook-Secret': env.TINES_WEBHOOK_SECRET || '',
+      },
       body:    JSON.stringify({
-        type:         'cyborg_token_request',
-        event_type:   'cyborg_token_request',
-        request_id:   requestId,
-        submitted_at: inserted.created_at,
+        // Defence-in-depth shared secret. Tines flow filters incoming events
+        // on this field BEFORE branching to any email-send action. Sent in
+        // both the header and the body so the Tines filter can use whichever
+        // is easier to configure in the UI.
+        webhook_secret: env.TINES_WEBHOOK_SECRET || '',
+        type:           'cyborg_token_request',
+        event_type:     'cyborg_token_request',
+        request_id:     requestId,
+        submitted_at:   inserted.created_at,
         name, email, notes,
-        request_meta: { ip, country, user_agent: ua, source: 'self_register' },
-        approve_url:  approveUrl,
-        reject_url:   rejectUrl,
+        request_meta:   { ip, country, user_agent: ua, source: 'self_register' },
+        approve_url:    approveUrl,
+        reject_url:     rejectUrl,
       }),
     });
     if (!r.ok) {

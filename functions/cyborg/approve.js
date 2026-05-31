@@ -120,11 +120,18 @@ export async function onRequestGet({ request, env }) {
 }
 
 async function forwardToTines(env, payload) {
+  // Inject the shared secret into the body too (alongside the header) so the
+  // Tines filter can use either mechanism — header capture isn't always
+  // exposed in every Tines UI version, the body field always is.
+  const augmented = { webhook_secret: env.TINES_WEBHOOK_SECRET || '', ...payload };
   try {
     const r = await fetch(env.TINES_REQUEST_WEBHOOK, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
+      headers: {
+        'Content-Type':            'application/json',
+        'X-Cyborg-Webhook-Secret': env.TINES_WEBHOOK_SECRET || '',
+      },
+      body:    JSON.stringify(augmented),
     });
     if (!r.ok) console.error('Tines forward returned', r.status);
   } catch (e) {

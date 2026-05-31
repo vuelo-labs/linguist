@@ -116,20 +116,26 @@ export async function onRequestPost({ request, env }) {
   const rejectUrl  = `${origin}/cyborg/approve?req=${requestId}&decision=reject&sig=${rejectSig}`;
 
   const tinesPayload = {
-    type:         'cyborg_token_request',
-    event_type:   'cyborg_token_request',   // for Tines branching
-    request_id:   requestId,
-    submitted_at: data.created_at,
+    // Defence-in-depth shared secret — Tines filters on this BEFORE any
+    // branch fires. Also sent in X-Cyborg-Webhook-Secret header below.
+    webhook_secret: env.TINES_WEBHOOK_SECRET || '',
+    type:           'cyborg_token_request',
+    event_type:     'cyborg_token_request',   // for Tines branching
+    request_id:     requestId,
+    submitted_at:   data.created_at,
     name, email, notes,
-    request_meta: { ip, country, user_agent: ua },
-    approve_url:  approveUrl,
-    reject_url:   rejectUrl,
+    request_meta:   { ip, country, user_agent: ua },
+    approve_url:    approveUrl,
+    reject_url:     rejectUrl,
   };
 
   try {
     const r = await fetch(env.TINES_REQUEST_WEBHOOK, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type':            'application/json',
+        'X-Cyborg-Webhook-Secret': env.TINES_WEBHOOK_SECRET || '',
+      },
       body:    JSON.stringify(tinesPayload),
     });
     if (!r.ok) {
