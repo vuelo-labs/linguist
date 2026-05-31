@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/cyborg/app/app.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a class="app-logo" href="/cyborg/app/">Cyborg</a>
+    <nav class="app-nav">
+      <a href="/cyborg/app/" class="nav-link nav-current">Dashboard</a>
+      <a href="/cyborg/app/candidates/" class="nav-link">Candidates</a>
+      <a href="/cyborg/app/team/" class="nav-link">Team</a>
+    </nav>
+    <div class="app-user-menu">
+      <span class="org-name" id="hdr-org-name">…</span>
+      <button class="user-btn" id="user-btn" aria-label="Account menu">
+        <span class="user-initial" id="user-initial">·</span>
+      </button>
+      <div class="user-popover" id="user-popover" hidden>
+        <div class="popover-meta">
+          <div class="popover-name" id="popover-name">…</div>
+          <div class="popover-email" id="popover-email">…</div>
+        </div>
+        <a class="popover-link" href="/cyborg/app/profile/">Profile &amp; activity</a>
+        <a class="popover-link signout" href="#" id="signout-link">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="app-container">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-lede" id="welcome-line">Welcome back.</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Active candidates</div>
+        <div class="kpi-value" id="kpi-active">…</div>
+        <div class="kpi-sub" id="kpi-active-sub">…</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pending review</div>
+        <div class="kpi-value" id="kpi-pending">…</div>
+        <div class="kpi-sub" id="kpi-pending-sub">requests awaiting your approval</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Reports rendered</div>
+        <div class="kpi-value" id="kpi-reports">…</div>
+        <div class="kpi-sub" id="kpi-reports-sub">total scored sessions</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Team members</div>
+        <div class="kpi-value" id="kpi-team">…</div>
+        <div class="kpi-sub" id="kpi-team-sub">across the organisation</div>
+      </div>
+    </div>
+
+    <section class="dash-section">
+      <div class="section-head">
+        <h2>Recent candidates</h2>
+        <a href="/cyborg/app/candidates/" class="section-link">View all</a>
+      </div>
+      <div class="card" id="recent-candidates-card">
+        <div id="recent-candidates">Loading…</div>
+      </div>
+    </section>
+
+    <section class="dash-section">
+      <div class="section-head">
+        <h2>Recent activity</h2>
+      </div>
+      <div class="card" id="recent-activity-card">
+        <div id="recent-activity">Loading…</div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  // ── Session ──────────────────────────────────────────────────────────
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { location.replace('/cyborg/signin/'); throw new Error('no user'); }
+
+  // Populate user menu
+  const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'You';
+  document.getElementById('user-initial').textContent = fullName.charAt(0).toUpperCase();
+  document.getElementById('popover-name').textContent = fullName;
+  document.getElementById('popover-email').textContent = user.email || '';
+  document.getElementById('welcome-line').textContent = `Welcome back, ${fullName.split(' ')[0]}.`;
+
+  // Toggle user popover
+  const userBtn = document.getElementById('user-btn');
+  const popover = document.getElementById('user-popover');
+  userBtn.addEventListener('click', (e) => { e.stopPropagation(); popover.hidden = !popover.hidden; });
+  document.addEventListener('click', () => { popover.hidden = true; });
+
+  document.getElementById('signout-link').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await supabase.auth.signOut();
+    location.replace('/cyborg/signin/');
+  });
+
+  // ── Org context ──────────────────────────────────────────────────────
+  // Pull the user's first/default org. V5 assumes single-org per user.
+  const { data: memberships } = await supabase
+    .from('organisation_members')
+    .select('organisation_id, role, organisations(id, name, slug)')
+    .order('joined_at', { ascending: true })
+    .limit(1);
+
+  if (!memberships?.length) {
+    // No org yet — they need to finish bootstrap. Send to signup with
+    // the orgName flow (or surface a recovery UI).
+    document.getElementById('welcome-line').innerHTML = `
+      You don't belong to any organisation yet.
+      <a href="/cyborg/signup/" style="color: var(--w-accent);">Finish setting up</a>.`;
+    return;
+  }
+
+  const org = memberships[0].organisations;
+  document.getElementById('hdr-org-name').textContent = org.name;
+
+  // ── KPIs ─────────────────────────────────────────────────────────────
+  const [
+    activeRes,
+    pendingRes,
+    reportsRes,
+    membersRes,
+  ] = await Promise.all([
+    supabase.from('cyborg_tokens').select('token', { count: 'exact', head: true })
+      .eq('organisation_id', org.id).is('used_at', null).is('revoked_at', null).gt('expires_at', new Date().toISOString()),
+    supabase.from('cyborg_token_requests').select('request_id', { count: 'exact', head: true })
+      .eq('organisation_id', org.id).eq('status', 'pending'),
+    supabase.from('cyborg_tokens').select('token', { count: 'exact', head: true })
+      .eq('organisation_id', org.id).not('used_at', 'is', null),
+    supabase.from('organisation_members').select('id', { count: 'exact', head: true })
+      .eq('organisation_id', org.id),
+  ]);
+
+  document.getElementById('kpi-active').textContent  = activeRes.count ?? 0;
+  document.getElementById('kpi-pending').textContent = pendingRes.count ?? 0;
+  document.getElementById('kpi-reports').textContent = reportsRes.count ?? 0;
+  document.getElementById('kpi-team').textContent    = membersRes.count ?? 0;
+  document.getElementById('kpi-active-sub').textContent = `${activeRes.count ?? 0} tokens still unused`;
+
+  // ── Recent candidates ────────────────────────────────────────────────
+  const { data: recentCands } = await supabase
+    .from('cyborg_tokens')
+    .select('token, candidate_label, issued_at, expires_at, used_at, revoked_at, launched_at, machine_url')
+    .eq('organisation_id', org.id)
+    .order('issued_at', { ascending: false })
+    .limit(5);
+
+  const rcEl = document.getElementById('recent-candidates');
+  if (!recentCands?.length) {
+    rcEl.innerHTML = `<div class="empty">No candidates yet. <a href="/cyborg/app/candidates/" style="color:var(--w-accent);">Issue your first token</a> or share the registration link with a candidate.</div>`;
+  } else {
+    rcEl.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Candidate</th><th>Issued</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          ${recentCands.map(c => `
+            <tr>
+              <td>${escapeHtml(c.candidate_label || '—')}</td>
+              <td>${formatDate(c.issued_at)}</td>
+              <td>${statusPill(c)}</td>
+              <td><a class="row-link" href="/cyborg/app/candidates/${encodeURIComponent(c.token)}/">View</a></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  // ── Recent activity ──────────────────────────────────────────────────
+  // V5: surface from cyborg_admin_audit if the user has visibility. For
+  // now we'll show org-scoped token issuance + revocation events derived
+  // from the cyborg_tokens row history. Full audit feed is V5.1.
+  const actEl = document.getElementById('recent-activity');
+  const acts = recentCands?.slice(0, 5).map(c => {
+    const evts = [];
+    evts.push({ ts: c.issued_at, text: `Issued token for ${escapeHtml(c.candidate_label || 'unnamed candidate')}` });
+    if (c.launched_at) evts.push({ ts: c.launched_at, text: `${escapeHtml(c.candidate_label || 'Candidate')} launched their workspace` });
+    if (c.used_at)     evts.push({ ts: c.used_at,     text: `${escapeHtml(c.candidate_label || 'Candidate')} submitted their work` });
+    if (c.revoked_at)  evts.push({ ts: c.revoked_at,  text: `Revoked ${escapeHtml(c.candidate_label || 'candidate token')}` });
+    return evts;
+  }).flat().sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 10) || [];
+
+  if (!acts.length) {
+    actEl.innerHTML = `<div class="empty">No activity yet. As your team issues tokens and candidates use them, activity will show here.</div>`;
+  } else {
+    actEl.innerHTML = `<ul class="activity-list">${acts.map(a => `<li><span class="activity-ts">${formatRelative(a.ts)}</span><span class="activity-text">${a.text}</span></li>`).join('')}</ul>`;
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+  function formatDate(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+    catch { return iso; }
+  }
+  function formatRelative(iso) {
+    if (!iso) return '';
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d ago`;
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+  function statusPill(c) {
+    if (c.revoked_at) return `<span class="pill pill-revoked">Revoked</span>`;
+    if (c.used_at)    return `<span class="pill pill-used">Submitted</span>`;
+    if (c.launched_at) return `<span class="pill pill-active">Running</span>`;
+    if (new Date(c.expires_at) < new Date()) return `<span class="pill pill-expired">Expired</span>`;
+    return `<span class="pill pill-pending">Awaiting launch</span>`;
+  }
+</script>
+
+</body>
+</html>

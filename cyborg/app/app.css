@@ -1,0 +1,431 @@
+/* Cyborg authenticated-app shell styles.
+   Used by /cyborg/app/* pages — dashboard, candidates, team, profile.
+   Same design language as /cyborg/* public pages but laid out for a
+   multi-page logged-in surface (persistent header, content grid). */
+
+:root { --c-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace; }
+
+body {
+  background: var(--w-bg);
+  color: var(--w-text);
+  font-family: var(--sans, 'Inter', sans-serif);
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* ── Header ────────────────────────────────────────────────────────── */
+
+.app-header {
+  background: var(--w-bg-card);
+  border-bottom: 1px solid var(--w-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-header-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 60px;
+}
+
+.app-logo {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--w-text);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  margin-right: 12px;
+}
+
+.app-nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-link {
+  padding: 8px 14px;
+  color: var(--w-muted);
+  text-decoration: none;
+  border-radius: 7px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.1s, color 0.1s;
+}
+
+.nav-link:hover { background: var(--w-accent-light); color: var(--w-text); }
+
+.nav-current { color: var(--w-text); background: var(--w-accent-light); }
+
+.app-user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.org-name {
+  font-size: 0.85rem;
+  color: var(--w-muted);
+  padding: 5px 10px;
+  background: var(--w-accent-light);
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.user-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--w-accent);
+  color: var(--w-bg);
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.user-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--w-bg-card);
+  border: 1px solid var(--w-border);
+  border-radius: 10px;
+  min-width: 240px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+  padding: 6px;
+  z-index: 11;
+}
+
+.popover-meta {
+  padding: 10px 14px 12px;
+  border-bottom: 1px solid var(--w-border);
+  margin-bottom: 4px;
+}
+
+.popover-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--w-text);
+  margin-bottom: 2px;
+}
+
+.popover-email {
+  font-size: 0.82rem;
+  color: var(--w-faint);
+  word-break: break-all;
+}
+
+.popover-link {
+  display: block;
+  padding: 9px 14px;
+  color: var(--w-text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+
+.popover-link:hover { background: var(--w-accent-light); }
+
+.popover-link.signout { color: #6e2618; }
+
+/* ── Main + container ────────────────────────────────────────────── */
+
+.app-main {
+  padding: 36px 0 80px;
+}
+
+.app-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.page-title {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 1.9rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  color: var(--w-text);
+}
+
+.page-lede {
+  color: var(--w-muted);
+  font-size: 0.98rem;
+  margin: 0 0 32px;
+  line-height: 1.5;
+}
+
+/* ── KPI grid (dashboard) ──────────────────────────────────────────── */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.kpi-card {
+  background: var(--w-bg-card);
+  border: 1px solid var(--w-border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.kpi-label {
+  font-size: 0.74rem;
+  color: var(--w-faint);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.kpi-value {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--w-text);
+  margin-bottom: 4px;
+  line-height: 1.1;
+}
+
+.kpi-sub {
+  font-size: 0.84rem;
+  color: var(--w-muted);
+  line-height: 1.4;
+}
+
+/* ── Sections + cards ─────────────────────────────────────────────── */
+
+.dash-section { margin-bottom: 32px; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-head h2 {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--w-text);
+}
+
+.section-link {
+  color: var(--w-accent);
+  font-size: 0.86rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.section-link:hover { text-decoration: underline; }
+
+.card {
+  background: var(--w-bg-card);
+  border: 1px solid var(--w-border);
+  border-radius: 12px;
+  padding: 18px 22px;
+}
+
+/* ── Data table ───────────────────────────────────────────────────── */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 8px 10px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--w-faint);
+  border-bottom: 1px solid var(--w-border);
+}
+
+.data-table td {
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--w-border);
+  vertical-align: middle;
+  color: var(--w-text);
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+
+.row-link {
+  color: var(--w-accent);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.row-link:hover { text-decoration: underline; }
+
+/* ── Status pills ─────────────────────────────────────────────────── */
+
+.pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 11px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pill-active   { background: #ecf3eb; color: #2d5a26; }
+.pill-pending  { background: #fdf6e3; color: #6b5022; }
+.pill-used     { background: var(--w-accent-light); color: var(--w-muted); }
+.pill-revoked  { background: #fbe9e7; color: #6e2618; }
+.pill-expired  { background: #efeae1; color: var(--w-faint); }
+
+/* ── Activity list ────────────────────────────────────────────────── */
+
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--w-border);
+  font-size: 0.9rem;
+  color: var(--w-text);
+  line-height: 1.45;
+}
+
+.activity-list li:last-child { border-bottom: none; }
+
+.activity-ts {
+  flex: 0 0 90px;
+  color: var(--w-faint);
+  font-size: 0.82rem;
+}
+
+.activity-text {
+  flex: 1;
+}
+
+/* ── Empty states ─────────────────────────────────────────────────── */
+
+.empty {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--w-faint);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+/* ── Buttons + forms (used across pages) ─────────────────────────── */
+
+.btn {
+  background: var(--w-accent);
+  color: var(--w-bg);
+  border: none;
+  border-radius: 9px;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.1s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:hover:not(:disabled) { opacity: 0.88; }
+
+.btn:disabled { opacity: 0.4; cursor: default; }
+
+.btn.secondary {
+  background: transparent;
+  color: var(--w-accent);
+  border: 1px solid var(--w-border-focus);
+}
+
+.btn.secondary:hover:not(:disabled) {
+  background: var(--w-accent-light);
+}
+
+.btn.danger {
+  background: #6e2618;
+  color: var(--w-bg);
+}
+
+.btn.small {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--w-faint);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.field input[type=text],
+.field input[type=email],
+.field input[type=number],
+.field select,
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--w-bg-input);
+  border: 1px solid var(--w-border);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 0.92rem;
+  color: var(--w-text);
+  font-family: inherit;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--w-border-focus);
+}
+
+.status {
+  margin-top: 12px;
+  padding: 9px 13px;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  display: none;
+}
+
+.status.ok  { background: #ecf3eb; border: 1px solid #b8d2b3; color: #2d5a26; display: block; }
+.status.err { background: #fbe9e7; border: 1px solid #e8b8af; color: #6e2618; display: block; }

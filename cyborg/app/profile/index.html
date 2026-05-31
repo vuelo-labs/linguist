@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/cyborg/app/app.css">
+  <style>
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    @media (max-width: 720px) { .profile-grid { grid-template-columns: 1fr; } }
+    .activity-row { padding: 11px 0; border-bottom: 1px solid var(--w-border); display: grid; grid-template-columns: 110px 130px 1fr; gap: 16px; align-items: baseline; font-size: 0.9rem; }
+    .activity-row:last-child { border-bottom: none; }
+    .activity-row .ts { color: var(--w-faint); font-size: 0.82rem; }
+    .activity-row .action { font-weight: 500; color: var(--w-text); }
+    .activity-row .target { color: var(--w-muted); font-family: var(--c-mono); font-size: 0.78rem; word-break: break-all; }
+    .action-success { color: #2d5a26; }
+    .action-failure { color: #6e2618; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a class="app-logo" href="/cyborg/app/">Cyborg</a>
+    <nav class="app-nav">
+      <a href="/cyborg/app/" class="nav-link">Dashboard</a>
+      <a href="/cyborg/app/candidates/" class="nav-link">Candidates</a>
+      <a href="/cyborg/app/team/" class="nav-link">Team</a>
+    </nav>
+    <div class="app-user-menu">
+      <span class="org-name" id="hdr-org-name">…</span>
+      <button class="user-btn" id="user-btn"><span id="user-initial">·</span></button>
+      <div class="user-popover" id="user-popover" hidden>
+        <div class="popover-meta">
+          <div class="popover-name" id="popover-name">…</div>
+          <div class="popover-email" id="popover-email">…</div>
+        </div>
+        <a class="popover-link" href="/cyborg/app/profile/">Profile &amp; activity</a>
+        <a class="popover-link signout" href="#" id="signout-link">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="app-container">
+    <h1 class="page-title">Your profile</h1>
+    <p class="page-lede">Your account details and a log of actions you've taken across all organisations.</p>
+
+    <div class="profile-grid">
+      <div class="card">
+        <h3 style="font-family: 'Newsreader', Georgia, serif; font-size: 1.05rem; font-weight: 500; margin: 0 0 12px;">Account</h3>
+        <ul class="kv-list" id="account-info" style="list-style:none; margin:0; padding:0;"></ul>
+      </div>
+      <div class="card">
+        <h3 style="font-family: 'Newsreader', Georgia, serif; font-size: 1.05rem; font-weight: 500; margin: 0 0 12px;">Organisations</h3>
+        <ul style="list-style:none; margin:0; padding:0;" id="org-list">Loading…</ul>
+      </div>
+    </div>
+
+    <section class="dash-section">
+      <div class="section-head">
+        <h2>Activity</h2>
+      </div>
+      <div class="card">
+        <div id="activity-body">Loading…</div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { location.replace('/cyborg/signin/?next=/cyborg/app/profile/'); throw new Error('no session'); }
+  const user = session.user;
+
+  const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'You';
+  document.getElementById('user-initial').textContent = fullName.charAt(0).toUpperCase();
+  document.getElementById('popover-name').textContent = fullName;
+  document.getElementById('popover-email').textContent = user.email || '';
+
+  document.getElementById('user-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('user-popover').hidden = !document.getElementById('user-popover').hidden; });
+  document.addEventListener('click', () => { document.getElementById('user-popover').hidden = true; });
+  document.getElementById('signout-link').addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.replace('/cyborg/signin/'); });
+
+  // Account info
+  document.getElementById('account-info').innerHTML = `
+    <li style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--w-border); font-size:0.9rem;"><span style="color:var(--w-faint); font-size:0.82rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;">Name</span><span style="color:var(--w-text);">${escapeHtml(fullName)}</span></li>
+    <li style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--w-border); font-size:0.9rem;"><span style="color:var(--w-faint); font-size:0.82rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;">Email</span><span style="color:var(--w-text); word-break:break-all;">${escapeHtml(user.email || '')}</span></li>
+    <li style="display:flex; justify-content:space-between; padding:8px 0; font-size:0.9rem;"><span style="color:var(--w-faint); font-size:0.82rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;">Signed up</span><span style="color:var(--w-text);">${formatDate(user.created_at)}</span></li>
+  `;
+
+  // Organisations
+  const { data: memberships } = await supabase
+    .from('organisation_members')
+    .select('organisation_id, role, joined_at, organisations(id, name, slug)')
+    .order('joined_at', { ascending: true });
+
+  if (memberships?.length) {
+    document.getElementById('hdr-org-name').textContent = memberships[0].organisations.name;
+    document.getElementById('org-list').innerHTML = memberships.map(m => `
+      <li style="padding:11px 0; border-bottom:1px solid var(--w-border); display:flex; justify-content:space-between; align-items:baseline;">
+        <span style="font-weight:500;">${escapeHtml(m.organisations.name)}</span>
+        <span style="font-size:0.78rem; color:var(--w-faint); text-transform:uppercase; letter-spacing:0.04em;">${m.role}</span>
+      </li>`).join('') + '<style>#org-list li:last-child { border-bottom: none !important; }</style>';
+  } else {
+    document.getElementById('org-list').innerHTML = `<div class="empty">No organisations.</div>`;
+  }
+
+  // Activity
+  const r = await fetch('/cyborg/app/api/profile/activity', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+    body: '{}',
+  });
+  const d = await r.json().catch(() => ({ ok: false }));
+  const acts = d.activity || [];
+
+  if (!acts.length) {
+    document.getElementById('activity-body').innerHTML = `<div class="empty">No actions logged yet.</div>`;
+  } else {
+    document.getElementById('activity-body').innerHTML = acts.map(a => `
+      <div class="activity-row">
+        <span class="ts">${formatRelative(a.created_at)}</span>
+        <span class="action ${a.success ? 'action-success' : 'action-failure'}">${formatAction(a.action)}</span>
+        <span class="target">${escapeHtml(a.target || '')}</span>
+      </div>`).join('');
+  }
+
+  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+  function formatDate(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return iso; } }
+  function formatRelative(iso) { if (!iso) return ''; const diff = (Date.now() - new Date(iso).getTime()) / 1000; if (diff < 60) return 'just now'; if (diff < 3600) return `${Math.floor(diff / 60)}m ago`; if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`; if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d ago`; return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  function formatAction(a) { return ({ 'issue_candidate_token': 'Issued candidate token', 'revoke_candidate_token': 'Revoked token', 'invite_member': 'Invited teammate', 'remove_member': 'Removed teammate', 'mint': 'Minted token (super-user)', 'revoke': 'Revoked token (super-user)', 'list_tokens': 'Viewed token list', 'list_reports': 'Viewed reports list', 'view_report': 'Viewed report', 'approve_request': 'Approved candidate request', 'reject_request': 'Rejected candidate request' }[a] || a); }
+</script>
+
+</body>
+</html>

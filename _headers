@@ -12,6 +12,25 @@
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
   X-Frame-Options: DENY
 
+# Cyborg authenticated app pages: also allow esm.sh (Supabase client module) +
+# Supabase + Google OAuth (sign-in pop-up + redirect). Cookie-bearing app fetches
+# go to self; auth fetches to the Supabase Auth REST API.
+/cyborg/app/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://lh3.googleusercontent.com; connect-src 'self' https://odnzrykfmfgdfybnmcfd.supabase.co wss://odnzrykfmfgdfybnmcfd.supabase.co https://esm.sh; frame-src 'self' https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://accounts.google.com; frame-ancestors 'none'
+  X-Frame-Options: DENY
+
+/cyborg/signin/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://odnzrykfmfgdfybnmcfd.supabase.co; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://accounts.google.com; frame-ancestors 'none'
+  X-Frame-Options: DENY
+
+/cyborg/signup/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://odnzrykfmfgdfybnmcfd.supabase.co; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://accounts.google.com; frame-ancestors 'none'
+  X-Frame-Options: DENY
+
+/cyborg/auth/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://odnzrykfmfgdfybnmcfd.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+
 # Cyborg admin pages: landing-style allowances (Google Fonts + Cloudflare Access)
 # plus same-origin iframe for the report viewer.
 /cyborg/admin/*

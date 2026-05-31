@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/cyborg/app/app.css">
+  <style>
+    .toolbar { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(20,20,20,0.55); z-index: 9999; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--w-bg-card); border-radius: 14px; padding: 28px 32px 24px; max-width: 440px; width: calc(100% - 40px); }
+    .modal h2 { font-family: 'Newsreader', Georgia, serif; font-size: 1.3rem; font-weight: 500; margin: 0 0 6px; }
+    .modal p { color: var(--w-muted); font-size: 0.92rem; margin: 0 0 16px; line-height: 1.55; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .invite-link { font-family: var(--c-mono); font-size: 0.82rem; background: #1f1c19; color: #f5f0e6; padding: 10px 12px; border-radius: 7px; overflow-x: auto; white-space: pre; margin: 12px 0; }
+    .role-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+    .role-owner  { background: #ecf3eb; color: #2d5a26; }
+    .role-admin  { background: #fdf6e3; color: #6b5022; }
+    .role-member { background: var(--w-accent-light); color: var(--w-muted); }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a class="app-logo" href="/cyborg/app/">Cyborg</a>
+    <nav class="app-nav">
+      <a href="/cyborg/app/" class="nav-link">Dashboard</a>
+      <a href="/cyborg/app/candidates/" class="nav-link">Candidates</a>
+      <a href="/cyborg/app/team/" class="nav-link nav-current">Team</a>
+    </nav>
+    <div class="app-user-menu">
+      <span class="org-name" id="hdr-org-name">…</span>
+      <button class="user-btn" id="user-btn"><span id="user-initial">·</span></button>
+      <div class="user-popover" id="user-popover" hidden>
+        <div class="popover-meta">
+          <div class="popover-name" id="popover-name">…</div>
+          <div class="popover-email" id="popover-email">…</div>
+        </div>
+        <a class="popover-link" href="/cyborg/app/profile/">Profile &amp; activity</a>
+        <a class="popover-link signout" href="#" id="signout-link">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="app-container">
+    <h1 class="page-title">Team</h1>
+    <p class="page-lede">Manage who has access to your organisation's candidates and reports.</p>
+
+    <div class="toolbar">
+      <div></div>
+      <button class="btn" id="invite-btn">Invite a teammate</button>
+    </div>
+
+    <section class="dash-section">
+      <div class="section-head">
+        <h2>Members</h2>
+      </div>
+      <div class="card">
+        <div id="members-body">Loading…</div>
+      </div>
+    </section>
+
+    <section class="dash-section" id="invites-section" style="display:none;">
+      <div class="section-head">
+        <h2>Pending invitations</h2>
+      </div>
+      <div class="card">
+        <div id="invites-body"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="modal-overlay" id="invite-modal">
+  <div class="modal">
+    <h2>Invite a teammate</h2>
+    <p>They'll receive an email with a sign-up link. The link is valid for 7 days.</p>
+    <form id="invite-form">
+      <div class="field">
+        <label for="i-email">Email</label>
+        <input type="email" id="i-email" required maxlength="320" placeholder="teammate@company.com" />
+      </div>
+      <div class="field">
+        <label for="i-role">Role</label>
+        <select id="i-role">
+          <option value="member">Member (can issue + review candidates)</option>
+          <option value="admin">Admin (can also manage team)</option>
+        </select>
+      </div>
+      <div class="status" id="invite-status"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="invite-cancel">Cancel</button>
+        <button type="submit" class="btn" id="invite-submit">Send invite</button>
+      </div>
+    </form>
+    <div id="invite-result" style="display:none;">
+      <div class="status ok" style="display:block;">Invitation sent. Share this link if the email doesn't arrive:</div>
+      <div class="invite-link" id="invite-link"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="invite-done">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { location.replace('/cyborg/signin/?next=/cyborg/app/team/'); throw new Error('no session'); }
+  const user = session.user;
+
+  const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'You';
+  document.getElementById('user-initial').textContent = fullName.charAt(0).toUpperCase();
+  document.getElementById('popover-name').textContent = fullName;
+  document.getElementById('popover-email').textContent = user.email || '';
+
+  document.getElementById('user-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('user-popover').hidden = !document.getElementById('user-popover').hidden; });
+  document.addEventListener('click', () => { document.getElementById('user-popover').hidden = true; });
+  document.getElementById('signout-link').addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.replace('/cyborg/signin/'); });
+
+  const { data: memberships } = await supabase
+    .from('organisation_members')
+    .select('organisation_id, role, organisations(id, name, slug)')
+    .order('joined_at', { ascending: true })
+    .limit(1);
+  if (!memberships?.length) { location.replace('/cyborg/app/'); throw new Error('no org'); }
+  const org = memberships[0].organisations;
+  const myRole = memberships[0].role;
+  document.getElementById('hdr-org-name').textContent = org.name;
+
+  // Only owner/admin can invite or remove.
+  const canManage = (myRole === 'owner' || myRole === 'admin');
+  if (!canManage) {
+    document.getElementById('invite-btn').style.display = 'none';
+  }
+
+  async function loadTeam() {
+    const [membersRes, invitesRes] = await Promise.all([
+      supabase
+        .from('organisation_members')
+        .select('id, user_id, role, joined_at')
+        .eq('organisation_id', org.id)
+        .order('joined_at', { ascending: true }),
+      supabase
+        .from('organisation_invitations')
+        .select('id, email, role, invited_at, expires_at, token')
+        .eq('organisation_id', org.id)
+        .is('accepted_at', null)
+        .gt('expires_at', new Date().toISOString())
+        .order('invited_at', { ascending: false }),
+    ]);
+
+    // Fetch member emails from auth.users via a service-role call to /cyborg/app/api/team/members.
+    // (Direct query from anon-context can't read auth.users.)
+    const r = await fetch('/cyborg/app/api/team/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ organisation_id: org.id }),
+    });
+    const d = await r.json().catch(() => ({ ok: false }));
+    const profilesByUserId = (d.profiles || []).reduce((m, p) => (m[p.user_id] = p, m), {});
+
+    const members = membersRes.data || [];
+    document.getElementById('members-body').innerHTML = members.length ? `
+      <table class="data-table">
+        <thead><tr><th>Member</th><th>Email</th><th>Role</th><th>Joined</th><th></th></tr></thead>
+        <tbody>
+          ${members.map(m => {
+            const p = profilesByUserId[m.user_id] || {};
+            const isMe = m.user_id === user.id;
+            const canRemove = canManage && m.role !== 'owner' && !isMe;
+            return `
+              <tr>
+                <td>${escapeHtml(p.full_name || p.email?.split('@')[0] || '—')} ${isMe ? '<span style="color:var(--w-faint); font-size:0.78rem; margin-left:6px;">(you)</span>' : ''}</td>
+                <td>${escapeHtml(p.email || '—')}</td>
+                <td><span class="role-badge role-${m.role}">${m.role}</span></td>
+                <td>${formatDate(m.joined_at)}</td>
+                <td>${canRemove ? `<button class="row-link" style="background:none; border:none; cursor:pointer; padding:0; color:#6e2618;" data-action="remove" data-member-id="${m.id}">Remove</button>` : ''}</td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>` : `<div class="empty">No members yet.</div>`;
+
+    document.querySelectorAll('button[data-action="remove"]').forEach(b => {
+      b.addEventListener('click', async () => {
+        if (!confirm('Remove this teammate? They lose access immediately.')) return;
+        const memberId = b.dataset.memberId;
+        const r = await fetch('/cyborg/app/api/team/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({ member_id: memberId, organisation_id: org.id }),
+        });
+        const d = await r.json().catch(() => ({}));
+        if (d.ok) loadTeam();
+        else alert(d.message || d.reason || 'Failed to remove member.');
+      });
+    });
+
+    const invites = invitesRes.data || [];
+    if (invites.length) {
+      document.getElementById('invites-section').style.display = 'block';
+      document.getElementById('invites-body').innerHTML = `
+        <table class="data-table">
+          <thead><tr><th>Email</th><th>Role</th><th>Invited</th><th>Expires</th></tr></thead>
+          <tbody>
+            ${invites.map(i => `
+              <tr>
+                <td>${escapeHtml(i.email)}</td>
+                <td><span class="role-badge role-${i.role}">${i.role}</span></td>
+                <td>${formatDate(i.invited_at)}</td>
+                <td>${formatDate(i.expires_at)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+    } else {
+      document.getElementById('invites-section').style.display = 'none';
+    }
+  }
+
+  // Invite modal
+  const modal = document.getElementById('invite-modal');
+  document.getElementById('invite-btn').addEventListener('click', () => {
+    document.getElementById('invite-form').style.display = 'block';
+    document.getElementById('invite-result').style.display = 'none';
+    document.getElementById('i-email').value = '';
+    document.getElementById('i-role').value = 'member';
+    document.getElementById('invite-status').className = 'status'; document.getElementById('invite-status').textContent = '';
+    modal.classList.add('show');
+    setTimeout(() => document.getElementById('i-email').focus(), 50);
+  });
+  document.getElementById('invite-cancel').addEventListener('click', () => modal.classList.remove('show'));
+  document.getElementById('invite-done').addEventListener('click', () => { modal.classList.remove('show'); loadTeam(); });
+
+  document.getElementById('invite-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('i-email').value.trim();
+    const role  = document.getElementById('i-role').value;
+    const btn   = document.getElementById('invite-submit');
+    const stat  = document.getElementById('invite-status');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    stat.className = 'status'; stat.textContent = '';
+
+    const r = await fetch('/cyborg/app/api/team/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ organisation_id: org.id, email, role }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!d.ok) {
+      stat.className = 'status err';
+      stat.textContent = d.message || d.reason || 'Could not send invite.';
+      btn.disabled = false; btn.textContent = 'Send invite';
+      return;
+    }
+    document.getElementById('invite-form').style.display = 'none';
+    document.getElementById('invite-result').style.display = 'block';
+    document.getElementById('invite-link').textContent = `${location.origin}/cyborg/signup/?invite=${d.token}`;
+    btn.disabled = false; btn.textContent = 'Send invite';
+  });
+
+  loadTeam();
+
+  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+  function formatDate(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return iso; } }
+</script>
+
+</body>
+</html>

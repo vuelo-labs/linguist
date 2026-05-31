@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidates — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/cyborg/app/app.css">
+  <style>
+    .toolbar { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; }
+    .filter-tabs { display: flex; gap: 4px; background: var(--w-bg-card); border: 1px solid var(--w-border); border-radius: 9px; padding: 3px; }
+    .filter-tab { background: transparent; border: none; padding: 6px 14px; font-size: 0.85rem; font-weight: 500; color: var(--w-muted); cursor: pointer; border-radius: 6px; font-family: inherit; }
+    .filter-tab.active { background: var(--w-accent-light); color: var(--w-text); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(20,20,20,0.55); z-index: 9999; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--w-bg-card); border-radius: 14px; padding: 28px 32px 24px; max-width: 440px; width: calc(100% - 40px); box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
+    .modal h2 { font-family: 'Newsreader', Georgia, serif; font-size: 1.3rem; font-weight: 500; margin: 0 0 6px; }
+    .modal p { color: var(--w-muted); font-size: 0.92rem; margin: 0 0 16px; line-height: 1.55; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .install-cmd { font-family: var(--c-mono); font-size: 0.82rem; background: #1f1c19; color: #f5f0e6; padding: 10px 12px; border-radius: 7px; overflow-x: auto; white-space: pre; margin: 12px 0; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a class="app-logo" href="/cyborg/app/">Cyborg</a>
+    <nav class="app-nav">
+      <a href="/cyborg/app/" class="nav-link">Dashboard</a>
+      <a href="/cyborg/app/candidates/" class="nav-link nav-current">Candidates</a>
+      <a href="/cyborg/app/team/" class="nav-link">Team</a>
+    </nav>
+    <div class="app-user-menu">
+      <span class="org-name" id="hdr-org-name">…</span>
+      <button class="user-btn" id="user-btn"><span id="user-initial">·</span></button>
+      <div class="user-popover" id="user-popover" hidden>
+        <div class="popover-meta">
+          <div class="popover-name" id="popover-name">…</div>
+          <div class="popover-email" id="popover-email">…</div>
+        </div>
+        <a class="popover-link" href="/cyborg/app/profile/">Profile &amp; activity</a>
+        <a class="popover-link signout" href="#" id="signout-link">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="app-container">
+    <h1 class="page-title">Candidates</h1>
+    <p class="page-lede">Issue and review candidate assessment tokens. Each token grants one 7-day window to complete the simulation.</p>
+
+    <div class="toolbar">
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="active">Active</button>
+        <button class="filter-tab" data-filter="pending">Pending requests</button>
+        <button class="filter-tab" data-filter="used">Submitted</button>
+        <button class="filter-tab" data-filter="revoked">Revoked / expired</button>
+      </div>
+      <button class="btn" id="issue-btn">Issue a token</button>
+    </div>
+
+    <div class="card">
+      <div id="candidates-body">Loading…</div>
+    </div>
+  </div>
+</main>
+
+<!-- Issue-token modal -->
+<div class="modal-overlay" id="issue-modal">
+  <div class="modal">
+    <h2>Issue a candidate token</h2>
+    <p>The candidate will receive an email with the launch link. Their 7-day window starts when you issue the token.</p>
+    <form id="issue-form">
+      <div class="field">
+        <label for="m-label">Candidate name + email</label>
+        <input type="text" id="m-label" required maxlength="200" placeholder="Alex Doe (alex@example.com)" />
+      </div>
+      <div class="field" style="max-width:160px;">
+        <label for="m-days">Days valid</label>
+        <input type="number" id="m-days" value="8" min="1" max="30" />
+      </div>
+      <div class="status" id="issue-status"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="issue-cancel">Cancel</button>
+        <button type="submit" class="btn" id="issue-submit">Issue token</button>
+      </div>
+    </form>
+    <div id="issue-result" style="display:none;">
+      <div class="status ok" style="display:block;">Token issued. The candidate will receive a launch link via email (configure your Tines flow if not already), or share this link directly:</div>
+      <div class="install-cmd" id="launch-url"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="issue-done">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  const { data: { user, session } } = await supabase.auth.getSession().then(r => ({ data: { user: r.data.session?.user, session: r.data.session } }));
+  if (!session) { location.replace('/cyborg/signin/?next=/cyborg/app/candidates/'); throw new Error('no session'); }
+
+  const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'You';
+  document.getElementById('user-initial').textContent = fullName.charAt(0).toUpperCase();
+  document.getElementById('popover-name').textContent = fullName;
+  document.getElementById('popover-email').textContent = user.email || '';
+
+  document.getElementById('user-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('user-popover').hidden = !document.getElementById('user-popover').hidden; });
+  document.addEventListener('click', () => { document.getElementById('user-popover').hidden = true; });
+  document.getElementById('signout-link').addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.replace('/cyborg/signin/'); });
+
+  const { data: memberships } = await supabase
+    .from('organisation_members')
+    .select('organisation_id, role, organisations(id, name, slug)')
+    .order('joined_at', { ascending: true })
+    .limit(1);
+  if (!memberships?.length) { location.replace('/cyborg/app/'); throw new Error('no org'); }
+  const org = memberships[0].organisations;
+  document.getElementById('hdr-org-name').textContent = org.name;
+
+  let currentFilter = 'all';
+
+  async function loadCandidates() {
+    document.getElementById('candidates-body').textContent = 'Loading…';
+
+    let query = supabase
+      .from('cyborg_tokens')
+      .select('token, candidate_label, issued_at, expires_at, used_at, revoked_at, launched_at, fly_machine_id')
+      .eq('organisation_id', org.id)
+      .order('issued_at', { ascending: false })
+      .limit(200);
+
+    const now = new Date().toISOString();
+    if (currentFilter === 'active')   query = query.is('used_at', null).is('revoked_at', null).gt('expires_at', now);
+    if (currentFilter === 'used')     query = query.not('used_at', 'is', null);
+    if (currentFilter === 'revoked')  query = query.not('revoked_at', 'is', null);
+
+    let candidates = [];
+    if (currentFilter !== 'pending') {
+      const { data, error } = await query;
+      if (error) { document.getElementById('candidates-body').innerHTML = `<div class="empty">Error loading candidates: ${error.message}</div>`; return; }
+      candidates = data || [];
+    }
+
+    let pendingHtml = '';
+    if (currentFilter === 'all' || currentFilter === 'pending') {
+      const { data: pending } = await supabase
+        .from('cyborg_token_requests')
+        .select('request_id, name, email, notes, created_at')
+        .eq('organisation_id', org.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      if (pending?.length) {
+        pendingHtml = `
+          <div style="margin-bottom:20px;">
+            <h3 style="font-family: 'Newsreader', Georgia, serif; font-size: 1.05rem; font-weight: 500; margin: 0 0 10px;">Pending requests (approve via Tines email)</h3>
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Email</th><th>Requested</th></tr></thead>
+              <tbody>
+                ${pending.map(p => `
+                  <tr>
+                    <td>${escapeHtml(p.name)}</td>
+                    <td>${escapeHtml(p.email)}</td>
+                    <td>${formatDate(p.created_at)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+      }
+    }
+
+    if (currentFilter === 'pending') {
+      document.getElementById('candidates-body').innerHTML = pendingHtml || `<div class="empty">No pending registration requests.</div>`;
+      return;
+    }
+
+    if (!candidates.length && !pendingHtml) {
+      document.getElementById('candidates-body').innerHTML = `<div class="empty">No candidates yet. Click "Issue a token" above or share <code>${location.origin}/cyborg/register/</code> with someone to register themselves.</div>`;
+      return;
+    }
+
+    document.getElementById('candidates-body').innerHTML = pendingHtml + `
+      <table class="data-table">
+        <thead><tr><th>Candidate</th><th>Issued</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          ${candidates.map(c => `
+            <tr>
+              <td>${escapeHtml(c.candidate_label || '—')}</td>
+              <td>${formatDate(c.issued_at)}</td>
+              <td>${formatDate(c.expires_at)}</td>
+              <td>${statusPill(c)}</td>
+              <td><a class="row-link" href="/cyborg/app/candidates/${encodeURIComponent(c.token)}/">View</a></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  document.querySelectorAll('.filter-tab').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    currentFilter = b.dataset.filter;
+    loadCandidates();
+  }));
+
+  // ── Issue-token modal ────────────────────────────────────────────────
+  const modal     = document.getElementById('issue-modal');
+  const issueForm = document.getElementById('issue-form');
+  const issueResult = document.getElementById('issue-result');
+
+  document.getElementById('issue-btn').addEventListener('click', () => {
+    issueForm.style.display = 'block'; issueResult.style.display = 'none';
+    document.getElementById('m-label').value = '';
+    document.getElementById('issue-status').className = 'status'; document.getElementById('issue-status').textContent = '';
+    modal.classList.add('show');
+    setTimeout(() => document.getElementById('m-label').focus(), 50);
+  });
+  document.getElementById('issue-cancel').addEventListener('click', () => modal.classList.remove('show'));
+  document.getElementById('issue-done').addEventListener('click', () => { modal.classList.remove('show'); loadCandidates(); });
+
+  issueForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const label = document.getElementById('m-label').value.trim();
+    const days  = parseInt(document.getElementById('m-days').value, 10) || 8;
+    const btn   = document.getElementById('issue-submit');
+    const stat  = document.getElementById('issue-status');
+    btn.disabled = true; btn.textContent = 'Issuing…';
+    stat.className = 'status'; stat.textContent = '';
+
+    const r = await fetch('/cyborg/app/api/candidates/issue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ organisation_id: org.id, label, days }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!d.ok) {
+      stat.className = 'status err';
+      stat.textContent = d.message || d.reason || 'Could not issue token.';
+      btn.disabled = false; btn.textContent = 'Issue token';
+      return;
+    }
+
+    issueForm.style.display = 'none'; issueResult.style.display = 'block';
+    document.getElementById('launch-url').textContent = `${location.origin}/cyborg/?t=${d.token}`;
+    btn.disabled = false; btn.textContent = 'Issue token';
+  });
+
+  loadCandidates();
+
+  // ── Helpers ──────────────────────────────────────────────────────────
+  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+  function formatDate(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); } catch { return iso; } }
+  function statusPill(c) {
+    if (c.revoked_at) return `<span class="pill pill-revoked">Revoked</span>`;
+    if (c.used_at)    return `<span class="pill pill-used">Submitted</span>`;
+    if (c.launched_at) return `<span class="pill pill-active">Running</span>`;
+    if (new Date(c.expires_at) < new Date()) return `<span class="pill pill-expired">Expired</span>`;
+    return `<span class="pill pill-pending">Awaiting launch</span>`;
+  }
+</script>
+
+</body>
+</html>

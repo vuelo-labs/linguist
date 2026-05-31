@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/cyborg/app/app.css">
+  <style>
+    .breadcrumb { color: var(--w-muted); font-size: 0.88rem; margin-bottom: 14px; }
+    .breadcrumb a { color: var(--w-accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    @media (max-width: 720px) { .detail-grid { grid-template-columns: 1fr; } }
+    .kv-list { list-style: none; margin: 0; padding: 0; }
+    .kv-list li { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--w-border); font-size: 0.9rem; gap: 12px; }
+    .kv-list li:last-child { border-bottom: none; }
+    .kv-list .k { color: var(--w-faint); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+    .kv-list .v { color: var(--w-text); text-align: right; word-break: break-all; }
+    .danger-zone { background: #fff4f1; border: 1px solid #f0b8ab; border-radius: 10px; padding: 18px 22px; margin-top: 24px; }
+    .danger-zone h3 { color: #6e2618; font-size: 1rem; margin: 0 0 6px; font-family: 'Newsreader', Georgia, serif; font-weight: 500; }
+    .danger-zone p { color: #6e2618; font-size: 0.88rem; margin: 0 0 12px; line-height: 1.5; opacity: 0.85; }
+    .reports-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+    .report-link { display: block; padding: 12px 14px; background: var(--w-accent-light); border-radius: 8px; text-decoration: none; color: var(--w-text); font-size: 0.86rem; font-weight: 500; text-align: center; transition: background 0.1s; }
+    .report-link:hover { background: var(--w-border); }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a class="app-logo" href="/cyborg/app/">Cyborg</a>
+    <nav class="app-nav">
+      <a href="/cyborg/app/" class="nav-link">Dashboard</a>
+      <a href="/cyborg/app/candidates/" class="nav-link nav-current">Candidates</a>
+      <a href="/cyborg/app/team/" class="nav-link">Team</a>
+    </nav>
+    <div class="app-user-menu">
+      <span class="org-name" id="hdr-org-name">…</span>
+      <button class="user-btn" id="user-btn"><span id="user-initial">·</span></button>
+      <div class="user-popover" id="user-popover" hidden>
+        <div class="popover-meta">
+          <div class="popover-name" id="popover-name">…</div>
+          <div class="popover-email" id="popover-email">…</div>
+        </div>
+        <a class="popover-link" href="/cyborg/app/profile/">Profile &amp; activity</a>
+        <a class="popover-link signout" href="#" id="signout-link">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="app-container" id="container">
+    <div class="breadcrumb">
+      <a href="/cyborg/app/candidates/">Candidates</a> / <span id="bc-name">…</span>
+    </div>
+    <h1 class="page-title" id="cand-name">Loading…</h1>
+    <p class="page-lede" id="cand-state">Looking up candidate state.</p>
+
+    <div class="detail-grid">
+      <div class="card">
+        <h3 style="font-family: 'Newsreader', Georgia, serif; font-size: 1.05rem; font-weight: 500; margin: 0 0 12px;">Token</h3>
+        <ul class="kv-list" id="token-info"></ul>
+      </div>
+      <div class="card">
+        <h3 style="font-family: 'Newsreader', Georgia, serif; font-size: 1.05rem; font-weight: 500; margin: 0 0 12px;">Workspace</h3>
+        <ul class="kv-list" id="workspace-info"></ul>
+      </div>
+    </div>
+
+    <div class="card" id="report-card" style="display:none;">
+      <h3 style="font-family: 'Newsreader', Georgia, serif; font-size: 1.05rem; font-weight: 500; margin: 0 0 6px;">Scored report</h3>
+      <p class="page-lede" id="report-meta" style="margin:0 0 10px;"></p>
+      <div class="reports-grid" id="report-links"></div>
+    </div>
+
+    <div class="danger-zone" id="danger-zone" style="display:none;">
+      <h3>Revoke token</h3>
+      <p>Revoking immediately stops the candidate's running workspace if one is active, and prevents any further use of this token. This is reversible (the token can be re-issued).</p>
+      <button class="btn danger" id="revoke-btn">Revoke token</button>
+      <div class="status" id="revoke-status"></div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { location.replace(`/cyborg/signin/?next=${encodeURIComponent(location.pathname)}`); throw new Error('no session'); }
+  const user = session.user;
+
+  const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'You';
+  document.getElementById('user-initial').textContent = fullName.charAt(0).toUpperCase();
+  document.getElementById('popover-name').textContent = fullName;
+  document.getElementById('popover-email').textContent = user.email || '';
+
+  document.getElementById('user-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('user-popover').hidden = !document.getElementById('user-popover').hidden; });
+  document.addEventListener('click', () => { document.getElementById('user-popover').hidden = true; });
+  document.getElementById('signout-link').addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.replace('/cyborg/signin/'); });
+
+  // Extract token from URL path: /cyborg/app/candidates/<token>/
+  const m = location.pathname.match(/\/cyborg\/app\/candidates\/([^\/]+)/);
+  const token = m ? decodeURIComponent(m[1]) : '';
+  if (!token) { document.getElementById('container').innerHTML = `<div class="empty">Token missing from URL.</div>`; throw new Error('no token'); }
+
+  const { data: memberships } = await supabase
+    .from('organisation_members')
+    .select('organisation_id, role, organisations(id, name, slug)')
+    .order('joined_at', { ascending: true })
+    .limit(1);
+  if (!memberships?.length) { location.replace('/cyborg/app/'); throw new Error('no org'); }
+  const org = memberships[0].organisations;
+  document.getElementById('hdr-org-name').textContent = org.name;
+
+  // Pull the candidate.
+  const { data: cand, error: candErr } = await supabase
+    .from('cyborg_tokens')
+    .select('token, candidate_label, issued_at, expires_at, used_at, revoked_at, approved_at, launched_at, machine_url, fly_machine_id, active_time_used_seconds, active_time_cap_seconds, organisation_id, issued_by_user_id')
+    .eq('token', token)
+    .maybeSingle();
+
+  if (candErr || !cand) {
+    document.getElementById('container').innerHTML = `<div class="empty">Candidate not found, or you don't have access to this token's organisation.</div>`;
+    throw new Error('no candidate');
+  }
+
+  // Defence in depth: verify the candidate is in OUR org (RLS already does this,
+  // but the explicit check makes the failure mode visible).
+  if (cand.organisation_id !== org.id) {
+    document.getElementById('container').innerHTML = `<div class="empty">This candidate belongs to a different organisation.</div>`;
+    throw new Error('wrong org');
+  }
+
+  document.getElementById('cand-name').textContent = cand.candidate_label || 'Unnamed candidate';
+  document.getElementById('bc-name').textContent   = cand.candidate_label || 'Candidate';
+
+  const state = currentState(cand);
+  document.getElementById('cand-state').innerHTML = `${statusPill(cand)} <span style="margin-left:8px;">${state.description}</span>`;
+
+  document.getElementById('token-info').innerHTML = `
+    <li><span class="k">Token</span><span class="v" style="font-family: var(--c-mono); font-size: 0.78rem;">${escapeHtml(cand.token)}</span></li>
+    <li><span class="k">Issued</span><span class="v">${formatDateTime(cand.issued_at)}</span></li>
+    <li><span class="k">Expires</span><span class="v">${formatDateTime(cand.expires_at)}</span></li>
+    ${cand.used_at ? `<li><span class="k">Submitted</span><span class="v">${formatDateTime(cand.used_at)}</span></li>` : ''}
+    ${cand.revoked_at ? `<li><span class="k">Revoked</span><span class="v">${formatDateTime(cand.revoked_at)}</span></li>` : ''}
+  `;
+
+  const activeUsed = cand.active_time_used_seconds || 0;
+  const activeCap  = cand.active_time_cap_seconds || 28800;
+  document.getElementById('workspace-info').innerHTML = `
+    <li><span class="k">Launched</span><span class="v">${cand.launched_at ? formatDateTime(cand.launched_at) : 'Never'}</span></li>
+    <li><span class="k">Machine</span><span class="v" style="font-family: var(--c-mono); font-size: 0.78rem;">${cand.fly_machine_id || '—'}</span></li>
+    <li><span class="k">Active time</span><span class="v">${formatHM(activeUsed)} / ${formatHM(activeCap)}</span></li>
+    <li><span class="k">Workspace URL</span><span class="v">${cand.machine_url ? `<a href="${cand.machine_url}" target="_blank" rel="noopener noreferrer" style="color:var(--w-accent);">Open</a>` : '—'}</span></li>
+  `;
+
+  // Reports if scored.
+  if (cand.used_at) {
+    const { data: reports } = await supabase
+      .from('reports')
+      .select('id, status, scored_at, cost_usd, duration_ms, master_url, candidate_url, manager_url, technical_url, recruiter_url')
+      .eq('candidate_token', cand.token)
+      .maybeSingle();
+
+    if (reports && reports.status === 'ready') {
+      document.getElementById('report-card').style.display = 'block';
+      document.getElementById('report-meta').textContent = `Scored ${formatRelative(reports.scored_at)} · cost $${(reports.cost_usd || 0).toFixed(4)} · ${Math.round((reports.duration_ms || 0) / 1000)}s`;
+      const tiers = ['master', 'candidate', 'manager', 'technical', 'recruiter'];
+      document.getElementById('report-links').innerHTML = tiers.map(t => {
+        const has = reports[`${t}_url`];
+        if (!has) return '';
+        const url = `/cyborg/admin/report?submission=${encodeURIComponent(reports.id)}&tier=${t}`;
+        return `<a class="report-link" href="${url}" target="_blank" rel="noopener noreferrer">${t.charAt(0).toUpperCase() + t.slice(1)}</a>`;
+      }).filter(Boolean).join('');
+    } else if (reports && reports.status === 'needs_review') {
+      document.getElementById('report-card').style.display = 'block';
+      document.getElementById('report-meta').innerHTML = `<strong>Needs review</strong> — the safety classifier couldn't run on this submission. Inspect the work product manually before any report is shared with the candidate.`;
+    } else if (reports && reports.status === 'rejected') {
+      document.getElementById('report-card').style.display = 'block';
+      document.getElementById('report-meta').innerHTML = `<strong>Rejected</strong> — the safety classifier flagged this submission. No report rendered.`;
+    } else if (reports && reports.status === 'processing') {
+      document.getElementById('report-card').style.display = 'block';
+      document.getElementById('report-meta').textContent = 'Processing — the scoring worker is currently running. Refresh in a minute.';
+    }
+  }
+
+  // Revoke button — show only if the token is still usable.
+  if (!cand.used_at && !cand.revoked_at && new Date(cand.expires_at) > new Date()) {
+    document.getElementById('danger-zone').style.display = 'block';
+    document.getElementById('revoke-btn').addEventListener('click', async () => {
+      if (!confirm('Revoke this token? The candidate\'s running workspace will be stopped.')) return;
+      const btn = document.getElementById('revoke-btn');
+      const stat = document.getElementById('revoke-status');
+      btn.disabled = true; btn.textContent = 'Revoking…';
+      stat.className = 'status'; stat.textContent = '';
+
+      const r = await fetch('/cyborg/app/api/candidates/revoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ token: cand.token }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (d.ok) {
+        stat.className = 'status ok'; stat.textContent = 'Revoked. Reloading…';
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        stat.className = 'status err'; stat.textContent = d.message || d.reason || 'Failed to revoke.';
+        btn.disabled = false; btn.textContent = 'Revoke token';
+      }
+    });
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────
+  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+  function formatDateTime(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } }
+  function formatRelative(iso) { if (!iso) return ''; const diff = (Date.now() - new Date(iso).getTime()) / 1000; if (diff < 60) return 'just now'; if (diff < 3600) return `${Math.floor(diff / 60)}m ago`; if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`; if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d ago`; return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  function formatHM(seconds) { const h = Math.floor(seconds / 3600); const m = Math.floor((seconds % 3600) / 60); return `${h}h ${m}m`; }
+  function statusPill(c) {
+    if (c.revoked_at) return `<span class="pill pill-revoked">Revoked</span>`;
+    if (c.used_at)    return `<span class="pill pill-used">Submitted</span>`;
+    if (c.launched_at) return `<span class="pill pill-active">Running</span>`;
+    if (new Date(c.expires_at) < new Date()) return `<span class="pill pill-expired">Expired</span>`;
+    return `<span class="pill pill-pending">Awaiting launch</span>`;
+  }
+  function currentState(c) {
+    if (c.revoked_at) return { description: `Revoked ${formatRelative(c.revoked_at)}.` };
+    if (c.used_at)    return { description: `Submitted ${formatRelative(c.used_at)}.` };
+    if (c.launched_at) return { description: `Workspace running. Active time used: ${formatHM(c.active_time_used_seconds || 0)} of ${formatHM(c.active_time_cap_seconds || 28800)}.` };
+    if (new Date(c.expires_at) < new Date()) return { description: `Token expired without use.` };
+    return { description: `Issued ${formatRelative(c.issued_at)}. Candidate hasn't launched yet.` };
+  }
+</script>
+
+</body>
+</html>
