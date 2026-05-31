@@ -338,12 +338,14 @@ function autoOs() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Pre-fill from ?t=
+  // Pre-fill from ?t= and auto-launch — most candidates arrive via the
+  // WhatsApp invite link that already includes ?t=, so we skip the explicit
+  // Continue → Launch two-click and go straight to spawn after validation.
   const params = new URLSearchParams(location.search);
   const t = params.get('t') || params.get('token');
   if (t) {
     document.getElementById('token').value = t.trim();
-    checkToken();
+    checkToken({ autoLaunch: true });
   }
   setOs(_os);
   document.getElementById('token').addEventListener('keydown', e => {
@@ -359,7 +361,25 @@ async function launchWorkspace() {
 
   btn.disabled = true;
   btn.textContent = 'Starting your workspace…';
-  hint.textContent = 'This usually takes 30-60 seconds. Please keep this tab open.';
+
+  // Live elapsed-time counter so the candidate sees progress during the
+  // 30-60s spawn. Updates the hint every second.
+  const launchStart = Date.now();
+  const progressMessages = [
+    [0,  'Reserving your workspace…'],
+    [10, 'Pulling environment image…'],
+    [25, 'Booting the desktop…'],
+    [45, 'Almost ready — finalising warehouse…'],
+    [70, 'Taking longer than usual. Hang tight.'],
+  ];
+  const progressTimer = setInterval(() => {
+    const elapsedS = Math.floor((Date.now() - launchStart) / 1000);
+    let msg = progressMessages[0][1];
+    for (const [threshold, m] of progressMessages) {
+      if (elapsedS >= threshold) msg = m;
+    }
+    hint.textContent = `${msg} (${elapsedS}s elapsed)`;
+  }, 1000);
 
   try {
     const r = await fetch(LAUNCH_URL, {
@@ -369,11 +389,13 @@ async function launchWorkspace() {
     });
     const d = await r.json();
     if (d.ok && d.url) {
+      clearInterval(progressTimer);
       hint.textContent = 'Workspace ready — redirecting…';
       // Brief pause so the message is visible.
       setTimeout(() => { window.location.href = d.url; }, 600);
       return;
     }
+    clearInterval(progressTimer);
 
     // Error path — surface what happened, re-enable the button so the candidate can retry.
     btn.disabled = false;
@@ -390,6 +412,7 @@ async function launchWorkspace() {
     status.textContent = msg;
     hint.textContent = '';
   } catch (e) {
+    clearInterval(progressTimer);
     btn.disabled = false;
     btn.textContent = 'Try again';
     status.className = 'status err';
@@ -420,14 +443,14 @@ curl -fsSL https://raw.githubusercontent.com/vuelo-labs/cyborg_versions/main/ins
   document.getElementById('cmd').textContent = cmd;
 }
 
-async function checkToken() {
+async function checkToken(opts = {}) {
   const tok = document.getElementById('token').value.trim();
   const status = document.getElementById('status');
-  const install = document.getElementById('install');
+  const launch = document.getElementById('launch');
   const btn = document.getElementById('check-btn');
 
   status.className = 'status'; status.textContent = '';
-  install.classList.remove('show');
+  launch.style.display = 'none';
   _validToken = null;
 
   if (!tok) {
@@ -449,10 +472,15 @@ async function checkToken() {
       const exp = d.expires_at ? new Date(d.expires_at).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : null;
       const who = d.candidate_label ? ` for ${escapeHtml(d.candidate_label)}` : '';
       status.className = 'status ok';
-      status.innerHTML = `Token accepted${who}. ${exp ? `Window closes <strong>${exp}</strong>.` : ''}`;
+      status.innerHTML = `Token accepted${who}. ${exp ? `Your 7-day window closes <strong>${exp}</strong>.` : ''}`;
       // Reveal the launch button (primary path) and pre-render the local-fallback install command.
       document.getElementById('launch').style.display = 'block';
       renderCmd();
+      // Auto-launch when the token came from the URL — the candidate arrived via the
+      // invite link and shouldn't have to click twice.
+      if (opts.autoLaunch) {
+        launchWorkspace();
+      }
     } else {
       status.className = 'status err';
       status.textContent = ({

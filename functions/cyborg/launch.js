@@ -47,7 +47,7 @@ export async function onRequestPost({ request, env }) {
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
   const { data: tokenRow, error: lookupErr } = await supabase
     .from('cyborg_tokens')
-    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, fly_machine_id, machine_url, launched_at')
+    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, fly_machine_id, machine_url, launched_at, active_time_used_seconds, active_time_cap_seconds, last_resumed_at')
     .eq('token', token)
     .maybeSingle();
 
@@ -58,10 +58,32 @@ export async function onRequestPost({ request, env }) {
   if (tokenRow.used_at)       return json({ ok: false, reason: 'already_used' }, 403);
   if (new Date(tokenRow.expires_at) < new Date()) return json({ ok: false, reason: 'expired' }, 403);
 
-  // ── Idempotency: same token re-clicks the launch button ──────────────
+  // ── Active-time cap check ─────────────────────────────────────────────
+  // Total active time = accumulated + (currently running period, if any).
+  // If the candidate is over the 8h cap, refuse to (re)launch.
+  const accumulated = tokenRow.active_time_used_seconds || 0;
+  let currentPeriod = 0;
+  if (tokenRow.last_resumed_at) {
+    currentPeriod = Math.max(0, Math.floor((Date.now() - new Date(tokenRow.last_resumed_at).getTime()) / 1000));
+  }
+  const usedTotal = accumulated + currentPeriod;
+  const cap = tokenRow.active_time_cap_seconds || 28800;
+  if (usedTotal >= cap) {
+    return json({ ok: false, reason: 'out_of_active_time', used: usedTotal, cap }, 403);
+  }
+
+  // ── Idempotency + resume-after-pause ─────────────────────────────────
+  // Three sub-cases when an fly_machine_id is already on the row:
+  //   1. Machine is already starting/started → return its URL (re-clicks)
+  //   2. Machine is stopped (paused) → start it, wait for ready, return URL
+  //      (this preserves all in-container state across pause/resume)
+  //   3. Machine is destroyed/failed/unknown → fall through to spawn fresh
   if (tokenRow.fly_machine_id && tokenRow.machine_url) {
-    const live = await checkMachineLive(env, tokenRow.fly_machine_id);
-    if (live) {
+    const state = await getMachineState(env, tokenRow.fly_machine_id);
+    if (state === 'started' || state === 'starting') {
+      // Re-click while already running. last_resumed_at is unchanged — the
+      // active-time clock is already ticking from when the candidate first
+      // launched (or resumed).
       return json({
         ok: true,
         url: tokenRow.machine_url,
@@ -69,8 +91,31 @@ export async function onRequestPost({ request, env }) {
         reused: true,
       });
     }
-    // Machine was destroyed (or in a bad state) — fall through to spawn a new one.
-    console.warn('launch: stale machine_id for token, respawning', tokenRow.fly_machine_id);
+    if (state === 'stopped' || state === 'suspended') {
+      // Resume the paused machine — preserves notes.md, work/, candidate-state.json.
+      const startOk = await startFlyMachine(env, tokenRow.fly_machine_id);
+      if (startOk) {
+        const ready = await waitForMachineStarted(env, tokenRow.fly_machine_id, SPAWN_TIMEOUT_MS);
+        if (ready) {
+          // Restart the active-time clock for the new period.
+          await supabase
+            .from('cyborg_tokens')
+            .update({ last_resumed_at: new Date().toISOString() })
+            .eq('token', token);
+          return json({
+            ok: true,
+            url: tokenRow.machine_url,
+            expires_at: tokenRow.expires_at,
+            resumed: true,
+          });
+        }
+        console.warn('launch: stopped machine failed to start, respawning', tokenRow.fly_machine_id);
+      } else {
+        console.warn('launch: start API failed for paused machine, respawning', tokenRow.fly_machine_id);
+      }
+    }
+    // Machine destroyed/failed/unknown — fall through to spawn fresh.
+    console.warn('launch: stale machine_id for token, respawning', tokenRow.fly_machine_id, 'state:', state);
   }
 
   // ── Spawn ─────────────────────────────────────────────────────────────
@@ -131,31 +176,34 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, reason: 'spawn_timeout', machine_id: machine.id }, 504);
   }
 
-  // Fly Machines on a service get a `<app>.fly.dev` hostname by default; the
-  // per-machine `<id>.<app>.internal` is for private networking. For
-  // candidate-facing URLs we want the per-machine HTTPS edge URL:
-  //   https://<machine-id>-<app>.fly.dev  (Fly's per-instance routing)
-  // (For a single-machine app you could also use `<app>.fly.dev`, but we
-  // need per-candidate isolation.)
-  const machineHost = `${machine.id}.vm.${env.FLY_APP_NAME}.internal`;
-  const candidateUrl = `https://${env.FLY_APP_NAME}.fly.dev`;
-  // NOTE: The exact public URL format depends on the Fly app's services config.
-  // With `services.ports[443]` per-machine, the routing is via the app hostname
-  // with a machine-id selector. For cohort 1 we surface the app URL; if more
-  // than one machine spins up simultaneously we add a `?machine=<id>` selector
-  // and rely on Fly's routing.
+  // Fly app URL routes to any healthy machine with the service config.
+  // For cohort 1 (sequential candidates) this is fine; for concurrent
+  // candidates we'd add `fly-prefer-instance-id=<machine.id>` to pin
+  // each candidate to their own machine — TODO when concurrent candidates
+  // matter.
   //
-  // TODO(owner): once the app is created and the first machine boots,
-  // verify the URL pattern with `fly machines list -a <app>` and update if needed.
+  // Append `?token=<token>` so the container's auth handler can exchange it
+  // for a session cookie on first hit (avoids the "Session expired" screen).
+  // The container's first response is a 302 that strips the token from the
+  // URL, so it doesn't end up in browser history or referer headers.
+  const candidateUrl = `https://${env.FLY_APP_NAME}.fly.dev/?token=${encodeURIComponent(token)}`;
 
   // ── Persist mapping ───────────────────────────────────────────────────
+  // Fresh spawn: kick off the active-time clock. Reset to 0 only on the very
+  // first spawn (no prior machine); preserve accumulated time if this is a
+  // re-spawn after a destroyed machine (rare, defensive).
+  const isFirstSpawn = !tokenRow.fly_machine_id;
+  const updatePayload = {
+    fly_machine_id:  machine.id,
+    machine_url:     candidateUrl,
+    launched_at:     new Date().toISOString(),
+    last_resumed_at: new Date().toISOString(),
+  };
+  if (isFirstSpawn) updatePayload.active_time_used_seconds = 0;
+
   const { error: updateErr } = await supabase
     .from('cyborg_tokens')
-    .update({
-      fly_machine_id: machine.id,
-      machine_url:    candidateUrl,
-      launched_at:    new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq('token', token);
   if (updateErr) {
     // Don't fail the launch — the candidate URL is still valid. Just log.
@@ -171,14 +219,26 @@ export async function onRequestPost({ request, env }) {
   });
 }
 
-async function checkMachineLive(env, machineId) {
+async function getMachineState(env, machineId) {
   try {
     const r = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}`, {
       headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` },
     });
-    if (!r.ok) return false;
+    if (!r.ok) return null;
     const m = await r.json();
-    return ['starting', 'started'].includes(m.state);
+    return m.state || null;
+  } catch {
+    return null;
+  }
+}
+
+async function startFlyMachine(env, machineId) {
+  try {
+    const r = await fetch(
+      `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}/start`,
+      { method: 'POST', headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` } }
+    );
+    return r.ok;
   } catch {
     return false;
   }

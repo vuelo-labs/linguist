@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign up — Cyborg / Veralux Analytics</title>
+  <meta name="description" content="Sign up for the Cyborg data analyst assessment. We'll email you a launch link.">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    :root { --c-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace; }
+    body { background: var(--w-bg); color: var(--w-text); font-family: var(--sans, 'Inter', sans-serif); margin: 0; }
+    .wrap { max-width: 620px; margin: 0 auto; padding: 56px 24px 96px; }
+    h1 { font-family: var(--serif, 'Newsreader', serif); font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.01em; margin: 0 0 14px; font-weight: 500; }
+    .lede { font-size: 1.05rem; color: var(--w-muted); line-height: 1.55; margin-bottom: 32px; }
+    .card { background: var(--w-bg-card); border: 1px solid var(--w-border); border-radius: 14px; padding: 28px 28px 24px; margin: 18px 0; }
+    .card h2 { font-family: var(--serif, 'Newsreader', serif); font-size: 1.3rem; margin: 0 0 16px; font-weight: 500; letter-spacing: -0.01em; }
+    label { display: block; font-size: 0.84rem; font-weight: 600; color: var(--w-faint); margin-bottom: 6px; letter-spacing: 0.02em; text-transform: uppercase; }
+    input[type=text], input[type=email], textarea {
+      width: 100%; box-sizing: border-box;
+      background: var(--w-bg-input); border: 1px solid var(--w-border);
+      border-radius: 9px; padding: 11px 14px; font-size: 0.95rem;
+      color: var(--w-text); font-family: inherit;
+      transition: border-color 0.1s;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--w-border-focus); }
+    textarea { resize: vertical; min-height: 100px; line-height: 1.55; }
+    .field { margin-bottom: 16px; }
+    .row-actions { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+    .btn {
+      background: var(--w-accent); color: var(--w-bg);
+      border: none; border-radius: 9px;
+      padding: 11px 24px; font-size: 0.95rem; font-weight: 500;
+      font-family: inherit; cursor: pointer;
+      transition: opacity 0.1s, background 0.1s;
+    }
+    .btn:hover:not(:disabled) { background: var(--w-accent-soft); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .status {
+      padding: 12px 14px; border-radius: 8px;
+      font-size: 0.92rem; line-height: 1.5;
+      margin-top: 16px; display: none;
+    }
+    .status.ok  { background: #ecf3eb; border: 1px solid #b8d2b3; color: #2d5a26; display: block; }
+    .status.err { background: #fbe9e7; border: 1px solid #e8b8af; color: #6e2618; display: block; }
+    .hp { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+    .footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--w-border); font-size: 0.86rem; color: var(--w-faint); line-height: 1.55; }
+    .footer a { color: var(--w-accent); }
+    ol.steps { line-height: 1.7; padding-left: 22px; margin: 6px 0 0; }
+    ol.steps li { margin-bottom: 4px; color: var(--w-text); }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <h1>Sign up for the assessment</h1>
+  <p class="lede">
+    A 7-day analyst-at-Veralux simulation. Fill in your details below and we'll email you a single
+    link to launch the workspace — no install, no token to remember. Runs in your browser.
+  </p>
+
+  <div class="card">
+    <h2>What happens next</h2>
+    <ol class="steps">
+      <li>You submit the form.</li>
+      <li>We email you a launch link (usually within a minute).</li>
+      <li>Click the link → your workspace boots in ~30 seconds → you start working.</li>
+      <li>You have <strong>7 days to fit in 8 hours of active work</strong>. Pause the workspace when you step away — your work-time clock stops with it.</li>
+      <li>Submit when you're done; you'll get a written feedback report.</li>
+    </ol>
+    <p class="muted" style="margin-top:14px; color:#5E5450; font-size:0.92rem;">
+      Treat it like a real first day: a couple of focused sittings beats grinding through it in one go. Quality of judgement, not hours logged.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>One thing to bring</h2>
+    <p>
+      Inside the workspace, the AI assistant (Claude Code) is pre-installed. The first time you run it,
+      it'll ask you to sign in — <strong>any free Anthropic account works</strong>, no payment, no API key
+      required. It takes about 30 seconds.
+    </p>
+    <p class="muted" style="font-size:0.92rem;">
+      The same sign-in also enables the in-app stakeholder DMs (Slack-style messaging with team members
+      in the simulation). If you'd rather not sign in, you can paste an Anthropic API key in the
+      Messages settings panel instead — keys are scoped to this session and never logged.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Your details</h2>
+    <form id="reg-form" autocomplete="off">
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required maxlength="200" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required maxlength="320" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="notes">A line on what's drawing you in (optional)</label>
+        <textarea id="notes" name="notes" maxlength="2000" placeholder="e.g. 'Coming off a finance grad scheme and exploring SaaS analyst roles'…"></textarea>
+      </div>
+
+      <!-- Honeypot — real users won't see or fill this -->
+      <div class="hp" aria-hidden="true">
+        <label for="website">Website (leave blank)</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADFJRZfDIYBjNzoS"></div>
+      </div>
+
+      <div class="row-actions">
+        <button type="submit" class="btn" id="submit-btn">Send me my launch link</button>
+        <span style="font-size:0.86rem; color:var(--w-muted);">Usually within a minute.</span>
+      </div>
+
+      <div class="status" id="status"></div>
+    </form>
+  </div>
+
+  <div class="footer">
+    Already have a launch link? <a href="/cyborg/">Open the assessment</a>.<br />
+    Trouble? Email the assessment owner.
+  </div>
+
+</div>
+
+<script>
+const form = document.getElementById('reg-form');
+const status = document.getElementById('status');
+const btn = document.getElementById('submit-btn');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  status.className = 'status'; status.textContent = '';
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  const turnstileToken = (form.querySelector('[name="cf-turnstile-response"]') || {}).value || '';
+  if (!turnstileToken) {
+    status.className = 'status err';
+    status.textContent = 'Please complete the verification challenge above.';
+    btn.disabled = false; btn.textContent = 'Send me my launch link';
+    return;
+  }
+
+  const payload = {
+    name:    document.getElementById('name').value,
+    email:   document.getElementById('email').value,
+    notes:   document.getElementById('notes').value,
+    website: document.getElementById('website').value,
+    turnstileToken,
+  };
+
+  try {
+    const r = await fetch('/cyborg/register', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const d = await r.json();
+    if (d.ok) {
+      status.className = 'status ok';
+      status.innerHTML = `Done. Check <strong>${escapeHtml(payload.email)}</strong> for your launch link in the next minute. Watch your spam folder just in case.`;
+      form.reset();
+      btn.textContent = 'Sent';
+    } else {
+      status.className = 'status err';
+      status.textContent = ({
+        'missing_fields':    'Please fill in your name and email.',
+        'bad_email':         'That email doesn\'t look right — double-check it.',
+        'too_large':         'Message is too long. Trim it and try again.',
+        'not_configured':    'Sorry — registration isn\'t wired up yet. Email the assessment owner directly.',
+        'turnstile_failed':  'Verification failed. Refresh the page and try again.',
+        'missing_turnstile': 'Please complete the verification challenge above.',
+        'mint_failed':       'Could not issue your token. Try again or email the owner.',
+      }[d.reason] || 'Could not send your registration. Try again or email the owner.');
+      if (window.turnstile) window.turnstile.reset();
+      btn.disabled = false; btn.textContent = 'Send me my launch link';
+    }
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = 'Could not reach the server. Check your connection and try again.';
+    btn.disabled = false; btn.textContent = 'Send me my launch link';
+  }
+});
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+</script>
+
+</body>
+</html>
