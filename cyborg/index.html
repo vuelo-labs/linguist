@@ -162,8 +162,8 @@
 
   <h1>Veralux Analytics — Workspace Setup</h1>
   <p class="lede">
-    A 7-day data analyst assessment inside a simulated company. The workspace runs locally
-    on your machine via Docker, captures how you work, and submits when you're done.
+    A 7-day data analyst assessment inside a simulated company. The workspace runs in your browser,
+    captures how you work, and submits when you're done. No install needed — paste your token and go.
   </p>
 
   <div class="card">
@@ -183,12 +183,13 @@
     <h2>What you'll need</h2>
     <ol class="steps">
       <li><strong>Your token</strong> — sent in your invitation email. Single-use.</li>
-      <li><strong>Docker Desktop</strong> — <a href="https://www.docker.com/products/docker-desktop" target="_blank" rel="noopener">download here</a>. Mac, Linux, or Windows-with-WSL2.</li>
-      <li><strong>~5 GB of free disk</strong> for the workspace image, and a laptop that can run a local container without melting.</li>
-      <li><strong>Stable internet</strong> for the one-time AI sign-in (OAuth) and image pull. The container itself runs locally.</li>
-      <li><strong>An IDE you're comfortable with</strong> — VS Code or Cursor with the Remote-SSH extension is the smoothest path. The browser also has a built-in terminal and SQL runner if you'd rather stay there.</li>
-      <li><strong>About 5 minutes to install.</strong> Then 7 days of clock time to use the workspace however suits you.</li>
+      <li><strong>A modern browser</strong> — Chrome, Firefox, Safari, or Edge. The workspace runs as a desktop-like interface in a single tab.</li>
+      <li><strong>Stable internet</strong> — the workspace lives on a hosted machine; you reach it over HTTPS.</li>
+      <li><strong>7 days of clock time</strong> to use the workspace however suits you. Aim for one or two focused 3–4-hour sessions.</li>
     </ol>
+    <p class="muted" style="margin-top:14px">
+      Prefer to run it locally on your machine? There's an opt-in Docker path — see "Prefer to run locally?" under the Start section below.
+    </p>
   </div>
 
   <div class="card">
@@ -258,7 +259,7 @@
 
   <div class="card">
     <h2>Start</h2>
-    <p>Paste your token, choose your operating system, and copy the install command.</p>
+    <p>Paste your token, then launch your workspace.</p>
 
     <div class="row" style="margin-bottom:6px;">
       <input type="text" id="token" placeholder="cyb_..." autocomplete="off" spellcheck="false" />
@@ -267,33 +268,50 @@
 
     <div class="status" id="status"></div>
 
-    <div class="install" id="install">
-      <div class="os-tabs" id="os-tabs">
-        <button class="os-tab cur" data-os="mac"   onclick="setOs('mac')">macOS</button>
-        <button class="os-tab"     data-os="linux" onclick="setOs('linux')">Linux</button>
-        <button class="os-tab"     data-os="win"   onclick="setOs('win')">Windows</button>
-      </div>
-
-      <pre class="cmd" id="cmd"></pre>
-      <div class="copy-bar">
-        <span id="install-hint">Open Terminal and paste this command.</span>
-        <button class="copy-btn" id="copy-btn" onclick="copyCmd()">Copy</button>
-      </div>
-
-      <div class="windows-note" id="win-note" style="display:none;">
-        On Windows, run the command inside <strong>WSL2 (Ubuntu)</strong>. Docker Desktop must be running with WSL2 integration enabled.
-        If you don't have WSL set up, the simplest path is to use a Mac or Linux machine if available.
-      </div>
-
-      <ol class="steps" style="margin-top:18px;">
-        <li>Wait ~10 seconds for the workspace to start.</li>
-        <li>Open <code>http://localhost:3000</code> — the Veralux desktop.</li>
-        <li>In the dock, open the Terminal and type <code>claude</code> to start your AI assistant. Sign in once with any Anthropic account.</li>
-      </ol>
-
-      <p class="muted" style="margin-top:14px">
-        Submitting the assessment locks the workspace (read-only). The same lock applies automatically when the 7-day window closes.
+    <div class="launch" id="launch" style="display:none; margin-top:18px;">
+      <button class="btn btn-large" id="launch-btn" onclick="launchWorkspace()" style="font-size:1rem; padding:14px 28px;">
+        Launch your workspace
+      </button>
+      <p class="muted" id="launch-hint" style="margin-top:14px">
+        Takes about 30 seconds to spin up. You'll be redirected to your workspace once it's ready. Your session lasts 7 days from now (or until you submit, whichever comes first).
       </p>
+
+      <details class="local-fallback" style="margin-top:24px; padding-top:18px; border-top:1px solid var(--w-border);">
+        <summary style="cursor:pointer; color:var(--w-muted); font-size:0.92rem;">Prefer to run locally?</summary>
+        <div style="margin-top:16px;">
+          <p class="muted">
+            If you'd rather run the workspace on your own machine via Docker, you can. You'll need
+            Docker Desktop installed and ~5 GB of free disk. Mac, Linux, or Windows-with-WSL2.
+          </p>
+
+          <div class="os-tabs" id="os-tabs">
+            <button class="os-tab cur" data-os="mac"   onclick="setOs('mac')">macOS</button>
+            <button class="os-tab"     data-os="linux" onclick="setOs('linux')">Linux</button>
+            <button class="os-tab"     data-os="win"   onclick="setOs('win')">Windows</button>
+          </div>
+
+          <pre class="cmd" id="cmd"></pre>
+          <div class="copy-bar">
+            <span id="install-hint">Open Terminal and paste this command.</span>
+            <button class="copy-btn" id="copy-btn" onclick="copyCmd()">Copy</button>
+          </div>
+
+          <div class="windows-note" id="win-note" style="display:none;">
+            On Windows, run the command inside <strong>WSL2 (Ubuntu)</strong>. Docker Desktop must be running with WSL2 integration enabled.
+            If you don't have WSL set up, the simplest path is to use a Mac or Linux machine if available.
+          </div>
+
+          <ol class="steps" style="margin-top:18px;">
+            <li>Wait ~10 seconds for the workspace to start.</li>
+            <li>Open <code>http://localhost:3000</code> — the Veralux desktop.</li>
+            <li>In the dock, open the Terminal and type <code>claude</code> to start your AI assistant. Sign in once with any Anthropic account.</li>
+          </ol>
+
+          <p class="muted" style="margin-top:14px">
+            Submitting the assessment locks the workspace (read-only). The same lock applies automatically when the 7-day window closes.
+          </p>
+        </div>
+      </details>
     </div>
   </div>
 
@@ -307,6 +325,7 @@
 
 <script>
 const VALIDATE_URL = '/cyborg/validate';
+const LAUNCH_URL   = '/cyborg/launch';
 let _os = autoOs();
 let _validToken = null;
 
@@ -332,10 +351,58 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+async function launchWorkspace() {
+  if (!_validToken) return;
+  const btn   = document.getElementById('launch-btn');
+  const hint  = document.getElementById('launch-hint');
+  const status = document.getElementById('status');
+
+  btn.disabled = true;
+  btn.textContent = 'Starting your workspace…';
+  hint.textContent = 'This usually takes 30-60 seconds. Please keep this tab open.';
+
+  try {
+    const r = await fetch(LAUNCH_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ token: _validToken }),
+    });
+    const d = await r.json();
+    if (d.ok && d.url) {
+      hint.textContent = 'Workspace ready — redirecting…';
+      // Brief pause so the message is visible.
+      setTimeout(() => { window.location.href = d.url; }, 600);
+      return;
+    }
+
+    // Error path — surface what happened, re-enable the button so the candidate can retry.
+    btn.disabled = false;
+    btn.textContent = 'Try again';
+    status.className = 'status err';
+    const msg = ({
+      'not_configured':   'The hosted workspace is not yet available. Try the local install option below, or contact the assessment owner.',
+      'already_used':     'This token has already been used. Each token is single-use — contact the assessment owner if you believe this is an error.',
+      'expired':          'This token has expired.',
+      'revoked':          'This token has been revoked.',
+      'spawn_failed':     'Could not start your workspace. Try again in a moment, or contact the assessment owner if it keeps failing.',
+      'spawn_timeout':    'Your workspace is taking longer than expected to start. Wait a minute and click again — if it was successfully started in the background, you\'ll be redirected to it.',
+    })[d.reason] || 'Could not launch the workspace. Try again or contact the assessment owner.';
+    status.textContent = msg;
+    hint.textContent = '';
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Try again';
+    status.className = 'status err';
+    status.textContent = 'Could not reach the launch server. Check your connection and try again.';
+    hint.textContent = '';
+  }
+}
+
 function setOs(os) {
   _os = os;
   document.querySelectorAll('.os-tab').forEach(b => b.classList.toggle('cur', b.dataset.os === os));
-  document.getElementById('win-note').style.display = (os === 'win') ? 'block' : 'none';
+  const winNote = document.getElementById('win-note');
+  if (winNote) winNote.style.display = (os === 'win') ? 'block' : 'none';
   if (_validToken) renderCmd();
 }
 
@@ -383,7 +450,8 @@ async function checkToken() {
       const who = d.candidate_label ? ` for ${escapeHtml(d.candidate_label)}` : '';
       status.className = 'status ok';
       status.innerHTML = `Token accepted${who}. ${exp ? `Window closes <strong>${exp}</strong>.` : ''}`;
-      install.classList.add('show');
+      // Reveal the launch button (primary path) and pre-render the local-fallback install command.
+      document.getElementById('launch').style.display = 'block';
       renderCmd();
     } else {
       status.className = 'status err';

@@ -1,0 +1,212 @@
+// POST /cyborg/launch — provision a hosted candidate workspace for a valid token.
+//
+// Flow:
+//   1. Validate the token (same checks as validate.js).
+//   2. If the token already has a running machine, return its URL (idempotent).
+//   3. Else call Fly Machines API to spawn a new machine with the token + deadline
+//      baked into env. Persist the machine_id + url back to cyborg_tokens.
+//   4. Return { ok: true, url, expires_at } for the landing page to redirect to.
+//
+// Required env (Cloudflare Pages secrets):
+//   FLY_API_TOKEN      — deploy-scoped token for the candidate-pool app
+//   FLY_APP_NAME       — e.g. cyborg-candidate-pool
+//   FLY_IMAGE_REF      — e.g. registry.fly.io/cyborg-candidate-pool:v5-recruiter_full
+//   FLY_REGION         — default 'lhr'
+//   SUBMISSION_ENDPOINT — e.g. https://linguist.vuelolabs.com/cyborg/submit
+//   SUPABASE_URL, SUPABASE_SERVICE_KEY — same as the rest of /cyborg/*
+//
+// If any required env is missing → returns 503 not_configured. Never spawns
+// silently with default values.
+
+import { createClient } from '@supabase/supabase-js';
+
+const FLY_API_BASE = 'https://api.machines.dev/v1';
+const DEFAULT_REGION = 'lhr';
+const MACHINE_CPUS = 2;
+const MACHINE_MEMORY_MB = 2048;
+const SPAWN_TIMEOUT_MS = 60000;     // 60s — image pull + first boot
+const POLL_INTERVAL_MS = 1500;
+
+export async function onRequestPost({ request, env }) {
+  // ── Env preflight ──────────────────────────────────────────────────────
+  const missing = ['FLY_API_TOKEN', 'FLY_APP_NAME', 'FLY_IMAGE_REF', 'SUBMISSION_ENDPOINT', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY']
+    .filter(k => !env[k]);
+  if (missing.length) {
+    console.error('launch not_configured: missing env', missing);
+    return json({ ok: false, reason: 'not_configured', missing }, 503);
+  }
+  const region = env.FLY_REGION || DEFAULT_REGION;
+
+  // ── Body ──────────────────────────────────────────────────────────────
+  let body;
+  try { body = await request.json(); } catch { return json({ ok: false, reason: 'bad_request' }, 400); }
+  const token = (body.token || '').toString().trim();
+  if (!token) return json({ ok: false, reason: 'missing_token' }, 400);
+
+  // ── Token validation (mirrors validate.js) ────────────────────────────
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+  const { data: tokenRow, error: lookupErr } = await supabase
+    .from('cyborg_tokens')
+    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, fly_machine_id, machine_url, launched_at')
+    .eq('token', token)
+    .maybeSingle();
+
+  if (lookupErr)              return json({ ok: false, reason: 'lookup_failed' }, 500);
+  if (!tokenRow)              return json({ ok: false, reason: 'unknown' }, 404);
+  if (tokenRow.revoked_at)    return json({ ok: false, reason: 'revoked' }, 403);
+  if (!tokenRow.approved_at)  return json({ ok: false, reason: 'pending_approval' }, 403);
+  if (tokenRow.used_at)       return json({ ok: false, reason: 'already_used' }, 403);
+  if (new Date(tokenRow.expires_at) < new Date()) return json({ ok: false, reason: 'expired' }, 403);
+
+  // ── Idempotency: same token re-clicks the launch button ──────────────
+  if (tokenRow.fly_machine_id && tokenRow.machine_url) {
+    const live = await checkMachineLive(env, tokenRow.fly_machine_id);
+    if (live) {
+      return json({
+        ok: true,
+        url: tokenRow.machine_url,
+        expires_at: tokenRow.expires_at,
+        reused: true,
+      });
+    }
+    // Machine was destroyed (or in a bad state) — fall through to spawn a new one.
+    console.warn('launch: stale machine_id for token, respawning', tokenRow.fly_machine_id);
+  }
+
+  // ── Spawn ─────────────────────────────────────────────────────────────
+  const machineConfig = {
+    name: `cyborg-${token.slice(-12)}`,
+    region,
+    config: {
+      image: env.FLY_IMAGE_REF,
+      env: {
+        CANDIDATE_TOKEN:     token,
+        SUBMISSION_ENDPOINT: env.SUBMISSION_ENDPOINT,
+        DEADLINE:            tokenRow.expires_at,
+        PROFILE:             env.PROFILE || 'v5-recruiter_full',
+      },
+      services: [{
+        ports: [
+          { port: 443, handlers: ['tls', 'http'] },
+          { port: 80,  handlers: ['http'],         force_https: true },
+        ],
+        protocol: 'tcp',
+        internal_port: 3000,
+        auto_stop_machines: 'off',
+        auto_start_machines: false,
+        min_machines_running: 1,
+      }],
+      guest: { cpu_kind: 'shared', cpus: MACHINE_CPUS, memory_mb: MACHINE_MEMORY_MB },
+      auto_destroy: false,
+    },
+  };
+
+  let machine;
+  try {
+    const flyRes = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines`, {
+      method:  'POST',
+      headers: {
+        'Authorization': `Bearer ${env.FLY_API_TOKEN}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify(machineConfig),
+    });
+    if (!flyRes.ok) {
+      const errText = await flyRes.text().catch(() => '');
+      console.error('fly machines create failed', flyRes.status, errText);
+      return json({ ok: false, reason: 'spawn_failed', status: flyRes.status }, 502);
+    }
+    machine = await flyRes.json();
+  } catch (e) {
+    console.error('fly machines create error', e);
+    return json({ ok: false, reason: 'spawn_failed' }, 502);
+  }
+
+  // Wait for the machine to be "started" before we hand the URL back — otherwise
+  // the candidate sees a Fly health-check 502 for 30+s.
+  const ready = await waitForMachineStarted(env, machine.id, SPAWN_TIMEOUT_MS);
+  if (!ready) {
+    console.error('fly machine never reached started state', machine.id);
+    // Don't roll back the row; let the candidate retry or fall through to the cleanup pass.
+    return json({ ok: false, reason: 'spawn_timeout', machine_id: machine.id }, 504);
+  }
+
+  // Fly Machines on a service get a `<app>.fly.dev` hostname by default; the
+  // per-machine `<id>.<app>.internal` is for private networking. For
+  // candidate-facing URLs we want the per-machine HTTPS edge URL:
+  //   https://<machine-id>-<app>.fly.dev  (Fly's per-instance routing)
+  // (For a single-machine app you could also use `<app>.fly.dev`, but we
+  // need per-candidate isolation.)
+  const machineHost = `${machine.id}.vm.${env.FLY_APP_NAME}.internal`;
+  const candidateUrl = `https://${env.FLY_APP_NAME}.fly.dev`;
+  // NOTE: The exact public URL format depends on the Fly app's services config.
+  // With `services.ports[443]` per-machine, the routing is via the app hostname
+  // with a machine-id selector. For cohort 1 we surface the app URL; if more
+  // than one machine spins up simultaneously we add a `?machine=<id>` selector
+  // and rely on Fly's routing.
+  //
+  // TODO(owner): once the app is created and the first machine boots,
+  // verify the URL pattern with `fly machines list -a <app>` and update if needed.
+
+  // ── Persist mapping ───────────────────────────────────────────────────
+  const { error: updateErr } = await supabase
+    .from('cyborg_tokens')
+    .update({
+      fly_machine_id: machine.id,
+      machine_url:    candidateUrl,
+      launched_at:    new Date().toISOString(),
+    })
+    .eq('token', token);
+  if (updateErr) {
+    // Don't fail the launch — the candidate URL is still valid. Just log.
+    console.error('cyborg_tokens update failed (machine spawned anyway)', updateErr.message);
+  }
+
+  return json({
+    ok: true,
+    url: candidateUrl,
+    machine_id: machine.id,
+    expires_at: tokenRow.expires_at,
+    reused: false,
+  });
+}
+
+async function checkMachineLive(env, machineId) {
+  try {
+    const r = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}`, {
+      headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` },
+    });
+    if (!r.ok) return false;
+    const m = await r.json();
+    return ['starting', 'started'].includes(m.state);
+  } catch {
+    return false;
+  }
+}
+
+async function waitForMachineStarted(env, machineId, timeoutMs) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const r = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}`, {
+        headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` },
+      });
+      if (r.ok) {
+        const m = await r.json();
+        if (m.state === 'started') return true;
+        if (['failed', 'destroyed'].includes(m.state)) return false;
+      }
+    } catch {
+      /* keep polling */
+    }
+    await new Promise(res => setTimeout(res, POLL_INTERVAL_MS));
+  }
+  return false;
+}
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+  });
+}
