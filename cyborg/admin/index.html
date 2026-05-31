@@ -125,6 +125,14 @@
       <div class="rm-meta" id="rm-meta"></div>
       <button class="rm-close" onclick="closeReportModal()" aria-label="Close">×</button>
     </div>
+    <!--
+      Iframe retained for the existing modal UX but is now never populated
+      directly with the report (security: see switchTier below). Each tier
+      click opens the report in a new tab, bypassing the iframe/sandbox class
+      of vulnerabilities entirely. Sandbox stays at the strictest setting
+      (allow-same-origin only, no allow-scripts) for any residual cases where
+      a developer might wire content into it later.
+    -->
     <iframe id="rm-iframe" sandbox="allow-same-origin"></iframe>
   </div>
 </div>
@@ -337,8 +345,19 @@ function switchTier(tier) {
   document.querySelectorAll('#rm-tabs .rm-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.tier === tier);
   });
+  // 2026-05-31: Reports are now opened in a new tab rather than loaded into
+  // the iframe. Rationale: iframe-embedded same-origin content forces a
+  // tradeoff between (a) allow-scripts + allow-same-origin (sandbox-escape
+  // risk per MDN), (b) Cloudflare Access cookie SameSite=None (widens
+  // cross-origin cookie surface), or (c) bypass the iframe. We take (c) —
+  // the report response still carries the tight CSP (default-src 'none'),
+  // CF Access still gates the endpoint, and we eliminate an entire class of
+  // iframe-related vulnerabilities at the cost of one extra tab.
   const url = `/cyborg/admin/report?submission=${encodeURIComponent(currentModal.submissionId)}&tier=${encodeURIComponent(tier)}`;
-  document.getElementById('rm-iframe').src = url;
+  // noopener + noreferrer hardens against tabnabbing + referrer leakage
+  // (the new tab can't navigate this window, and the URL with submission_id
+  // is not sent in the Referer header).
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 async function loadReports() {
