@@ -3,9 +3,9 @@
 // Body: { member_id: uuid, organisation_id: uuid }
 //
 // Behaviour:
-//   1. Verify the caller is owner/admin of the org
+//   1. Verify the caller is an admin of the org (teammates cannot remove)
 //   2. Verify the target member belongs to that org
-//   3. Disallow removing the org's last owner (or yourself if you're the only owner)
+//   3. Disallow removing the org's last admin (or yourself if you're the only admin)
 //   4. Delete the organisation_members row
 //   5. Write to cyborg_admin_audit
 
@@ -37,7 +37,7 @@ export async function onRequestPost({ request, env }) {
     .maybeSingle();
 
   if (!callerMembership) return json({ ok: false, reason: 'not_a_member_of_org' }, 403);
-  if (!['owner', 'admin'].includes(callerMembership.role)) return json({ ok: false, reason: 'insufficient_role' }, 403);
+  if (callerMembership.role !== 'admin') return json({ ok: false, reason: 'insufficient_role' }, 403);
 
   // Target must belong to the org.
   const { data: target } = await admin
@@ -49,15 +49,15 @@ export async function onRequestPost({ request, env }) {
 
   if (!target) return json({ ok: false, reason: 'member_not_found' }, 404);
 
-  // Can't remove the last owner (or yourself if you're an owner).
-  if (target.role === 'owner') {
-    const { count: ownerCount } = await admin
+  // Can't remove the last admin (org would be ownerless).
+  if (target.role === 'admin') {
+    const { count: adminCount } = await admin
       .from('organisation_members')
       .select('id', { count: 'exact', head: true })
       .eq('organisation_id', orgId)
-      .eq('role', 'owner');
-    if ((ownerCount || 0) <= 1) {
-      return json({ ok: false, reason: 'cannot_remove_last_owner' }, 400);
+      .eq('role', 'admin');
+    if ((adminCount || 0) <= 1) {
+      return json({ ok: false, reason: 'cannot_remove_last_admin' }, 400);
     }
   }
 

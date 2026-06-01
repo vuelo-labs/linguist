@@ -79,58 +79,51 @@ export async function onRequestPost({ request, env }) {
 
   // ── Owner assignment ─────────────────────────────────────────────────
   // Look up the owner in auth.users. If they already have an account,
-  // add them directly. Otherwise drop an invitation row.
-  let ownerStatus = 'unknown';
-  let inviteToken = null;
+  // attach them. Otherwise create the auth row directly (email-confirmed,
+  // no password) so they can sign in via magic link or Google OAuth
+  // immediately — no separate invitation/signup step required.
+  let ownerStatus  = 'unknown';
+  let ownerUserId  = null;
 
-  const { data: ownerUser } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
-  const match = (ownerUser?.users || []).find(u => (u.email || '').toLowerCase() === ownerEmail);
+  const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
+  const match = (list?.users || []).find(u => (u.email || '').toLowerCase() === ownerEmail);
 
   if (match) {
-    const { error: memberErr } = await supabase.from('organisation_members').insert({
-      organisation_id: org.id,
-      user_id:         match.id,
-      role:            'owner',
-      invited_at:      new Date().toISOString(),
-      joined_at:       new Date().toISOString(),
-    });
-    if (memberErr) {
-      // Try to roll back the org so we don't leave it orphaned.
-      await supabase.from('organisations').delete().eq('id', org.id);
-      console.error('owner member insert failed:', memberErr.message);
-      await writeAuditLog(supabase, {
-        actorEmail: access.email, action: 'create_org',
-        success: false, detail: { reason: 'member_insert_failed', name, slug }, ...meta,
-      });
-      return jsonResponse({ error: 'Failed to assign owner', detail: memberErr.message }, 500);
-    }
+    ownerUserId = match.id;
     ownerStatus = 'added_existing_user';
   } else {
-    // No account yet → store an invitation. The user will sign up with
-    // this email; the bootstrap function picks up the invitation and
-    // makes them owner on first sign-in.
-    const tokenBytes = crypto.getRandomValues(new Uint8Array(16));
-    inviteToken = Array.from(tokenBytes, b => b.toString(16).padStart(2, '0')).join('');
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
-    const { error: invErr } = await supabase.from('organisation_invitations').insert({
-      organisation_id: org.id,
-      email:           ownerEmail,
-      role:            'owner',
-      token:           inviteToken,
-      expires_at:      expiresAt,
-      invited_by:      null,
+    const { data: newUser, error: createUserErr } = await supabase.auth.admin.createUser({
+      email:         ownerEmail,
+      email_confirm: true,   // skip Supabase's verification step — they auth via magic link / Google
     });
-    if (invErr) {
+    if (createUserErr || !newUser?.user) {
       await supabase.from('organisations').delete().eq('id', org.id);
-      console.error('invitation insert failed:', invErr.message);
+      console.error('owner user create failed:', createUserErr?.message);
       await writeAuditLog(supabase, {
         actorEmail: access.email, action: 'create_org',
-        success: false, detail: { reason: 'invitation_insert_failed', name, slug }, ...meta,
+        success: false, detail: { reason: 'user_create_failed', name, slug, error: createUserErr?.message }, ...meta,
       });
-      return jsonResponse({ error: 'Failed to invite owner', detail: invErr.message }, 500);
+      return jsonResponse({ error: 'Failed to create owner account', detail: createUserErr?.message }, 500);
     }
-    ownerStatus = 'invitation_created';
+    ownerUserId = newUser.user.id;
+    ownerStatus = 'created_new_user';
+  }
+
+  const { error: memberErr } = await supabase.from('organisation_members').insert({
+    organisation_id: org.id,
+    user_id:         ownerUserId,
+    role:            'admin',
+    invited_at:      new Date().toISOString(),
+    joined_at:       new Date().toISOString(),
+  });
+  if (memberErr) {
+    await supabase.from('organisations').delete().eq('id', org.id);
+    console.error('owner member insert failed:', memberErr.message);
+    await writeAuditLog(supabase, {
+      actorEmail: access.email, action: 'create_org',
+      success: false, detail: { reason: 'member_insert_failed', name, slug }, ...meta,
+    });
+    return jsonResponse({ error: 'Failed to assign owner', detail: memberErr.message }, 500);
   }
 
   await writeAuditLog(supabase, {
@@ -145,6 +138,6 @@ export async function onRequestPost({ request, env }) {
     ok: true,
     organisation: org,
     ownerStatus,
-    inviteToken,  // surface so the admin can share the signup link manually if email isn't wired
+    signinUrl: '/cyborg/signin/',
   });
 }

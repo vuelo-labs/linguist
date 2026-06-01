@@ -1,14 +1,14 @@
-// POST /cyborg/auth/bootstrap — post-signup org creation / invite acceptance.
+// POST /cyborg/auth/bootstrap — post-signup invite acceptance.
 //
 // Called from /cyborg/auth/callback/ after the magic-link round trip. Uses
 // the user's freshly-issued access token to:
 //   1. Identify the user (auth.users row)
 //   2. If they have a pending invitation matching their email → accept it
 //      (insert organisation_member, mark invitation accepted)
-//   3. Else if they passed an orgName → create that org + add them as owner
-//   4. Else if they already belong to at least one org → no-op
-//   5. Else → create a default-named org and make them the owner (so the
-//      app shell always has something to land on)
+//   3. Else if they already belong to at least one org → no-op
+//   4. Else → return ok with mode='no_action'. The dashboard surfaces the
+//      "contact Vuelo Labs" message in that case. Org creation is platform-
+//      admin gated (paywall) — bootstrap never creates an org.
 //
 // All operations use the user's JWT for the supabase client so RLS enforces
 // they can only act on rows they have access to. Service role NOT used here
@@ -24,7 +24,6 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { body = {}; }
   const name        = (body.name || '').toString().trim().slice(0, 200);
-  const orgName     = body.orgName ? body.orgName.toString().trim().slice(0, 200) : null;
   const inviteToken = body.inviteToken ? body.inviteToken.toString().trim() : null;
 
   // Important: we use the user's JWT so RLS applies. The publishable key
@@ -100,61 +99,25 @@ export async function onRequestPost({ request, env }) {
     .eq('user_id', user.id);
 
   if ((memberCount || 0) > 0) {
+    // Persist display name on auth.users metadata if supplied.
+    if (name) {
+      try {
+        await admin.auth.admin.updateUserById(user.id, { user_metadata: { ...(user.user_metadata || {}), full_name: name } });
+      } catch (_) { /* non-fatal */ }
+    }
     return json({ ok: true, mode: 'already_member' });
   }
 
-  // ── Branch 2 / 3: create org + owner-membership ────────────────────────
-  // Either an explicit orgName from signup, or a default based on email.
-  const fallbackOrgName = (user.email || 'My organisation').split('@')[0] + "'s organisation";
-  const finalOrgName    = orgName || fallbackOrgName;
-  const slugBase        = finalOrgName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'org';
-
-  // Slug must be unique — append a short random suffix if collision.
-  let slug = slugBase;
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const { data: existing } = await admin
-      .from('organisations')
-      .select('id')
-      .eq('slug', slug)
-      .maybeSingle();
-    if (!existing) break;
-    slug = `${slugBase}-${Math.random().toString(36).slice(2, 6)}`;
-  }
-
-  const { data: org, error: orgErr } = await admin
-    .from('organisations')
-    .insert({ name: finalOrgName, slug, created_by: user.id })
-    .select('id')
-    .single();
-
-  if (orgErr || !org) {
-    console.error('bootstrap: org insert failed', orgErr?.message);
-    return json({ ok: false, reason: 'org_insert_failed', detail: orgErr?.message }, 500);
-  }
-
-  const { error: ownerErr } = await admin.from('organisation_members').insert({
-    organisation_id: org.id,
-    user_id:         user.id,
-    role:            'owner',
-    invited_at:      new Date().toISOString(),
-    joined_at:       new Date().toISOString(),
-  });
-
-  if (ownerErr) {
-    // Clean up the org so we don't leave it orphaned.
-    await admin.from('organisations').delete().eq('id', org.id);
-    console.error('bootstrap: owner-member insert failed', ownerErr.message);
-    return json({ ok: false, reason: 'member_insert_failed' }, 500);
-  }
-
-  // Save the display name on the auth user metadata for future UI use.
+  // ── No-action branch ────────────────────────────────────────────────
+  // No invitation, not yet a member. Org creation is platform-admin
+  // gated — bootstrap never creates an org. The dashboard will show the
+  // "contact Vuelo Labs" message on next render.
   if (name) {
     try {
       await admin.auth.admin.updateUserById(user.id, { user_metadata: { ...(user.user_metadata || {}), full_name: name } });
     } catch (_) { /* non-fatal */ }
   }
-
-  return json({ ok: true, mode: 'org_created', organisation_id: org.id, organisation_slug: slug });
+  return json({ ok: true, mode: 'no_action' });
 }
 
 function json(data, status = 200) {

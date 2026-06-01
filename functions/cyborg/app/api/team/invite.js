@@ -1,9 +1,9 @@
 // POST /cyborg/app/api/team/invite — invite a teammate to the org.
 //
-// Body: { organisation_id: uuid, email: string, role: 'admin' | 'member' }
+// Body: { organisation_id: uuid, email: string, role: 'admin' | 'teammate' }
 //
 // Behaviour:
-//   1. Verify the caller is owner/admin of the org
+//   1. Verify the caller is an admin of the org (teammates cannot invite)
 //   2. Verify the invitee isn't already a member
 //   3. Generate an invitation token; insert organisation_invitations row
 //   4. Fire Tines webhook with event_type='team_invite' so the invitee
@@ -27,10 +27,10 @@ export async function onRequestPost({ request, env }) {
 
   const orgId = (body.organisation_id || '').toString().trim();
   const email = (body.email || '').toString().trim().toLowerCase();
-  const role  = (body.role  || 'member').toString().trim();
+  const role  = (body.role  || 'teammate').toString().trim();
 
   if (!orgId || !email) return json({ ok: false, reason: 'missing_fields' }, 400);
-  if (!['admin', 'member'].includes(role)) return json({ ok: false, reason: 'bad_role' }, 400);
+  if (!['admin', 'teammate'].includes(role)) return json({ ok: false, reason: 'bad_role' }, 400);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ ok: false, reason: 'bad_email' }, 400);
 
   const admin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
@@ -51,7 +51,7 @@ export async function onRequestPost({ request, env }) {
     });
     return json({ ok: false, reason: 'not_a_member_of_org' }, 403);
   }
-  if (!['owner', 'admin'].includes(membership.role)) {
+  if (membership.role !== 'admin') {
     return json({ ok: false, reason: 'insufficient_role' }, 403);
   }
 

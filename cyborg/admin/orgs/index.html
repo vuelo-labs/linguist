@@ -231,10 +231,8 @@ async function createOrg() {
     }
 
     const msg = d.ownerStatus === 'added_existing_user'
-      ? `Created ${d.organisation.name} and added ${ownerEmail} as owner.`
-      : `Created ${d.organisation.name}. Invitation sent to ${ownerEmail}` + (d.inviteToken
-          ? ` (signup link: /cyborg/signup/?invite=${d.inviteToken}).`
-          : '.');
+      ? `Created ${d.organisation.name} and added ${ownerEmail} as owner. They can sign in at /cyborg/signin/.`
+      : `Created ${d.organisation.name}. Owner account provisioned for ${ownerEmail} — they can sign in at /cyborg/signin/ (magic link or Google).`;
     status.className = 'status ok';
     status.textContent = msg;
 

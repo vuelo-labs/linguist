@@ -19,9 +19,9 @@
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
     .invite-link { font-family: var(--c-mono); font-size: 0.82rem; background: #1f1c19; color: #f5f0e6; padding: 10px 12px; border-radius: 7px; overflow-x: auto; white-space: pre; margin: 12px 0; }
     .role-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
-    .role-owner  { background: #ecf3eb; color: #2d5a26; }
-    .role-admin  { background: #fdf6e3; color: #6b5022; }
-    .role-member { background: var(--w-accent-light); color: var(--w-muted); }
+    .role-admin     { background: #ecf3eb; color: #2d5a26; }
+    .role-teammate  { background: var(--w-accent-light); color: var(--w-muted); }
+    .role-candidate { background: #fdf6e3; color: #6b5022; }
   </style>
 </head>
 <body>
@@ -91,8 +91,8 @@
       <div class="field">
         <label for="i-role">Role</label>
         <select id="i-role">
-          <option value="member">Member (can issue + review candidates)</option>
-          <option value="admin">Admin (can also manage team)</option>
+          <option value="teammate">Teammate (issue + review candidates, manage campaigns)</option>
+          <option value="admin">Admin (also manage team)</option>
         </select>
       </div>
       <div class="status" id="invite-status"></div>
@@ -142,8 +142,9 @@
   const myRole = memberships[0].role;
   document.getElementById('hdr-org-name').textContent = org.name;
 
-  // Only owner/admin can invite or remove.
-  const canManage = (myRole === 'owner' || myRole === 'admin');
+  // Only admins can invite or remove teammates. Teammates can see the
+  // page but can't manage roster.
+  const canManage = (myRole === 'admin');
   if (!canManage) {
     document.getElementById('invite-btn').style.display = 'none';
   }
@@ -182,7 +183,10 @@
           ${members.map(m => {
             const p = profilesByUserId[m.user_id] || {};
             const isMe = m.user_id === user.id;
-            const canRemove = canManage && m.role !== 'owner' && !isMe;
+            // Admins can remove anyone except themselves. The API enforces
+            // the "can't remove the last admin" guard, so we don't need to
+            // count client-side.
+            const canRemove = canManage && !isMe;
             return `
               <tr>
                 <td>${escapeHtml(p.full_name || p.email?.split('@')[0] || '—')} ${isMe ? '<span style="color:var(--w-faint); font-size:0.78rem; margin-left:6px;">(you)</span>' : ''}</td>
@@ -237,7 +241,7 @@
     document.getElementById('invite-form').style.display = 'block';
     document.getElementById('invite-result').style.display = 'none';
     document.getElementById('i-email').value = '';
-    document.getElementById('i-role').value = 'member';
+    document.getElementById('i-role').value = 'teammate';
     document.getElementById('invite-status').className = 'status'; document.getElementById('invite-status').textContent = '';
     modal.classList.add('show');
     setTimeout(() => document.getElementById('i-email').focus(), 50);
