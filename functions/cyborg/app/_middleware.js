@@ -1,21 +1,17 @@
 // Auth middleware for /cyborg/app/* paths.
 //
-// Verifies the Supabase Auth session (read from the sb-* cookie family) and
-// either passes through to the underlying static page / function, or
-// redirects to /cyborg/signin/?next=<requested-path>.
+// Only guards API endpoints (/cyborg/app/api/*). HTML pages are passed
+// through — each page calls supabase.auth.getSession() on load and
+// redirects to /cyborg/signin/ client-side if there's no session. We
+// can't reliably do server-side auth for HTML page loads because
+// Supabase JS stores the session in localStorage (not cookies), so a
+// full-page navigation carries no auth state to the server.
 //
-// Implementation notes:
-//   • Supabase JS persists the session as a JSON cookie named
-//     `sb-<projectref>-auth-token` (split into `.0` / `.1` for large tokens).
-//     We extract + assemble it, then call /auth/v1/user with the access token
-//     to verify it's still valid. One network round-trip per request.
-//   • Session lookups go to the Supabase Auth REST API directly — no
-//     supabase-js client construction needed in the middleware. Lighter
-//     and faster.
-//   • If the cookie is missing or the token's expired, redirect to signin.
-
-const PROJECT_REF = 'odnzrykfmfgdfybnmcfd';
-const AUTH_COOKIE_BASE = `sb-${PROJECT_REF}-auth-token`;
+// API endpoints work fine server-side because they're called via fetch
+// with an explicit `Authorization: Bearer <jwt>` header from the app
+// pages. The middleware verifies that token with Supabase Auth and
+// passes the user id/email downstream via X-Cyborg-User-* request
+// headers.
 
 export async function onRequest({ request, next, env }) {
   const url = new URL(request.url);
@@ -23,24 +19,21 @@ export async function onRequest({ request, next, env }) {
   // Allow /cyborg/auth/callback/ + /cyborg/auth/bootstrap to bypass.
   if (url.pathname.startsWith('/cyborg/auth/')) return next();
 
-  // API paths return JSON 401; HTML paths get a 302 redirect to signin.
+  // HTML pages do client-side auth checks; pass through.
   const isApi = url.pathname.startsWith('/cyborg/app/api/');
-  const unauth = (msg) => isApi
-    ? new Response(JSON.stringify({ ok: false, reason: msg }), { status: 401, headers: { 'Content-Type': 'application/json' } })
-    : redirectToSignin(url);
+  if (!isApi) return next();
 
-  // Two auth pathways: Authorization: Bearer <jwt> header (typical for
-  // fetch() from the app) OR sb-* cookies (typical for HTML page nav).
+  const unauth = (msg) =>
+    new Response(JSON.stringify({ ok: false, reason: msg }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+  // API paths require Authorization: Bearer <jwt> header.
   const headerAuth = request.headers.get('authorization') || '';
   let accessToken = '';
   if (headerAuth.startsWith('Bearer ')) {
     accessToken = headerAuth.slice(7);
-  } else {
-    const cookieHeader = request.headers.get('cookie') || '';
-    const sessionJson  = cookieHeader ? extractSessionCookie(cookieHeader) : null;
-    if (sessionJson) {
-      try { accessToken = JSON.parse(sessionJson).access_token || ''; } catch { /* fall through */ }
-    }
   }
 
   if (!accessToken) return unauth('no_session');
@@ -63,44 +56,8 @@ export async function onRequest({ request, next, env }) {
   if (!user?.id) return unauth('no_user');
 
   // Pass the verified user info to downstream functions via request headers.
-  // Static pages don't see these (they re-fetch in the browser), but our
-  // org/candidate API endpoints can trust them without re-verifying.
   const augmented = new Request(request);
   augmented.headers.set('X-Cyborg-User-Id', user.id);
   augmented.headers.set('X-Cyborg-User-Email', user.email || '');
   return next(augmented);
-}
-
-function extractSessionCookie(cookieHeader) {
-  // Supabase JS may split the cookie across .0 / .1 for large tokens.
-  // Concatenate in order if both exist; otherwise return the single value.
-  const cookies = parseCookies(cookieHeader);
-  if (cookies[AUTH_COOKIE_BASE]) {
-    return decodeURIComponent(cookies[AUTH_COOKIE_BASE]);
-  }
-  const parts = [];
-  let i = 0;
-  while (cookies[`${AUTH_COOKIE_BASE}.${i}`] !== undefined) {
-    parts.push(cookies[`${AUTH_COOKIE_BASE}.${i}`]);
-    i++;
-  }
-  if (parts.length) return decodeURIComponent(parts.join(''));
-  return null;
-}
-
-function parseCookies(header) {
-  const out = {};
-  for (const part of header.split(';')) {
-    const eq = part.indexOf('=');
-    if (eq < 0) continue;
-    const key = part.slice(0, eq).trim();
-    const val = part.slice(eq + 1).trim();
-    if (key) out[key] = val;
-  }
-  return out;
-}
-
-function redirectToSignin(url) {
-  const next = encodeURIComponent(url.pathname + url.search);
-  return Response.redirect(`${url.origin}/cyborg/signin/?next=${next}`, 302);
 }

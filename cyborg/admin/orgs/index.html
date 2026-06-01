@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organisations — Cyborg admin</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    :root { --c-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace; }
+    body { background: var(--w-bg); color: var(--w-text); font-family: var(--sans, 'Inter', sans-serif); margin: 0; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+    .crumbs { font-size: 0.82rem; color: var(--w-muted); margin-bottom: 14px; }
+    .crumbs a { color: var(--w-muted); text-decoration: none; border-bottom: 1px dotted var(--w-border); }
+    h1 { font-family: var(--serif, 'Newsreader', serif); font-size: 1.8rem; margin: 0 0 6px; font-weight: 500; }
+    .lede { color: var(--w-muted); margin-bottom: 22px; font-size: 0.95rem; }
+    .card { background: var(--w-bg-card); border: 1px solid var(--w-border); border-radius: 12px; padding: 22px 24px; margin: 16px 0; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .toolbar h2 { font-family: var(--serif, 'Newsreader', serif); font-size: 1.15rem; margin: 0; font-weight: 500; }
+    .btn { background: var(--w-accent); color: var(--w-bg); border: none; border-radius: 8px; padding: 9px 18px; font-size: 0.9rem; font-weight: 500; font-family: inherit; cursor: pointer; }
+    .btn:hover:not(:disabled) { opacity: 0.9; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .btn.small { padding: 5px 11px; font-size: 0.82rem; }
+    .btn.ghost { background: transparent; color: var(--w-muted); border: 1px solid var(--w-border); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--w-border); vertical-align: top; }
+    th { font-weight: 600; color: var(--w-faint); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    .mono { font-family: var(--c-mono); font-size: 0.82rem; color: var(--w-muted); }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 11px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+    .pill.uncapped { background: #efe6f4; color: #5c2378; }
+    .pill.capped   { background: #ecf3eb; color: #2d5a26; }
+    .limit-bits { font-size: 0.82rem; color: var(--w-muted); }
+    .status { margin-top: 12px; padding: 9px 12px; border-radius: 7px; font-size: 0.88rem; display: none; }
+    .status.ok { background: #ecf3eb; border: 1px solid #b8d2b3; color: #2d5a26; display: block; }
+    .status.err { background: #fbe9e7; border: 1px solid #e8b8af; color: #6e2618; display: block; }
+
+    /* modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--w-bg-card); border-radius: 14px; padding: 28px 30px; max-width: 520px; width: 100%; }
+    .modal h3 { font-family: var(--serif, 'Newsreader', serif); font-size: 1.3rem; margin: 0 0 14px; font-weight: 500; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--w-faint); margin-bottom: 5px; letter-spacing: 0.02em; text-transform: uppercase; }
+    input[type=text], input[type=email], input[type=number] {
+      width: 100%; box-sizing: border-box;
+      background: var(--w-bg-input); border: 1px solid var(--w-border);
+      border-radius: 8px; padding: 9px 12px; font-size: 0.92rem;
+      color: var(--w-text); font-family: inherit;
+    }
+    input:focus { outline: none; border-color: var(--w-border-focus); }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .row3 .field { margin-bottom: 0; }
+    .limits-toggle { font-size: 0.86rem; margin: 14px 0 10px; display: flex; gap: 8px; align-items: center; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="crumbs">
+    <a href="/cyborg/admin/">← Admin</a>
+  </div>
+
+  <h1>Organisations</h1>
+  <p class="lede">Platform admin — create customer organisations and set their limits. Vuelo Labs is uncapped.</p>
+
+  <div class="card">
+    <div class="toolbar">
+      <h2>All organisations</h2>
+      <div>
+        <button class="btn ghost small" onclick="loadOrgs()">Refresh</button>
+        <button class="btn small" onclick="openCreateModal()">+ New organisation</button>
+      </div>
+    </div>
+    <div id="orgs-status" class="status"></div>
+    <div id="orgs-body">Loading…</div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="create-modal" onclick="closeCreateModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Create organisation</h3>
+
+    <div class="field">
+      <label for="c-name">Organisation name</label>
+      <input type="text" id="c-name" placeholder="Acme Inc" />
+    </div>
+
+    <div class="field">
+      <label for="c-owner">Initial owner email</label>
+      <input type="email" id="c-owner" placeholder="founder@acme.com" />
+    </div>
+
+    <div class="limits-toggle">
+      <input type="checkbox" id="c-uncapped" onchange="toggleLimits()" />
+      <label for="c-uncapped" style="margin: 0; text-transform: none; letter-spacing: 0; font-size: 0.88rem; font-weight: 400; color: var(--w-text);">Uncapped (internal / partner only)</label>
+    </div>
+
+    <div class="row3" id="limits-fields">
+      <div class="field">
+        <label for="c-members">Members</label>
+        <input type="number" id="c-members" value="5" min="0" />
+      </div>
+      <div class="field">
+        <label for="c-campaigns">Campaigns</label>
+        <input type="number" id="c-campaigns" value="100" min="0" />
+      </div>
+      <div class="field">
+        <label for="c-candidates">Candidates</label>
+        <input type="number" id="c-candidates" value="100" min="0" />
+      </div>
+    </div>
+
+    <div class="status" id="create-status"></div>
+
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn" id="create-btn" onclick="createOrg()">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const escapeHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+async function loadOrgs() {
+  const body = $('orgs-body');
+  const status = $('orgs-status');
+  status.className = 'status'; status.textContent = '';
+  body.innerHTML = 'Loading…';
+
+  try {
+    const r = await fetch('/cyborg/admin/orgs/list');
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.error || `HTTP ${r.status}`);
+    }
+    const d = await r.json();
+    renderOrgs(d.orgs || []);
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = 'Failed to load: ' + (e.message || e);
+    body.innerHTML = '';
+  }
+}
+
+function renderOrgs(orgs) {
+  if (!orgs.length) { $('orgs-body').innerHTML = '<div style="padding:18px 0; color:var(--w-muted);">No organisations yet.</div>'; return; }
+  const rows = orgs.map(o => {
+    const isUncapped = !o.limits;
+    const counts = o.counts || {};
+    const pill = isUncapped
+      ? '<span class="pill uncapped">Uncapped</span>'
+      : '<span class="pill capped">Capped</span>';
+    const limitBits = isUncapped
+      ? '<span class="limit-bits">no limits</span>'
+      : `<span class="limit-bits">${counts.members}/${o.limits.members} members · ${counts.campaigns}/${o.limits.campaigns} campaigns · ${counts.candidates}/${o.limits.candidates} candidates</span>`;
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:500;">${escapeHtml(o.name)}</div>
+          <div class="mono">${escapeHtml(o.slug)}</div>
+        </td>
+        <td>${pill}</td>
+        <td>${limitBits}</td>
+        <td class="mono" style="font-size:0.78rem;">${escapeHtml(new Date(o.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))}</td>
+      </tr>`;
+  }).join('');
+  $('orgs-body').innerHTML = `
+    <table>
+      <thead><tr><th>Organisation</th><th>Status</th><th>Usage / limits</th><th>Created</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function openCreateModal() {
+  $('c-name').value = ''; $('c-owner').value = '';
+  $('c-uncapped').checked = false;
+  $('c-members').value = 5; $('c-campaigns').value = 100; $('c-candidates').value = 100;
+  toggleLimits();
+  $('create-status').className = 'status'; $('create-status').textContent = '';
+  $('create-modal').classList.add('show');
+  $('c-name').focus();
+}
+
+function closeCreateModal(e) {
+  if (e && e.target.id !== 'create-modal') return;
+  $('create-modal').classList.remove('show');
+}
+
+function toggleLimits() {
+  const off = $('c-uncapped').checked;
+  ['c-members', 'c-campaigns', 'c-candidates'].forEach(id => { $(id).disabled = off; });
+  $('limits-fields').style.opacity = off ? '0.4' : '1';
+}
+
+async function createOrg() {
+  const name       = $('c-name').value.trim();
+  const ownerEmail = $('c-owner').value.trim();
+  const uncapped   = $('c-uncapped').checked;
+  const status     = $('create-status');
+
+  if (!name)       { status.className = 'status err'; status.textContent = 'Name is required.'; return; }
+  if (!ownerEmail) { status.className = 'status err'; status.textContent = 'Owner email is required.'; return; }
+
+  const limits = uncapped ? null : {
+    members:    parseInt($('c-members').value, 10) || 0,
+    campaigns:  parseInt($('c-campaigns').value, 10) || 0,
+    candidates: parseInt($('c-candidates').value, 10) || 0,
+  };
+
+  $('create-btn').disabled = true;
+  status.className = 'status'; status.textContent = 'Creating…';
+
+  try {
+    const r = await fetch('/cyborg/admin/orgs/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, ownerEmail, limits }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.ok) {
+      status.className = 'status err';
+      status.textContent = 'Failed: ' + (d.error || `HTTP ${r.status}`) + (d.detail ? ' — ' + d.detail : '');
+      return;
+    }
+
+    const msg = d.ownerStatus === 'added_existing_user'
+      ? `Created ${d.organisation.name} and added ${ownerEmail} as owner.`
+      : `Created ${d.organisation.name}. Invitation sent to ${ownerEmail}` + (d.inviteToken
+          ? ` (signup link: /cyborg/signup/?invite=${d.inviteToken}).`
+          : '.');
+    status.className = 'status ok';
+    status.textContent = msg;
+
+    setTimeout(() => { closeCreateModal(); loadOrgs(); }, 1800);
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = 'Failed: ' + (e.message || e);
+  } finally {
+    $('create-btn').disabled = false;
+  }
+}
+
+loadOrgs();
+</script>
+
+</body>
+</html>

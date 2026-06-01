@@ -126,12 +126,15 @@
     .limit(1);
 
   if (!memberships?.length) {
-    // No org yet — they need to finish bootstrap. Send to signup with
-    // the orgName flow (or surface a recovery UI).
+    // No org yet. Org creation is platform-admin gated (paywall) — the
+    // user can't self-serve an org. They either accepted an invitation
+    // (which would have placed them in an org via bootstrap), or they
+    // signed up speculatively and need a Vuelo Labs admin to set them up.
     document.getElementById('welcome-line').innerHTML = `
-      You don't belong to any organisation yet.
-      <a href="/cyborg/signup/" style="color: var(--w-accent);">Finish setting up</a>.`;
-    return;
+      Your organisation hasn't been set up yet. Contact
+      <a href="mailto:hello@vuelolabs.com" style="color: var(--w-accent);">hello@vuelolabs.com</a>
+      to get access.`;
+    throw new Error('no_organisation');
   }
 
   const org = memberships[0].organisations;
