@@ -211,6 +211,11 @@ export function requestMeta(request) {
 // Race-window note: two concurrent calls can both pass the count check
 // before either insert lands. Acceptable at cohort-1 scale — for higher
 // throughput, swap for an atomic UPSERT against a per-bucket counter row.
+//
+// The insert is AWAITED (not fire-and-forget): Cloudflare Pages Functions
+// cancel any pending promises once the handler returns, so a fire-and-forget
+// insert never reaches the DB. The cost is one extra round-trip per call
+// (~50ms typical) — acceptable for cohort-1 traffic and correctness.
 export async function checkEndpointRateLimit(supabase, bucketKey, windowSec, maxCount) {
   if (!bucketKey) return { ok: true };
   const sinceIso = new Date(Date.now() - windowSec * 1000).toISOString();
@@ -226,12 +231,11 @@ export async function checkEndpointRateLimit(supabase, bucketKey, windowSec, max
   if ((count || 0) >= maxCount) {
     return { ok: false, count, limit: maxCount, retryAfter: windowSec };
   }
-  // Record this call. Fire-and-forget; no await on the insert path.
-  supabase
+  // Record this call — must be awaited or the CF worker discards the
+  // pending promise on response.
+  const { error: insertErr } = await supabase
     .from('cyborg_rate_limit_events')
-    .insert({ bucket_key: bucketKey })
-    .then(({ error: insertErr }) => {
-      if (insertErr) console.error('rate-limit insert error:', insertErr.message);
-    });
+    .insert({ bucket_key: bucketKey });
+  if (insertErr) console.error('rate-limit insert error:', insertErr.message);
   return { ok: true };
 }
