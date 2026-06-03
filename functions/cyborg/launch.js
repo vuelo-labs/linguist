@@ -17,8 +17,16 @@
 //
 // If any required env is missing → returns 503 not_configured. Never spawns
 // silently with default values.
+//
+// V5 hardened (2026-06-03):
+//   • Per-token rate-limit (3/min). Re-clicks within the limit hit the
+//     existing function-level idempotency (returns the running URL); past
+//     the limit returns 429 + Retry-After. Rate-limited by token rather
+//     than IP because CGNAT'd candidates can legitimately share an IP.
+//   • 429s logged to cyborg_admin_audit (action: rate_limit_hit).
 
 import { createClient } from '@supabase/supabase-js';
+import { requestMeta, writeAuditLog, checkEndpointRateLimit } from './_lib.js';
 
 const FLY_API_BASE = 'https://api.machines.dev/v1';
 const DEFAULT_REGION = 'lhr';
@@ -26,6 +34,8 @@ const MACHINE_CPUS = 2;
 const MACHINE_MEMORY_MB = 2048;
 const SPAWN_TIMEOUT_MS = 60000;     // 60s — image pull + first boot
 const POLL_INTERVAL_MS = 1500;
+const RATE_LIMIT_WINDOW_SEC  = 60;
+const RATE_LIMIT_MAX_PER_TOKEN = 3;
 
 export async function onRequestPost({ request, env }) {
   // ── Env preflight ──────────────────────────────────────────────────────
@@ -45,6 +55,33 @@ export async function onRequestPost({ request, env }) {
 
   // ── Token validation (mirrors validate.js) ────────────────────────────
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+  const meta = requestMeta(request);
+
+  // ── Rate-limit: 3 req/min per token ───────────────────────────────────
+  // Re-clicks within the limit hit the idempotency check below (which
+  // returns the existing machine URL); past the limit returns 429. Scoped
+  // by token rather than IP so CGNAT'd candidates don't collide.
+  const rl = await checkEndpointRateLimit(
+    supabase,
+    `launch:token:${token}`,
+    RATE_LIMIT_WINDOW_SEC,
+    RATE_LIMIT_MAX_PER_TOKEN,
+  );
+  if (!rl.ok) {
+    await writeAuditLog(supabase, {
+      actorEmail: '(public)',
+      action:     'rate_limit_hit',
+      target:     '/cyborg/launch',
+      success:    true,
+      detail:     { count: rl.count, limit: rl.limit, token_prefix: token.slice(0, 8) },
+      ...meta,
+    });
+    return json(
+      { ok: false, reason: 'rate_limited', retry_after: rl.retryAfter },
+      429,
+      { 'Retry-After': String(rl.retryAfter) },
+    );
+  }
   const { data: tokenRow, error: lookupErr } = await supabase
     .from('cyborg_tokens')
     .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, fly_machine_id, machine_url, launched_at, active_time_used_seconds, active_time_cap_seconds, last_resumed_at')
@@ -264,9 +301,13 @@ async function waitForMachineStarted(env, machineId, timeoutMs) {
   return false;
 }
 
-function json(data, status = 200) {
+function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    headers: {
+      'Content-Type':  'application/json',
+      'Cache-Control': 'no-store',
+      ...extraHeaders,
+    },
   });
 }

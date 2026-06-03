@@ -25,10 +25,14 @@ export function generateToken() {
   return `cyb_${hex}`;
 }
 
-export function jsonResponse(data, status = 200) {
+export function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      ...extraHeaders,
+    },
   });
 }
 
@@ -188,4 +192,46 @@ export function requestMeta(request) {
     country:   request.headers.get('cf-ipcountry')     || '',
     userAgent: request.headers.get('user-agent')        || '',
   };
+}
+
+// ── Endpoint rate-limit helper (V5 security) ─────────────────────────────
+// Per-endpoint sliding-window rate-limit using cyborg_rate_limit_events.
+// bucket_key namespacing convention:
+//   "<endpoint>:<dimension>:<value>"
+//   e.g. "validate:ip:1.2.3.4", "launch:token:cyb_abc..."
+//
+// Returns { ok: true } if the call is under the limit, or
+//         { ok: false, count, limit, retryAfter } if at/over the limit.
+//
+// Insert is best-effort: a failed insert won't make the rate-limit
+// fail-closed (would lock candidates out on a transient DB blip). The
+// counter check is the load-bearing operation; insert failure is logged
+// but does not propagate.
+//
+// Race-window note: two concurrent calls can both pass the count check
+// before either insert lands. Acceptable at cohort-1 scale — for higher
+// throughput, swap for an atomic UPSERT against a per-bucket counter row.
+export async function checkEndpointRateLimit(supabase, bucketKey, windowSec, maxCount) {
+  if (!bucketKey) return { ok: true };
+  const sinceIso = new Date(Date.now() - windowSec * 1000).toISOString();
+  const { count, error } = await supabase
+    .from('cyborg_rate_limit_events')
+    .select('id', { count: 'exact', head: true })
+    .eq('bucket_key', bucketKey)
+    .gt('created_at', sinceIso);
+  if (error) {
+    console.error('rate-limit lookup error:', error.message);
+    return { ok: true };  // fail-open on lookup error
+  }
+  if ((count || 0) >= maxCount) {
+    return { ok: false, count, limit: maxCount, retryAfter: windowSec };
+  }
+  // Record this call. Fire-and-forget; no await on the insert path.
+  supabase
+    .from('cyborg_rate_limit_events')
+    .insert({ bucket_key: bucketKey })
+    .then(({ error: insertErr }) => {
+      if (insertErr) console.error('rate-limit insert error:', insertErr.message);
+    });
+  return { ok: true };
 }
