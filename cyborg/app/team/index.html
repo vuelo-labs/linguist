@@ -31,8 +31,10 @@
     <a class="app-logo" href="/cyborg/app/">Cyborg</a>
     <nav class="app-nav">
       <a href="/cyborg/app/" class="nav-link">Dashboard</a>
-      <a href="/cyborg/app/candidates/" class="nav-link">Candidates</a>
       <a href="/cyborg/app/team/" class="nav-link nav-current">Team</a>
+      <a href="/cyborg/app/campaigns/" class="nav-link">Campaigns</a>
+      <a href="/cyborg/app/candidates/" class="nav-link">Candidates</a>
+      <a href="/cyborg/app/reports/" class="nav-link">Reports</a>
     </nav>
     <div class="app-user-menu">
       <span class="org-name" id="hdr-org-name">…</span>
@@ -102,11 +104,14 @@
       </div>
     </form>
     <div id="invite-result" style="display:none;">
-      <div class="status ok" style="display:block;">Invitation sent. Share this link if the email doesn't arrive:</div>
+      <div class="status ok" style="display:block;">Invitation created. The email was sent to the invitee — but you can also share this link directly:</div>
       <div class="invite-link" id="invite-link"></div>
-      <div class="modal-actions">
-        <button type="button" class="btn" id="invite-done">Done</button>
+      <div class="modal-actions" style="justify-content:flex-start; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn" id="invite-copy">Copy link</button>
+        <button type="button" class="btn" id="invite-open">Open link</button>
+        <button type="button" class="btn secondary" id="invite-done">Done</button>
       </div>
+      <div id="invite-copy-feedback" style="display:none; font-size:0.82rem; color:#2d5a26; margin-top:8px;">Link copied to clipboard.</div>
     </div>
   </div>
 </div>
@@ -150,12 +155,15 @@
   }
 
   async function loadTeam() {
-    const [membersRes, invitesRes] = await Promise.all([
-      supabase
-        .from('organisation_members')
-        .select('id, user_id, role, joined_at')
-        .eq('organisation_id', org.id)
-        .order('joined_at', { ascending: true }),
+    // Members come from the service-role endpoint (RLS only lets users
+    // read their OWN membership row directly; the endpoint returns the
+    // full org roster after verifying caller membership).
+    const [membersHttp, invitesRes] = await Promise.all([
+      fetch('/cyborg/app/api/team/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ organisation_id: org.id }),
+      }).then(r => r.json()).catch(() => ({ ok: false, profiles: [] })),
       supabase
         .from('organisation_invitations')
         .select('id, email, role, invited_at, expires_at, token')
@@ -165,23 +173,12 @@
         .order('invited_at', { ascending: false }),
     ]);
 
-    // Fetch member emails from auth.users via a service-role call to /cyborg/app/api/team/members.
-    // (Direct query from anon-context can't read auth.users.)
-    const r = await fetch('/cyborg/app/api/team/members', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ organisation_id: org.id }),
-    });
-    const d = await r.json().catch(() => ({ ok: false }));
-    const profilesByUserId = (d.profiles || []).reduce((m, p) => (m[p.user_id] = p, m), {});
-
-    const members = membersRes.data || [];
+    const members = membersHttp.profiles || [];
     document.getElementById('members-body').innerHTML = members.length ? `
       <table class="data-table">
         <thead><tr><th>Member</th><th>Email</th><th>Role</th><th>Joined</th><th></th></tr></thead>
         <tbody>
           ${members.map(m => {
-            const p = profilesByUserId[m.user_id] || {};
             const isMe = m.user_id === user.id;
             // Admins can remove anyone except themselves. The API enforces
             // the "can't remove the last admin" guard, so we don't need to
@@ -189,8 +186,8 @@
             const canRemove = canManage && !isMe;
             return `
               <tr>
-                <td>${escapeHtml(p.full_name || p.email?.split('@')[0] || '—')} ${isMe ? '<span style="color:var(--w-faint); font-size:0.78rem; margin-left:6px;">(you)</span>' : ''}</td>
-                <td>${escapeHtml(p.email || '—')}</td>
+                <td>${escapeHtml(m.full_name || m.email?.split('@')[0] || '—')} ${isMe ? '<span style="color:var(--w-faint); font-size:0.78rem; margin-left:6px;">(you)</span>' : ''}</td>
+                <td>${escapeHtml(m.email || '—')}</td>
                 <td><span class="role-badge role-${m.role}">${m.role}</span></td>
                 <td>${formatDate(m.joined_at)}</td>
                 <td>${canRemove ? `<button class="row-link" style="background:none; border:none; cursor:pointer; padding:0; color:#6e2618;" data-action="remove" data-member-id="${m.id}">Remove</button>` : ''}</td>
@@ -219,7 +216,7 @@
       document.getElementById('invites-section').style.display = 'block';
       document.getElementById('invites-body').innerHTML = `
         <table class="data-table">
-          <thead><tr><th>Email</th><th>Role</th><th>Invited</th><th>Expires</th></tr></thead>
+          <thead><tr><th>Email</th><th>Role</th><th>Invited</th><th>Expires</th><th></th></tr></thead>
           <tbody>
             ${invites.map(i => `
               <tr>
@@ -227,9 +224,22 @@
                 <td><span class="role-badge role-${i.role}">${i.role}</span></td>
                 <td>${formatDate(i.invited_at)}</td>
                 <td>${formatDate(i.expires_at)}</td>
+                <td><button class="row-link" style="background:none;border:none;cursor:pointer;padding:0;color:var(--w-accent);font-family:inherit;font-size:inherit;" data-action="copy-invite" data-token="${escapeHtml(i.token)}">Copy link</button></td>
               </tr>`).join('')}
           </tbody>
         </table>`;
+
+      document.querySelectorAll('button[data-action="copy-invite"]').forEach(b => {
+        b.addEventListener('click', async () => {
+          const link = `${location.origin}/cyborg/signup/?invite=${b.dataset.token}`;
+          try {
+            await navigator.clipboard.writeText(link);
+            const orig = b.textContent;
+            b.textContent = 'Copied ✓';
+            setTimeout(() => { b.textContent = orig; }, 1500);
+          } catch (_) { alert(link); }
+        });
+      });
     } else {
       document.getElementById('invites-section').style.display = 'none';
     }
@@ -248,6 +258,26 @@
   });
   document.getElementById('invite-cancel').addEventListener('click', () => modal.classList.remove('show'));
   document.getElementById('invite-done').addEventListener('click', () => { modal.classList.remove('show'); loadTeam(); });
+
+  document.getElementById('invite-copy').addEventListener('click', async () => {
+    const link = document.getElementById('invite-link').textContent;
+    try {
+      await navigator.clipboard.writeText(link);
+      const fb = document.getElementById('invite-copy-feedback');
+      fb.style.display = 'block';
+      fb.textContent = 'Link copied to clipboard.';
+      setTimeout(() => { fb.style.display = 'none'; }, 2000);
+    } catch (_) {
+      const range = document.createRange();
+      range.selectNodeContents(document.getElementById('invite-link'));
+      const sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(range);
+    }
+  });
+  document.getElementById('invite-open').addEventListener('click', () => {
+    const link = document.getElementById('invite-link').textContent;
+    window.open(link, '_blank', 'noopener,noreferrer');
+  });
 
   document.getElementById('invite-form').addEventListener('submit', async (e) => {
     e.preventDefault();

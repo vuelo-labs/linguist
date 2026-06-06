@@ -30,8 +30,10 @@
     <a class="app-logo" href="/cyborg/app/">Cyborg</a>
     <nav class="app-nav">
       <a href="/cyborg/app/" class="nav-link">Dashboard</a>
-      <a href="/cyborg/app/candidates/" class="nav-link nav-current">Candidates</a>
       <a href="/cyborg/app/team/" class="nav-link">Team</a>
+      <a href="/cyborg/app/campaigns/" class="nav-link">Campaigns</a>
+      <a href="/cyborg/app/candidates/" class="nav-link nav-current">Candidates</a>
+      <a href="/cyborg/app/reports/" class="nav-link">Reports</a>
     </nav>
     <div class="app-user-menu">
       <span class="org-name" id="hdr-org-name">…</span>
@@ -77,8 +79,12 @@
     <p>The candidate will receive an email with the launch link. Their 7-day window starts when you issue the token.</p>
     <form id="issue-form">
       <div class="field">
-        <label for="m-label">Candidate name + email</label>
-        <input type="text" id="m-label" required maxlength="200" placeholder="Alex Doe (alex@example.com)" />
+        <label for="m-name">Candidate name</label>
+        <input type="text" id="m-name" required maxlength="200" placeholder="Alex Doe" />
+      </div>
+      <div class="field">
+        <label for="m-email">Candidate email</label>
+        <input type="email" id="m-email" required maxlength="320" placeholder="alex@example.com" />
       </div>
       <div class="field" style="max-width:160px;">
         <label for="m-days">Days valid</label>
@@ -87,15 +93,18 @@
       <div class="status" id="issue-status"></div>
       <div class="modal-actions">
         <button type="button" class="btn secondary" id="issue-cancel">Cancel</button>
-        <button type="submit" class="btn" id="issue-submit">Issue token</button>
+        <button type="submit" class="btn" id="issue-submit">Issue + email token</button>
       </div>
     </form>
     <div id="issue-result" style="display:none;">
-      <div class="status ok" style="display:block;">Token issued. The candidate will receive a launch link via email (configure your Tines flow if not already), or share this link directly:</div>
+      <div class="status ok" style="display:block;">Token issued. The candidate will receive a launch link via email, or share this link directly:</div>
       <div class="install-cmd" id="launch-url"></div>
-      <div class="modal-actions">
-        <button type="button" class="btn" id="issue-done">Done</button>
+      <div class="modal-actions" style="justify-content:flex-start; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn" id="issue-copy">Copy link</button>
+        <button type="button" class="btn" id="issue-open">Open link</button>
+        <button type="button" class="btn secondary" id="issue-done">Done</button>
       </div>
+      <div id="issue-copy-feedback" style="display:none; font-size:0.82rem; color:#2d5a26; margin-top:8px;">Link copied to clipboard.</div>
     </div>
   </div>
 </div>
@@ -200,7 +209,7 @@
               <td>${formatDate(c.issued_at)}</td>
               <td>${formatDate(c.expires_at)}</td>
               <td>${statusPill(c)}</td>
-              <td><a class="row-link" href="/cyborg/app/candidates/${encodeURIComponent(c.token)}/">View</a></td>
+              <td><a class="row-link" href="/cyborg/app/candidates/view/?token=${encodeURIComponent(c.token)}">View</a></td>
             </tr>`).join('')}
         </tbody>
       </table>`;
@@ -220,39 +229,75 @@
 
   document.getElementById('issue-btn').addEventListener('click', () => {
     issueForm.style.display = 'block'; issueResult.style.display = 'none';
-    document.getElementById('m-label').value = '';
+    document.getElementById('m-name').value  = '';
+    document.getElementById('m-email').value = '';
     document.getElementById('issue-status').className = 'status'; document.getElementById('issue-status').textContent = '';
     modal.classList.add('show');
-    setTimeout(() => document.getElementById('m-label').focus(), 50);
+    setTimeout(() => document.getElementById('m-name').focus(), 50);
   });
   document.getElementById('issue-cancel').addEventListener('click', () => modal.classList.remove('show'));
   document.getElementById('issue-done').addEventListener('click', () => { modal.classList.remove('show'); loadCandidates(); });
 
+  document.getElementById('issue-copy').addEventListener('click', async () => {
+    const link = document.getElementById('launch-url').textContent;
+    try {
+      await navigator.clipboard.writeText(link);
+      const fb = document.getElementById('issue-copy-feedback');
+      fb.style.display = 'block';
+      fb.textContent = 'Link copied to clipboard.';
+      setTimeout(() => { fb.style.display = 'none'; }, 2000);
+    } catch (_) { alert(link); }
+  });
+  document.getElementById('issue-open').addEventListener('click', () => {
+    const link = document.getElementById('launch-url').textContent;
+    window.open(link, '_blank', 'noopener,noreferrer');
+  });
+
   issueForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const label = document.getElementById('m-label').value.trim();
+    const name  = document.getElementById('m-name').value.trim();
+    const email = document.getElementById('m-email').value.trim();
     const days  = parseInt(document.getElementById('m-days').value, 10) || 8;
     const btn   = document.getElementById('issue-submit');
     const stat  = document.getElementById('issue-status');
     btn.disabled = true; btn.textContent = 'Issuing…';
     stat.className = 'status'; stat.textContent = '';
 
+    // Compose the freeform label for back-compat with how older rows are
+    // formatted ("Name (email)") so the candidates table still reads cleanly.
+    const label = email ? `${name} (${email})` : name;
+
     const r = await fetch('/cyborg/app/api/candidates/issue', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ organisation_id: org.id, label, days }),
+      body: JSON.stringify({ organisation_id: org.id, label, candidate_email: email, days }),
     });
     const d = await r.json().catch(() => ({}));
     if (!d.ok) {
       stat.className = 'status err';
       stat.textContent = d.message || d.reason || 'Could not issue token.';
-      btn.disabled = false; btn.textContent = 'Issue token';
+      btn.disabled = false; btn.textContent = 'Issue + email token';
       return;
     }
 
     issueForm.style.display = 'none'; issueResult.style.display = 'block';
     document.getElementById('launch-url').textContent = `${location.origin}/cyborg/?t=${d.token}`;
-    btn.disabled = false; btn.textContent = 'Issue token';
+    // Reflect actual outcome — issue vs resend, send success vs failure —
+    // so the operator knows whether to copy + share the link manually and
+    // whether this was a brand-new key or a re-send of the existing one.
+    const okBanner = issueResult.querySelector('.status.ok');
+    if (okBanner) {
+      const verb = d.resend ? 'Re-sent existing access link to' : 'Token issued and emailed to';
+      const verbFailed = d.resend ? 'Tried to re-send the existing access link to' : 'Token issued, but the email send to';
+      if (d.email_sent) {
+        okBanner.textContent = `${verb} ${email}. They'll get the launch link from hello@vuelolabs.com.`;
+      } else if (email) {
+        okBanner.textContent = `${verbFailed} ${email} failed (${d.email_send_error || 'unknown'}). Copy the link below and share manually.`;
+      } else {
+        okBanner.textContent = `Token issued. No email provided — share the link below manually.`;
+      }
+    }
+    btn.disabled = false; btn.textContent = 'Issue + email token';
   });
 
   loadCandidates();

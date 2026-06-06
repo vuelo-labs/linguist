@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaigns — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/cyborg/app/app.css">
+  <style>
+    .toolbar { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(20,20,20,0.55); z-index: 9999; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--w-bg-card); border-radius: 14px; padding: 28px 32px 24px; max-width: 520px; width: calc(100% - 40px); box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
+    .modal h2 { font-family: 'Newsreader', Georgia, serif; font-size: 1.3rem; font-weight: 500; margin: 0 0 6px; }
+    .modal p { color: var(--w-muted); font-size: 0.92rem; margin: 0 0 16px; line-height: 1.55; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .preset-card { padding: 10px 12px; border: 1px solid var(--w-border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+    .preset-card.selected { border-color: var(--w-accent); background: var(--w-accent-light); }
+    .preset-card .pname { font-weight: 500; font-size: 0.94rem; }
+    .preset-card .pdesc { font-size: 0.84rem; color: var(--w-muted); margin-top: 3px; }
+    .preset-card .pbuild { font-size: 0.76rem; color: var(--w-faint); font-family: var(--c-mono); margin-top: 4px; }
+    .preset-card.not-built .pbuild { color: #974f0c; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a class="app-logo" href="/cyborg/app/">Cyborg</a>
+    <nav class="app-nav">
+      <a href="/cyborg/app/" class="nav-link">Dashboard</a>
+      <a href="/cyborg/app/team/" class="nav-link">Team</a>
+      <a href="/cyborg/app/campaigns/" class="nav-link nav-current">Campaigns</a>
+      <a href="/cyborg/app/candidates/" class="nav-link">Candidates</a>
+      <a href="/cyborg/app/reports/" class="nav-link">Reports</a>
+    </nav>
+    <div class="app-user-menu">
+      <span class="org-name" id="hdr-org-name">…</span>
+      <button class="user-btn" id="user-btn"><span id="user-initial">·</span></button>
+      <div class="user-popover" id="user-popover" hidden>
+        <div class="popover-meta">
+          <div class="popover-name" id="popover-name">…</div>
+          <div class="popover-email" id="popover-email">…</div>
+        </div>
+        <a class="popover-link" href="/cyborg/app/profile/">Profile &amp; activity</a>
+        <a class="popover-link signout" href="#" id="signout-link">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="app-container">
+    <h1 class="page-title">Campaigns</h1>
+    <p class="page-lede">Group candidates into named campaigns and pick the assessment image (preset) each campaign deploys. Candidates inherit the preset's environment when they launch.</p>
+
+    <div class="toolbar">
+      <div></div>
+      <button class="btn" id="create-btn">Create campaign</button>
+    </div>
+
+    <div class="card">
+      <div id="campaigns-body">Loading…</div>
+    </div>
+  </div>
+</main>
+
+<!-- Create-campaign modal -->
+<div class="modal-overlay" id="create-modal">
+  <div class="modal">
+    <h2>Create a campaign</h2>
+    <p>Pick a name and an assessment preset. Tokens minted into this campaign will spawn machines from the chosen preset's image.</p>
+    <form id="create-form">
+      <div class="field">
+        <label for="c-name">Campaign name</label>
+        <input type="text" id="c-name" required maxlength="200" placeholder="e.g. Engineering hiring 2026 Q3" />
+      </div>
+      <div class="field">
+        <label>Preset</label>
+        <div id="preset-list">Loading presets…</div>
+      </div>
+      <div class="status" id="create-status"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="create-cancel">Cancel</button>
+        <button type="submit" class="btn" id="create-submit">Create campaign</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { location.replace('/cyborg/signin/?next=/cyborg/app/campaigns/'); throw new Error('no session'); }
+  const user = session.user;
+
+  const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'You';
+  document.getElementById('user-initial').textContent = fullName.charAt(0).toUpperCase();
+  document.getElementById('popover-name').textContent = fullName;
+  document.getElementById('popover-email').textContent = user.email || '';
+
+  document.getElementById('user-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('user-popover').hidden = !document.getElementById('user-popover').hidden; });
+  document.addEventListener('click', () => { document.getElementById('user-popover').hidden = true; });
+  document.getElementById('signout-link').addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.replace('/cyborg/signin/'); });
+
+  const { data: memberships } = await supabase
+    .from('organisation_members')
+    .select('organisation_id, role, organisations(id, name, slug)')
+    .order('joined_at', { ascending: true })
+    .limit(1);
+  if (!memberships?.length) { location.replace('/cyborg/app/'); throw new Error('no org'); }
+  const org = memberships[0].organisations;
+  document.getElementById('hdr-org-name').textContent = org.name;
+
+  let CACHED_PRESETS = [];
+  let SELECTED_PRESET_ID = null;
+
+  function escapeHtml(s) {
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+  function formatDate(s) { try { return new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); } catch { return s; } }
+
+  async function api(path, opts = {}) {
+    return fetch(path, {
+      ...opts,
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(opts.headers || {}),
+      },
+    });
+  }
+
+  async function loadCampaigns() {
+    document.getElementById('campaigns-body').textContent = 'Loading…';
+    const r = await api(`/cyborg/app/api/campaigns/list?organisation_id=${encodeURIComponent(org.id)}`);
+    const d = await r.json().catch(() => null);
+    if (!r.ok || !d || !d.ok) {
+      document.getElementById('campaigns-body').innerHTML = `<div class="empty">Error loading campaigns: ${escapeHtml((d && d.reason) || r.status)}</div>`;
+      return;
+    }
+    CACHED_PRESETS = d.presets || [];
+    const campaigns = d.campaigns || [];
+    if (campaigns.length === 0) {
+      document.getElementById('campaigns-body').innerHTML = `<div class="empty">No campaigns yet. Click "Create campaign" above to get started.</div>`;
+      return;
+    }
+    document.getElementById('campaigns-body').innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Campaign</th><th>Preset</th><th>Image</th><th>Tokens</th><th>Created</th></tr></thead>
+        <tbody>
+          ${campaigns.map((c) => {
+            const preset = c.presets;
+            const imageTag = preset?.current_image_tag || (preset ? 'not yet built' : '—');
+            const imageCls = preset?.current_image_tag ? 'mono' : 'mono';
+            return `
+              <tr>
+                <td><strong>${escapeHtml(c.name)}</strong><div style="font-size:0.78rem;color:var(--w-muted);font-family:var(--c-mono);">${escapeHtml(c.slug)}</div></td>
+                <td>${preset ? escapeHtml(preset.display_name) : '<span style="color:var(--w-muted);">(no preset)</span>'}</td>
+                <td class="${imageCls}" style="font-size:0.78rem;">${escapeHtml(imageTag)}</td>
+                <td>${c.token_count}</td>
+                <td>${formatDate(c.created_at)}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderPresetList() {
+    const host = document.getElementById('preset-list');
+    if (!CACHED_PRESETS.length) {
+      host.innerHTML = `<div class="empty" style="padding:10px;">No presets assigned to your org yet. Ask your platform admin to assign one.</div>`;
+      return;
+    }
+    host.innerHTML = `
+      <div class="preset-card" data-preset-id="" style="border-style:dashed;">
+        <div class="pname">No preset</div>
+        <div class="pdesc">Tokens use the default image. Useful while you're still picking.</div>
+      </div>
+      ${CACHED_PRESETS.map((p) => `
+        <div class="preset-card ${p.current_image_tag ? '' : 'not-built'}" data-preset-id="${escapeHtml(p.id)}">
+          <div class="pname">${escapeHtml(p.display_name)}</div>
+          <div class="pdesc">${escapeHtml(p.description || '')}</div>
+          <div class="pbuild">${p.current_image_tag ? escapeHtml(p.current_image_tag) : 'NOT YET BUILT — falls back to default image'}</div>
+        </div>
+      `).join('')}
+    `;
+    host.querySelectorAll('.preset-card').forEach((el) => {
+      el.addEventListener('click', () => {
+        SELECTED_PRESET_ID = el.dataset.presetId || null;
+        host.querySelectorAll('.preset-card').forEach((c) => c.classList.remove('selected'));
+        el.classList.add('selected');
+      });
+    });
+  }
+
+  document.getElementById('create-btn').addEventListener('click', () => {
+    renderPresetList();
+    SELECTED_PRESET_ID = null;
+    document.getElementById('c-name').value = '';
+    document.getElementById('create-status').className = 'status';
+    document.getElementById('create-status').textContent = '';
+    document.getElementById('create-modal').classList.add('show');
+  });
+  document.getElementById('create-cancel').addEventListener('click', () => {
+    document.getElementById('create-modal').classList.remove('show');
+  });
+  document.getElementById('create-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'create-modal') document.getElementById('create-modal').classList.remove('show');
+  });
+
+  document.getElementById('create-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('c-name').value.trim();
+    const status = document.getElementById('create-status');
+    if (!name) { status.className = 'status err'; status.textContent = 'Name is required.'; return; }
+    status.className = 'status'; status.textContent = 'Creating…';
+    document.getElementById('create-submit').disabled = true;
+    const r = await api('/cyborg/app/api/campaigns/create', {
+      method: 'POST',
+      body: JSON.stringify({ organisation_id: org.id, name, preset_id: SELECTED_PRESET_ID }),
+    });
+    const d = await r.json().catch(() => null);
+    document.getElementById('create-submit').disabled = false;
+    if (!r.ok || !d || !d.ok) {
+      status.className = 'status err';
+      status.textContent = (d && d.reason) || `Failed (${r.status}).`;
+      return;
+    }
+    status.className = 'status ok';
+    status.textContent = `Campaign "${d.campaign.name}" created.`;
+    setTimeout(() => {
+      document.getElementById('create-modal').classList.remove('show');
+      loadCampaigns();
+    }, 700);
+  });
+
+  loadCampaigns();
+</script>
+
+</body>
+</html>

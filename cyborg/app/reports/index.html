@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/cyborg/app/app.css">
+  <style>
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--w-border); font-size: 0.9rem; vertical-align: top; }
+    .table th { font-weight: 600; color: var(--w-faint); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+    .pill-ready      { background: #ecf3eb; color: #2d5a26; }
+    .pill-processing { background: #fdf6e3; color: #6b5022; }
+    .pill-failed     { background: #fff4f1; color: #6e2618; }
+    .pill-rejected   { background: #f4e8f7; color: #6a2d7e; }
+    .pill-pending    { background: var(--w-accent-light); color: var(--w-muted); }
+    .tier-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tier-link { padding: 4px 10px; background: var(--w-accent-light); border-radius: 6px; font-size: 0.78rem; text-decoration: none; color: var(--w-text); font-weight: 500; }
+    .tier-link:hover { background: var(--w-border); }
+    .cost { font-family: var(--c-mono); font-size: 0.82rem; color: var(--w-muted); }
+    .muted-sm { color: var(--w-muted); font-size: 0.82rem; }
+    .empty { padding: 32px; text-align: center; color: var(--w-muted); font-size: 0.92rem; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a class="app-logo" href="/cyborg/app/">Cyborg</a>
+    <nav class="app-nav">
+      <a href="/cyborg/app/" class="nav-link">Dashboard</a>
+      <a href="/cyborg/app/team/" class="nav-link">Team</a>
+      <a href="/cyborg/app/campaigns/" class="nav-link">Campaigns</a>
+      <a href="/cyborg/app/candidates/" class="nav-link">Candidates</a>
+      <a href="/cyborg/app/reports/" class="nav-link nav-current">Reports</a>
+    </nav>
+    <div class="app-user-menu">
+      <span class="org-name" id="hdr-org-name">…</span>
+      <button class="user-btn" id="user-btn"><span id="user-initial">·</span></button>
+      <div class="user-popover" id="user-popover" hidden>
+        <div class="popover-meta">
+          <div class="popover-name" id="popover-name">…</div>
+          <div class="popover-email" id="popover-email">…</div>
+        </div>
+        <a class="popover-link" href="/cyborg/app/profile/">Profile &amp; activity</a>
+        <a class="popover-link signout" href="#" id="signout-link">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="app-container">
+    <h1 class="page-title">Reports</h1>
+    <p class="page-lede">Submitted assessments and their scored reports. Click a tier to open the rendered report in a new tab.</p>
+
+    <section class="dash-section">
+      <div class="card">
+        <div id="reports-body">Loading…</div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { location.replace('/cyborg/signin/?next=/cyborg/app/reports/'); throw new Error('no session'); }
+  const user = session.user;
+
+  const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'You';
+  document.getElementById('user-initial').textContent = fullName.charAt(0).toUpperCase();
+  document.getElementById('popover-name').textContent = fullName;
+  document.getElementById('popover-email').textContent = user.email || '';
+
+  document.getElementById('user-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('user-popover').hidden = !document.getElementById('user-popover').hidden; });
+  document.addEventListener('click', () => { document.getElementById('user-popover').hidden = true; });
+  document.getElementById('signout-link').addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.replace('/cyborg/signin/'); });
+
+  const { data: memberships } = await supabase
+    .from('organisation_members')
+    .select('organisation_id, role, organisations(id, name, slug)')
+    .order('joined_at', { ascending: true })
+    .limit(1);
+  if (!memberships?.length) { location.replace('/cyborg/app/'); throw new Error('no org'); }
+  const org = memberships[0].organisations;
+  document.getElementById('hdr-org-name').textContent = org.name;
+
+  // Server-side list endpoint — needed because the `submissions` table has
+  // no RLS policy for org members (the only RLS on `reports` is for the
+  // candidate machine itself reading its own row). The endpoint runs with
+  // service-role + an explicit org-membership check.
+  const listRes = await fetch('/cyborg/app/api/reports/list', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+    body: JSON.stringify({ organisation_id: org.id }),
+  });
+  const listJson = await listRes.json().catch(() => ({ ok: false }));
+  const subs        = listJson.submissions || [];
+  const reports     = listJson.reports     || [];
+  const tokenMeta   = Object.fromEntries((listJson.tokens || []).map(t => [t.token, t]));
+  const reportBySubId = Object.fromEntries(reports.map(r => [r.submission_id, r]));
+
+  const body = document.getElementById('reports-body');
+  if (!subs.length) {
+    body.innerHTML = `<div class="empty">No submissions yet. When a candidate completes their assessment and submits, it'll appear here.</div>`;
+  } else {
+    const rows = subs.map(s => {
+      const r = reportBySubId[s.id];
+      const meta = tokenMeta[s.candidate_token] || {};
+      const candidateName = s.candidate_label || meta.candidate_label || meta.candidate_email || '(unknown)';
+      const status  = r ? (r.status || 'pending') : 'pending';
+      const pillCls = `pill-${status.replace(/[^a-z]/g, '')}`;
+      const ts = s.received_at ? new Date(s.received_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+      const cost = r && r.cost_usd != null ? `$${Number(r.cost_usd).toFixed(3)}` : '—';
+      const model = r?.model_used || '—';
+      const errorCell = r?.error ? `<div class="muted-sm" style="color:#6e2618;margin-top:4px;">${escapeHtml(r.error)}</div>` : '';
+      const tiers = (r && r.status === 'ready')
+        ? ['master', 'manager', 'candidate', 'technical', 'recruiter'].map(t =>
+            `<button class="tier-link" data-sub="${s.id}" data-tier="${t}">${t}</button>`
+          ).join('')
+        : `<span class="muted-sm">${status === 'processing' ? 'Scoring in progress…' : status === 'rejected' ? 'Rejected by safety classifier' : status === 'failed' ? 'Scoring failed' : 'Not yet scored'}</span>`;
+      return `
+        <tr>
+          <td>${escapeHtml(candidateName)}${errorCell}</td>
+          <td>${ts}${s.dev_mode ? ' <span class="muted-sm">(dev)</span>' : ''}</td>
+          <td><span class="pill ${pillCls}">${escapeHtml(status)}</span></td>
+          <td><div class="tier-links">${tiers}</div></td>
+          <td class="cost">${cost}<div class="muted-sm">${escapeHtml(model)}</div></td>
+        </tr>
+      `;
+    }).join('');
+    body.innerHTML = `
+      <table class="table">
+        <thead><tr><th>Candidate</th><th>Submitted</th><th>Status</th><th>Reports</th><th>Cost / Model</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    // Wire each tier-link button to the authed fetch-then-blob flow. We
+    // can't use a plain <a target=_blank> because the report endpoint is
+    // Authorization-header-gated (no cookie-based session for Supabase),
+    // so a target=_blank link would 401. Fetch returns HTML; we wrap in
+    // a blob URL and open that in a new tab.
+    body.querySelectorAll('.tier-link').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const sub  = btn.getAttribute('data-sub');
+        const tier = btn.getAttribute('data-tier');
+        const orig = btn.textContent;
+        btn.textContent = '…'; btn.disabled = true;
+        try {
+          const r = await fetch('/cyborg/app/api/reports/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify({ submission_id: Number(sub), tier }),
+          });
+          if (!r.ok) {
+            const detail = await r.json().catch(() => ({}));
+            alert(`Could not load ${tier} report: ${detail.reason || r.status}`);
+            return;
+          }
+          const html = await r.text();
+          const blob = new Blob([html], { type: 'text/html' });
+          const url  = URL.createObjectURL(blob);
+          window.open(url, '_blank', 'noopener,noreferrer');
+          // Revoke after a delay — let the new tab finish loading first.
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+        } finally {
+          btn.textContent = orig; btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+</script>
+</body>
+</html>
