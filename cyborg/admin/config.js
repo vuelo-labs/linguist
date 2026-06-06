@@ -419,7 +419,7 @@ function renderTrace(d) {
 
 // ── Presets card (v1.1) ───────────────────────────────────────────────────
 async function loadPresets() {
-  const r = await cfgApi('/cyborg/admin/presets', { method: 'GET' });
+  const r = await cfgApi('/cyborg/admin/presets/list', { method: 'GET' });
   if (r.status === 401) { location.reload(); return; }
   let d = null;
   try { d = await r.json(); } catch { d = null; }

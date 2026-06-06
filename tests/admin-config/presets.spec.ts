@@ -45,7 +45,7 @@ async function mockApi(page: Page) {
   await page.route('**/cyborg/reports/list', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ reports: [] }) }));
   await page.route('**/cyborg/admin/orgs/list', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ orgs: MOCK_ORGS }) }));
 
-  await page.route('**/cyborg/admin/presets', (route) => {
+  await page.route('**/cyborg/admin/presets/list', (route) => {
     const enriched = MOCK_PRESETS.map((p) => ({
       ...p,
       last_build_status: buildStatusByPreset[p.slug] ?? p.last_build_status,
