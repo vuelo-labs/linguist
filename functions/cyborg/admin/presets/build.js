@@ -56,6 +56,8 @@ export async function onRequestPost({ request, env }) {
       'Accept':                'application/vnd.github+json',
       'X-GitHub-Api-Version':  '2022-11-28',
       'Content-Type':          'application/json',
+      // GitHub requires a User-Agent on every API request (returns 403 without it).
+      'User-Agent':            'cyborg-admin-preset-dispatcher',
     },
     body: JSON.stringify({
       ref,
