@@ -21,7 +21,7 @@ export async function onRequestGet({ request, env }) {
 
   const { data: campaigns, error } = await supabase
     .from('campaigns')
-    .select('id, organisation_id, name, slug, status, settings, created_at')
+    .select('id, organisation_id, name, slug, status, settings, preset_id, created_at, presets ( id, slug, display_name, current_image_tag, last_build_status )')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -54,6 +54,7 @@ export async function onRequestPost({ request, env }) {
   const name = (body.name || '').toString().trim();
   const organisationId = (body.organisation_id || '').toString().trim();
   const settings = body.settings || {};
+  const presetId = (body.preset_id || '').toString().trim() || null;
 
   if (!name) return jsonResponse({ error: 'name is required' }, 400);
   if (name.length > 200) return jsonResponse({ error: 'name too long (max 200)' }, 400);
@@ -69,6 +70,18 @@ export async function onRequestPost({ request, env }) {
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
+  // If a preset is provided, verify it's assigned to this org.
+  if (presetId) {
+    const { data: assignment, error: assignErr } = await supabase
+      .from('org_presets')
+      .select('preset_id')
+      .eq('organisation_id', organisationId)
+      .eq('preset_id', presetId)
+      .maybeSingle();
+    if (assignErr) return jsonResponse({ error: 'preset assignment lookup failed' }, 500);
+    if (!assignment) return jsonResponse({ error: 'preset is not assigned to this organisation' }, 403);
+  }
+
   const { data: campaign, error } = await supabase
     .from('campaigns')
     .insert({
@@ -77,8 +90,9 @@ export async function onRequestPost({ request, env }) {
       slug: slugInput,
       status: 'active',
       settings,
+      preset_id: presetId,
     })
-    .select('id, organisation_id, name, slug, status, settings, created_at')
+    .select('id, organisation_id, name, slug, status, settings, preset_id, created_at')
     .single();
 
   if (error) {

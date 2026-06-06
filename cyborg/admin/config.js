@@ -7,6 +7,8 @@ let CFG_KNOBS = [];              // KNOBS_METADATA from the API
 let CFG_CAMPAIGNS_BY_ID = {};    // id → campaign row (last fetched)
 let CFG_CURRENT_CAMPAIGN_ID = null;
 let CFG_ORIGINAL_SETTINGS = {};  // snapshot for Reset
+let CFG_PRESETS = [];            // last-fetched preset list
+let CFG_PRESET_POLL_TIMERS = {}; // preset_slug → poll interval id (only active builds)
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function cfgEscapeHtml(s) {
@@ -139,10 +141,47 @@ async function loadCampaignPolicy(id) {
   const d = await r.json();
   CFG_KNOBS = d.knobs || CFG_KNOBS;
   const settings = (d.campaign && d.campaign.settings) || {};
+  const presetId = (d.campaign && d.campaign.preset_id) || '';
   CFG_ORIGINAL_SETTINGS = JSON.parse(JSON.stringify(settings));
+  renderPresetPicker(presetId);
   renderKnobFields(settings);
   document.getElementById('cfg-policy-form').style.display = 'block';
   cfgShowStatus('cfg-policy-status', '');
+}
+
+function renderPresetPicker(selectedId) {
+  const sel = document.getElementById('cfg-preset-select');
+  if (!sel) return;
+  sel.innerHTML = '';
+  const ph = document.createElement('option');
+  ph.value = ''; ph.textContent = '— no preset (use default image) —';
+  sel.appendChild(ph);
+  for (const p of CFG_PRESETS) {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    const buildState = p.current_image_tag
+      ? ` · built (${p.last_build_status || 'success'})`
+      : ' · NOT YET BUILT';
+    opt.textContent = `${p.display_name}${buildState}`;
+    if (p.id === selectedId) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  updatePresetWarn();
+  sel.onchange = updatePresetWarn;
+}
+
+function updatePresetWarn() {
+  const sel = document.getElementById('cfg-preset-select');
+  const warn = document.getElementById('cfg-preset-warn');
+  if (!sel || !warn) return;
+  const p = CFG_PRESETS.find(x => x.id === sel.value);
+  if (p && !p.current_image_tag) {
+    warn.style.display = 'block';
+    warn.innerHTML = `<strong>Preset not yet built.</strong> Tokens in this campaign will spawn from the default image until the preset is built. Click <strong>Build</strong> on the Presets card.`;
+  } else {
+    warn.style.display = 'none';
+    warn.textContent = '';
+  }
 }
 
 function renderKnobFields(settings) {
@@ -232,10 +271,12 @@ function collectPolicyFromForm() {
 async function saveCampaignPolicy() {
   if (!CFG_CURRENT_CAMPAIGN_ID) return;
   const policy = collectPolicyFromForm();
+  const presetSel = document.getElementById('cfg-preset-select');
+  const presetId = presetSel ? presetSel.value : '';
   cfgShowStatus('cfg-policy-status', 'Saving…');
   const r = await cfgApi(`/cyborg/admin/config/campaign/${encodeURIComponent(CFG_CURRENT_CAMPAIGN_ID)}`, {
     method: 'PATCH',
-    body: JSON.stringify({ settings: policy }),
+    body: JSON.stringify({ settings: policy, preset_id: presetId || null }),
   });
   if (r.status === 401) { location.reload(); return; }
   const d = await r.json().catch(() => null);
@@ -245,7 +286,7 @@ async function saveCampaignPolicy() {
     return;
   }
   CFG_ORIGINAL_SETTINGS = JSON.parse(JSON.stringify(d.campaign.settings || {}));
-  cfgShowStatus('cfg-policy-status', 'Policy saved. New machines will pick up the change.', 'ok');
+  cfgShowStatus('cfg-policy-status', 'Saved. New machines will pick up the change.', 'ok');
 }
 
 function resetPolicyForm() {
@@ -374,4 +415,158 @@ function renderTrace(d) {
   ` : '<div class="cfg-trace-section"><h3>Report</h3><div class="empty" style="padding:10px;">No report yet.</div></div>';
 
   return headerHtml + timelineHtml + submissionHtml + reportHtml;
+}
+
+// ── Presets card (v1.1) ───────────────────────────────────────────────────
+async function loadPresets() {
+  const r = await cfgApi('/cyborg/admin/presets', { method: 'GET' });
+  if (r.status === 401) { location.reload(); return; }
+  let d = null;
+  try { d = await r.json(); } catch { d = null; }
+  if (!r.ok || !d) {
+    cfgShowStatus('presets-status', `Failed to load presets (${r.status}).`, 'err');
+    return;
+  }
+  CFG_PRESETS = d.presets || [];
+  renderPresetsList();
+}
+
+function renderPresetsList() {
+  const body = document.getElementById('presets-body');
+  if (!body) return;
+  if (CFG_PRESETS.length === 0) {
+    body.innerHTML = '<div class="empty">No presets defined. Edit <code>workspace-content/presets/v6.yaml</code> and run the migration to seed.</div>';
+    return;
+  }
+  const rows = CFG_PRESETS.map((p) => {
+    const status = p.last_build_status || (p.current_image_tag ? 'success' : '—');
+    const statusClass = status === 'success' ? 'active' : (status === 'running' ? 'pending' : (status === 'failed' ? 'revoked' : 'expired'));
+    const built = p.current_image_tag ? cfgEscapeHtml(p.current_image_tag) : '—';
+    const lastAt = p.last_build_at ? new Date(p.last_build_at).toLocaleString('en-GB') : '—';
+    const buildDisabled = status === 'running' ? 'disabled' : '';
+    const buildLabel = status === 'running' ? 'Building…' : 'Build';
+    return `
+      <tr data-slug="${cfgEscapeHtml(p.slug)}">
+        <td>
+          <div style="font-weight:500;">${cfgEscapeHtml(p.display_name)}</div>
+          <div style="font-size:0.78rem; color:var(--w-muted);">${cfgEscapeHtml(p.slug)} · ${cfgEscapeHtml(p.key_source || '—')}</div>
+        </td>
+        <td><span class="pill ${statusClass}">${cfgEscapeHtml(status)}</span></td>
+        <td class="mono" style="font-size:0.78rem;">${built}</td>
+        <td>${cfgEscapeHtml(lastAt)}</td>
+        <td><button class="btn small" onclick="buildPreset('${cfgEscapeHtml(p.slug)}')" ${buildDisabled}>${buildLabel}</button></td>
+      </tr>
+    `;
+  }).join('');
+  body.innerHTML = `
+    <table>
+      <thead><tr><th>Preset</th><th>Build</th><th>Image tag</th><th>Last build</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  // Resume polls for any preset stuck in 'running' (e.g. page reload during a build).
+  for (const p of CFG_PRESETS) {
+    if (p.last_build_status === 'running' && !CFG_PRESET_POLL_TIMERS[p.slug]) {
+      pollPresetBuildStatus(p.slug);
+    }
+  }
+}
+
+async function buildPreset(slug) {
+  cfgShowStatus('presets-status', `Dispatching build for ${slug}…`);
+  const r = await cfgApi('/cyborg/admin/presets/build', {
+    method: 'POST',
+    body: JSON.stringify({ preset_slug: slug }),
+  });
+  if (r.status === 401) { location.reload(); return; }
+  const d = await r.json().catch(() => null);
+  if (!r.ok || !d || !d.ok) {
+    cfgShowStatus('presets-status', (d && d.error) || `Dispatch failed (${r.status}).`, 'err');
+    return;
+  }
+  cfgShowStatus('presets-status', `Build dispatched for ${slug}. Polling…`, 'ok');
+  await loadPresets();   // immediate refresh shows running pill
+  pollPresetBuildStatus(slug);
+}
+
+function pollPresetBuildStatus(slug) {
+  if (CFG_PRESET_POLL_TIMERS[slug]) clearInterval(CFG_PRESET_POLL_TIMERS[slug]);
+  const intervalId = setInterval(async () => {
+    const r = await cfgApi(`/cyborg/admin/presets/build-status?preset_slug=${encodeURIComponent(slug)}`, { method: 'GET' });
+    if (!r.ok) return;
+    const d = await r.json().catch(() => null);
+    if (!d || !d.preset) return;
+    const status = d.preset.last_build_status;
+    if (status !== 'running') {
+      clearInterval(intervalId);
+      delete CFG_PRESET_POLL_TIMERS[slug];
+      const msg = status === 'success'
+        ? `Build complete: ${d.preset.current_image_tag}`
+        : `Build ${status || 'ended'} for ${slug}.`;
+      cfgShowStatus('presets-status', msg, status === 'success' ? 'ok' : 'err');
+      await loadPresets();
+    }
+  }, 5000);
+  CFG_PRESET_POLL_TIMERS[slug] = intervalId;
+}
+
+// ── Org → preset assignment ───────────────────────────────────────────────
+async function loadOrgListForPresetAssign() {
+  const sel = document.getElementById('op-org');
+  if (!sel) return;
+  const r = await cfgApi('/cyborg/admin/orgs/list', { method: 'GET' });
+  if (!r.ok) return;
+  const d = await r.json().catch(() => null);
+  if (!d || !d.orgs) return;
+  sel.innerHTML = '';
+  const ph = document.createElement('option');
+  ph.value = ''; ph.textContent = '— pick an organisation —';
+  sel.appendChild(ph);
+  for (const o of d.orgs) {
+    const opt = document.createElement('option');
+    opt.value = o.id; opt.textContent = o.name;
+    sel.appendChild(opt);
+  }
+}
+
+async function loadOrgPresetAssignment(orgId) {
+  const body = document.getElementById('op-assignment-body');
+  if (!body) return;
+  if (!orgId) { body.innerHTML = ''; return; }
+  const r = await cfgApi(`/cyborg/admin/orgs/${encodeURIComponent(orgId)}/presets`, { method: 'GET' });
+  if (!r.ok) {
+    body.innerHTML = `<div class="status err">Lookup failed (${r.status}).</div>`;
+    return;
+  }
+  const d = await r.json();
+  const rows = (d.presets || []).map((p) => `
+    <label style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:0.88rem;">
+      <input type="checkbox" data-preset-id="${cfgEscapeHtml(p.id)}" ${p.assigned ? 'checked' : ''} />
+      <span>${cfgEscapeHtml(p.display_name)} <span style="color:var(--w-muted); font-family:var(--c-mono); font-size:0.78rem;">${cfgEscapeHtml(p.slug)}</span></span>
+    </label>
+  `).join('');
+  body.innerHTML = `
+    <div style="margin-top:8px;">${rows}</div>
+    <button class="btn small" onclick="saveOrgPresetAssignment('${cfgEscapeHtml(orgId)}')" style="margin-top:10px;">Save assignment</button>
+    <div id="op-status" class="status" style="margin-top:8px;"></div>
+  `;
+}
+
+async function saveOrgPresetAssignment(orgId) {
+  const body = document.getElementById('op-assignment-body');
+  if (!body) return;
+  const checked = Array.from(body.querySelectorAll('input[type="checkbox"]'))
+    .filter((i) => i.checked)
+    .map((i) => i.dataset.presetId);
+  const r = await cfgApi(`/cyborg/admin/orgs/${encodeURIComponent(orgId)}/presets`, {
+    method: 'PUT',
+    body: JSON.stringify({ preset_ids: checked }),
+  });
+  const d = await r.json().catch(() => null);
+  const status = document.getElementById('op-status');
+  if (!r.ok || !d || !d.ok) {
+    if (status) { status.className = 'status err'; status.textContent = (d && d.error) || `Save failed (${r.status}).`; }
+    return;
+  }
+  if (status) { status.className = 'status ok'; status.textContent = `Assigned ${checked.length} preset(s).`; }
 }

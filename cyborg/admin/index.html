@@ -73,6 +73,30 @@
     <a class="btn small" href="/cyborg/admin/orgs/" style="text-decoration:none;">Manage orgs →</a>
   </div>
 
+  <!-- Presets (v1.1 env composer) -->
+  <div class="card" id="presets-card">
+    <div class="toolbar">
+      <h2 style="margin:0;">Presets</h2>
+      <button class="btn ghost small" onclick="loadPresets()">Refresh</button>
+    </div>
+    <p style="font-size:0.84rem; color:var(--w-muted); margin:6px 0 12px;">
+      Each preset bundles environment content (warehouse, names) + runtime knobs into a Fly image. Edit <code>workspace-content/presets/v6.yaml</code> in the cyborg repo and click Build to publish. Campaigns reference a preset; tokens inherit its image.
+    </p>
+    <div id="presets-status" class="status"></div>
+    <div id="presets-body"></div>
+
+    <details style="margin-top:16px;">
+      <summary style="cursor:pointer; font-size:0.86rem; color:var(--w-muted);">Manage org preset assignment</summary>
+      <div style="margin-top:12px;">
+        <div class="field">
+          <label for="op-org">Organisation</label>
+          <select id="op-org" onchange="loadOrgPresetAssignment(this.value)"></select>
+        </div>
+        <div id="op-assignment-body"></div>
+      </div>
+    </details>
+  </div>
+
   <!-- Configuration & Diagnostics -->
   <div class="card" id="config-card">
     <div class="toolbar">
@@ -111,7 +135,15 @@
       </div>
 
       <div id="cfg-policy-form" style="display:none;">
-        <div id="cfg-knob-fields"></div>
+        <div class="field" style="margin-bottom:14px;">
+          <label for="cfg-preset-select">Preset</label>
+          <select id="cfg-preset-select"></select>
+          <div id="cfg-preset-warn" style="display:none; margin-top:6px; padding:8px 10px; border-radius:6px; background:#fbe9e7; border:1px solid #e8b8af; color:#6e2618; font-size:0.82rem;"></div>
+        </div>
+        <details>
+          <summary style="cursor:pointer; font-size:0.86rem; color:var(--w-muted); margin-bottom:10px;">Advanced: override runtime knobs on top of preset</summary>
+          <div id="cfg-knob-fields"></div>
+        </details>
         <div style="margin-top:14px; padding:10px 12px; border-radius:7px; background:#fdf6e3; border:1px solid #d4c790; font-size:0.84rem; color:#6b5022;">
           Saved policies apply to <strong>candidate machines spawned after the change</strong>. In-flight candidate sessions continue with the policy they spawned with.
         </div>
@@ -342,8 +374,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   loadTokens();
   loadReports();
-  loadCampaignList();
+  // Load presets first so the campaign editor can render a preset dropdown
+  // when a campaign is selected.
+  loadPresets().then(() => loadCampaignList());
   loadOrgListForCampaignForm();
+  loadOrgListForPresetAssign();
 });
 
 async function api(path, opts = {}) {

@@ -46,21 +46,28 @@ export async function onRequestPatch({ request, env, params }) {
   let body;
   try { body = await request.json(); } catch { return jsonResponse({ error: 'Invalid JSON' }, 400); }
 
-  const incomingSettings = body.settings;
-  if (!incomingSettings || typeof incomingSettings !== 'object') {
-    return jsonResponse({ error: 'body.settings is required (object)' }, 400);
-  }
+  const incomingSettings = body.settings || {};
+  const incomingPresetId = body.preset_id !== undefined ? (body.preset_id || null) : undefined;
+  const hasSettings = body.settings !== undefined;
 
-  const policyCheck = validatePolicy(incomingSettings);
-  if (!policyCheck.ok) {
-    return jsonResponse({ error: 'Invalid settings', details: policyCheck.errors }, 400);
+  if (hasSettings) {
+    if (typeof incomingSettings !== 'object' || Array.isArray(incomingSettings)) {
+      return jsonResponse({ error: 'body.settings must be an object' }, 400);
+    }
+    const policyCheck = validatePolicy(incomingSettings);
+    if (!policyCheck.ok) {
+      return jsonResponse({ error: 'Invalid settings', details: policyCheck.errors }, 400);
+    }
+  }
+  if (!hasSettings && incomingPresetId === undefined) {
+    return jsonResponse({ error: 'body must include settings and/or preset_id' }, 400);
   }
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
   const { data: current, error: getErr } = await supabase
     .from('campaigns')
-    .select('id, settings')
+    .select('id, organisation_id, settings, preset_id')
     .eq('id', id)
     .maybeSingle();
   if (getErr) {
@@ -69,13 +76,29 @@ export async function onRequestPatch({ request, env, params }) {
   }
   if (!current) return jsonResponse({ error: 'Campaign not found' }, 404);
 
-  const merged = { ...(current.settings || {}), ...incomingSettings };
+  const updatePayload = {};
+  if (hasSettings) {
+    updatePayload.settings = { ...(current.settings || {}), ...incomingSettings };
+  }
+  if (incomingPresetId !== undefined) {
+    if (incomingPresetId) {
+      const { data: assignment, error: assignErr } = await supabase
+        .from('org_presets')
+        .select('preset_id')
+        .eq('organisation_id', current.organisation_id)
+        .eq('preset_id', incomingPresetId)
+        .maybeSingle();
+      if (assignErr) return jsonResponse({ error: 'preset assignment lookup failed' }, 500);
+      if (!assignment) return jsonResponse({ error: 'preset is not assigned to this organisation' }, 403);
+    }
+    updatePayload.preset_id = incomingPresetId;
+  }
 
   const { data: updated, error: updErr } = await supabase
     .from('campaigns')
-    .update({ settings: merged })
+    .update(updatePayload)
     .eq('id', id)
-    .select('id, organisation_id, name, slug, status, settings, created_at')
+    .select('id, organisation_id, name, slug, status, settings, preset_id, created_at')
     .single();
 
   if (updErr) {
@@ -88,7 +111,12 @@ export async function onRequestPatch({ request, env, params }) {
     action:     'update_campaign_settings',
     target:     id,
     success:    true,
-    detail:     { changed_keys: Object.keys(incomingSettings), before: current.settings, after: merged },
+    detail:     {
+      changed_keys: hasSettings ? Object.keys(incomingSettings) : [],
+      preset_change: incomingPresetId !== undefined ? { from: current.preset_id, to: incomingPresetId } : null,
+      before: { settings: current.settings, preset_id: current.preset_id },
+      after:  { settings: updatePayload.settings || current.settings, preset_id: 'preset_id' in updatePayload ? updatePayload.preset_id : current.preset_id },
+    },
     ...meta,
   });
 

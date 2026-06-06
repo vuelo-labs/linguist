@@ -154,6 +154,8 @@ test.describe('Admin config pane — v1 click-through', () => {
     await page.waitForLoadState('networkidle');
     await page.locator('#cfg-campaign-select').selectOption('cmp-1');
     await expect(page.locator('#cfg-policy-form')).toBeVisible();
+    // v1.1: knobs are now in an Advanced disclosure; open it first.
+    await page.locator('#cfg-policy-form details summary').filter({ hasText: /Advanced/i }).click();
     await expect(page.locator('.cfg-knob-label').first()).toContainText('Claude model');
     await expect(page.locator('.cfg-knob')).toHaveCount(4);
 
@@ -206,6 +208,7 @@ test.describe('Admin config pane — screenshots for review', () => {
     await page.waitForLoadState('networkidle');
     await page.locator('#cfg-campaign-select').selectOption('cmp-1');
     await page.locator('#cfg-policy-form').waitFor({ state: 'visible' });
+    await page.locator('#cfg-policy-form details summary').filter({ hasText: /Advanced/i }).click();
     await page.locator('input[data-knob="block_external_https"]').check();
     await page.getByRole('button', { name: 'Save policy' }).click();
     await page.locator('#cfg-policy-status.ok').waitFor();

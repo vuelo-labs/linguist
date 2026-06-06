@@ -156,31 +156,49 @@ export async function onRequestPost({ request, env }) {
     console.warn('launch: stale machine_id for token, respawning', tokenRow.fly_machine_id, 'state:', state);
   }
 
-  // ── Resolve per-campaign session policy ──────────────────────────────
-  // Per planning/control-spine.md § KNOBS, billable per-campaign knobs are
-  // overlaid onto the Fly machine env. The campaign's `settings` JSONB is
-  // validated at write time (admin/config/_knobs.js::validatePolicy); we
-  // trust it at read time and just translate to env var keys.
+  // ── Resolve per-campaign session policy + preset image ────────────────
+  // v1.1 preset path: campaign → preset → image_ref (Fly registry tag).
+  // Per-campaign settings JSONB stays as the runtime knob override surface.
+  // Both are merged into the Fly machine env at spawn (settings overlays
+  // preset.runtime_knobs).
   let policyEnv = {};
+  let presetImageRef = null;
   if (tokenRow.campaign_id) {
     const { data: campaign, error: campaignErr } = await supabase
       .from('campaigns')
-      .select('id, settings')
+      .select('id, settings, preset_id')
       .eq('id', tokenRow.campaign_id)
       .maybeSingle();
     if (campaignErr) {
       console.error('campaign lookup failed at spawn time', campaignErr.message);
-    } else if (campaign && campaign.settings) {
-      policyEnv = policyToEnvVars(campaign.settings);
+    } else if (campaign) {
+      if (campaign.settings) policyEnv = policyToEnvVars(campaign.settings);
+      if (campaign.preset_id) {
+        const { data: preset, error: presetErr } = await supabase
+          .from('presets')
+          .select('slug, current_image_tag')
+          .eq('id', campaign.preset_id)
+          .maybeSingle();
+        if (presetErr) {
+          console.error('preset lookup failed at spawn time', presetErr.message);
+        } else if (preset && preset.current_image_tag) {
+          presetImageRef = `registry.fly.io/${env.FLY_APP_NAME}:${preset.current_image_tag}`;
+        }
+      }
     }
   }
 
   // ── Spawn ─────────────────────────────────────────────────────────────
+  // Image precedence: preset's current_image_tag > env.FLY_IMAGE_REF (default).
+  // If a campaign references a preset that hasn't been built yet, we still
+  // spawn from the default — admin UI will warn the operator before they
+  // mint tokens to an unbuilt preset.
+  const imageRef = presetImageRef || env.FLY_IMAGE_REF;
   const machineConfig = {
     name: `cyborg-${token.slice(-12)}`,
     region,
     config: {
-      image: env.FLY_IMAGE_REF,
+      image: imageRef,
       env: {
         CANDIDATE_TOKEN:     token,
         SUBMISSION_ENDPOINT: env.SUBMISSION_ENDPOINT,
