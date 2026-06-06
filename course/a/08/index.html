@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agent Delegation and Briefing · Linguist</title>
-  <meta name="description" content="Decide when to delegate a task to a subagent, write a 5-part brief, and evaluate whether the result matched what you asked for.">
+  <meta name="description" content="Decide when to delegate a task to a subagent, write a 5-part brief and evaluate whether the result matched what you asked for.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
@@ -44,7 +44,7 @@
       <section class="module-hero">
         <p class="module-eyebrow">Advanced Practitioner · Module 08</p>
         <h1 class="module-title">Agent Delegation and Briefing</h1>
-        <p class="module-objective">After this, you can decide when to delegate a task to a subagent, write a 5-part brief that gives the subagent everything it needs, and evaluate whether the result matched what you asked for.</p>
+        <p class="module-objective">After this, you can decide when to delegate a task to a subagent, write a 5-part brief that gives the subagent everything it needs and evaluate whether the result matched what you asked for.</p>
       </section>
 
       <div class="module-body">
@@ -59,9 +59,9 @@
 
         <p>In E-05 you learned the habit of asking the AI to plan before it acts. In A-06 you formalised that into a deliberate planning step within Claude Code.</p>
 
-        <p>Delegation takes this further. You are not asking Claude Code to plan a task and then execute it in front of you. You are asking it to hand that task off to an entirely separate session — a subagent — which will run its own tool calls, produce its own results, and report back with a summary. You receive conclusions, not process.</p>
+        <p>Delegation takes this further. You are not asking Claude Code to plan a task and then execute it in front of you. You are asking it to hand that task off to an entirely separate session, a subagent, which will run its own tool calls, produce its own results and report back with a summary. You receive conclusions, not process.</p>
 
-        <p>This is powerful. It is also the most expensive thing you can do in Claude Code. Understanding when to use it — and when not to — is the final skill in the Advanced Practitioner track.</p>
+        <p>This is powerful. It is also the most expensive thing you can do in Claude Code. Understanding when to use it and when not to, is the final skill in the Advanced Practitioner track.</p>
 
         <h2>The delegation decision</h2>
 
@@ -97,7 +97,7 @@
           <li>Would the intermediate tool calls and results fill my main session with content I will not need again?</li>
         </ol>
 
-        <p>If the answer to all three is yes, delegation is likely worth it. If the answer to question 2 is no — you cannot evaluate the output — do the task in the main session so you can follow the reasoning.</p>
+        <p>If the answer to all three is yes, delegation is likely worth it. If the answer to question 2 is no, you cannot evaluate the output, do the task in the main session so you can follow the reasoning.</p>
 
         <h3>Without / With: The delegation decision in practice</h3>
 
@@ -111,7 +111,7 @@
 
         <h2>The 5-part brief</h2>
 
-        <p>A subagent starts every task with zero context. It has not seen your main session. It does not know what you have tried, what you have decided, or why this task matters. Brief it the way you would brief a capable colleague who has just walked into the room with no background.</p>
+        <p>A subagent starts every task with zero context. It has not seen your main session. It does not know what you have tried, what you have decided or why this task matters. Brief it the way you would brief a capable colleague who has just walked into the room with no background.</p>
 
         <p>A good brief has five parts:</p>
 
@@ -119,9 +119,9 @@
 
         <p><strong>2. Context</strong> — what the subagent needs to know that it cannot see from the files alone. Background on the project. Decisions already made. Things already tried. Why this task exists. This is what the subagent cannot infer and will get wrong without you telling it.</p>
 
-        <p><strong>3. Scope</strong> — what is in and what is explicitly out. If you want three competitors researched, name them and exclude everything else. If you want one section of a document reviewed, name it. Scope protects against the subagent doing more — or less — than you intended.</p>
+        <p><strong>3. Scope</strong> — what is in and what is explicitly out. If you want three competitors researched, name them and exclude everything else. If you want one section of a document reviewed, name it. Scope protects against the subagent doing more or less, than you intended.</p>
 
-        <p><strong>4. Output format</strong> — the structure, headings, and form of the response. If you want three sections, say so. If you want a table, describe it. If you want bullet points, name it. The subagent will default to its own format if you do not specify.</p>
+        <p><strong>4. Output format</strong> — the structure, headings and form of the response. If you want three sections, say so. If you want a table, describe it. If you want bullet points, name it. The subagent will default to its own format if you do not specify.</p>
 
         <p><strong>5. Length target</strong> — a word count or item count. "Under 300 words total." "One paragraph per topic." "A list of no more than 10 items." Without this, the subagent will produce whatever length feels complete to it — which may be much more than you need.</p>
 
@@ -133,7 +133,7 @@
 
         <p>Without: "Review the auth changes for security issues."</p>
 
-        <p>The subagent does not know which files, which changes, what has already been checked, or what format to report in.</p>
+        <p>The subagent does not know which files, which changes, what has already been checked or what format to report in.</p>
 
         <p>With:</p>
 
@@ -149,7 +149,7 @@
 
         <p>Without: "Research how competitors handle objections to their product."</p>
 
-        <p>The subagent does not know which competitors, which objections, what the research is for, or how to format the result.</p>
+        <p>The subagent does not know which competitors, which objections, what the research is for or how to format the result.</p>
 
         <p>With:</p>
 
@@ -157,7 +157,7 @@
           <p>Goal: Research the three most common objections to [product/service] and summarise how competitors address each one.</p>
           <p>Context: I am preparing a sales presentation for [audience]. The competitors to focus on are [names]. I need to understand how they position themselves, not to copy them, but to anticipate what the audience may have already heard.</p>
           <p>Scope: Only these three competitors. Do not recommend a response strategy — just summarise what they do.</p>
-          <p>Output format: Three sections, one per competitor. Each section: competitor name, the objection they address most prominently, and how they address it.</p>
+          <p>Output format: Three sections, one per competitor. Each section: competitor name, the objection they address most prominently and how they address it.</p>
           <p>Length target: Under 300 words total.</p>
         </blockquote>
 
@@ -169,17 +169,17 @@
 
         <p><strong>Task A:</strong> Research what the top 3 project management methodologies are and write two sentences summarising each one.</p>
 
-        <p>This is a good candidate for delegation. It is independent, the output is specific and bounded, you can evaluate whether the summaries are accurate, and the intermediate research would fill your main session with content you will not need again.</p>
+        <p>This is a good candidate for delegation. It is independent, the output is specific and bounded, you can evaluate whether the summaries are accurate and the intermediate research would fill your main session with content you will not need again.</p>
 
         <p><strong>Task B:</strong> Read through my draft proposal and tell me whether the argument is persuasive.</p>
 
-        <p>This is not a good candidate for delegation. Whether the argument is persuasive depends on your judgement, your knowledge of the audience, and your sense of what counts as persuasive in this context. A subagent's opinion is not the opinion you need. Do this in the main session.</p>
+        <p>This is not a good candidate for delegation. Whether the argument is persuasive depends on your judgement, your knowledge of the audience and your sense of what counts as persuasive in this context. A subagent's opinion is not the opinion you need. Do this in the main session.</p>
 
         <h3>Part 2 — Write and send a brief</h3>
 
         <p>Choose a task from your own work that is genuinely delegatable. It should pass the three-question test: independent, evaluable output, would generate noise in the main session.</p>
 
-        <p>Write the full 5-part brief using the template below. Do not skip parts. If you find yourself unable to write one of the parts, that is a signal: the task may not be as clear as you thought, or it may not be delegatable after all.</p>
+        <p>Write the full 5-part brief using the template below. Do not skip parts. If you find yourself unable to write one of the parts, that is a signal: the task may not be as clear as you thought or it may not be delegatable after all.</p>
 
         <p>Send the brief. When the subagent returns, evaluate the output against your brief:</p>
         <ul>
@@ -208,7 +208,7 @@
 
         <ul>
           <li>Goal — one sentence, starting with a noun or verb: "A summary of...", "A list of...", "An analysis of...". If it takes more than one sentence to state the goal, the task may need to be broken into two delegations.</li>
-          <li>Context — everything the subagent needs to do the job without coming back to ask. If you find yourself writing "as you know" or "as we discussed" — delete it. The subagent knows nothing. Start from scratch.</li>
+          <li>Context — everything the subagent needs to do the job without coming back to ask. If you find yourself writing "as you know" or "as we discussed", delete it. The subagent knows nothing. Start from scratch.</li>
           <li>Scope — name what is in and name what is out. "Only these three documents" or "any files in the research/ folder" or "do not include recommendations — only findings."</li>
           <li>Output format — be specific. If you want a table, describe its columns. If you want three sections, name them. If you want plain prose, say so.</li>
           <li>Length target — a ceiling, not a target. "Under 300 words" means the subagent should stop at 300 even if it has more to say. That constraint forces prioritisation.</li>
@@ -222,7 +222,7 @@
 
         <h2>Recovery path</h2>
 
-        <p>If the subagent output misses the brief — wrong scope, wrong format, wrong length, or an answer to a question you did not ask — do not re-delegate immediately.</p>
+        <p>If the subagent output misses the brief — wrong scope, wrong format, wrong length or an answer to a question you did not ask — do not re-delegate immediately.</p>
 
         <p>Bring the output back to your main session and ask: what did the brief fail to make clear? Was the scope too broad? Did the goal sentence allow more than one interpretation? Was the format underspecified?</p>
 
@@ -232,11 +232,11 @@
 
         <h2>You have completed the Advanced Practitioner track</h2>
 
-        <p>You now have the full Claude Code workflow: cost awareness, mental models, persistent instructions, session hygiene, context management, planning before execution, tool selection, and delegation.</p>
+        <p>You now have the full Claude Code workflow: cost awareness, mental models, persistent instructions, session hygiene, context management, planning before execution, tool selection and delegation.</p>
 
-        <p>These are not steps in a sequence to be done once. They are habits that compound. The practitioner who names tools in every message, separates planning from execution, and delegates only what genuinely warrants isolation will get consistently better results at consistently lower cost than one who relies on Claude Code's defaults.</p>
+        <p>These are not steps in a sequence to be done once. They are habits that compound. The practitioner who names tools in every message, separates planning from execution and delegates only what genuinely warrants isolation will get consistently better results at consistently lower cost than one who relies on Claude Code's defaults.</p>
 
-        <p>The next stage — the Builder track — is for those who want to design AI systems for others: building workflows, writing system prompts, defining tools, and architecting multi-agent pipelines via the API or Workbench. That track is coming.</p>
+        <p>The next stage, the Builder track, is for those who want to design AI systems for others: building workflows, writing system prompts, defining tools and architecting multi-agent pipelines via the API or Workbench. That track is coming.</p>
 
         <p>Before that: one more module. A-09 is the capstone — a real project, completed using the full toolkit you now have.</p>
 

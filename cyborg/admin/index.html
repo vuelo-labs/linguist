@@ -174,6 +174,19 @@
     </div>
   </div>
 
+  <!-- Fly orphan sweep -->
+  <div class="card" id="orphans-card">
+    <div class="toolbar">
+      <h2 style="margin:0;">Fly orphan sweep</h2>
+      <button class="btn small" onclick="sweepOrphans()" id="sweep-btn">Sweep orphans</button>
+    </div>
+    <p style="font-size:0.84rem; color:var(--w-muted); margin:0 0 10px;">
+      Lists every machine in <code>cyborg-candidate-pool</code> and destroys ones not referenced by a currently-active token. Use after long sessions or out-of-band Fly CLI experiments to keep idle cost down.
+    </p>
+    <div class="status" id="sweep-status"></div>
+    <div id="sweep-result"></div>
+  </div>
+
   <!-- Mint -->
   <div class="card" id="mint-card">
     <h2>Mint a token</h2>
@@ -186,6 +199,13 @@
         <label for="m-days">Days valid</label>
         <input type="number" id="m-days" value="8" min="1" max="30" />
       </div>
+    </div>
+    <div class="field">
+      <label for="m-campaign">Campaign (optional)</label>
+      <select id="m-campaign" onchange="updateMintCampaignWarn()">
+        <option value="">— no campaign (default image) —</option>
+      </select>
+      <div id="m-campaign-warn" style="display:none; margin-top:6px; padding:8px 10px; border-radius:6px; background:#fbe9e7; border:1px solid #e8b8af; color:#6e2618; font-size:0.82rem;"></div>
     </div>
     <div class="field">
       <label for="m-notes">Notes (optional)</label>
@@ -367,6 +387,14 @@
     background: var(--w-bg-input); padding: 8px 10px; border-radius: 6px;
     white-space: pre-wrap; word-break: break-all;
   }
+
+  /* V1.2 Phase D-C — pre-warmed machine pool sub-row on the Presets card.
+     The inline target_pool_size editor + pool-status pills are rendered by
+     renderPresetPoolRow() in config.js; these rules just nest the sub-row
+     visually under the preset's build row. */
+  .preset-pool-row > td { border-top: none; }
+  .pool-status .pill { vertical-align: middle; }
+  .pool-target-input { font-family: inherit; }
 </style>
 
 <script src="/cyborg/admin/config.js"></script>
@@ -376,10 +404,96 @@ document.addEventListener('DOMContentLoaded', () => {
   loadReports();
   // Load presets first so the campaign editor can render a preset dropdown
   // when a campaign is selected.
-  loadPresets().then(() => loadCampaignList());
+  loadPresets().then(() => loadCampaignList()).then(() => populateMintCampaignSelect());
   loadOrgListForCampaignForm();
   loadOrgListForPresetAssign();
 });
+
+// Mint card campaign picker — sourced from the same cached campaign list as the
+// Configuration → Policy editor, decorated with build-state pills.
+let MINT_CAMPAIGNS = [];
+let MINT_PRESETS_BY_ID = {};
+async function populateMintCampaignSelect() {
+  try {
+    const r = await api('/cyborg/admin/config/campaigns', { method: 'GET' });
+    if (!r.ok) return;
+    const d = await r.json();
+    MINT_CAMPAIGNS = d.campaigns || [];
+    MINT_PRESETS_BY_ID = {};
+    for (const c of MINT_CAMPAIGNS) {
+      if (c.presets) MINT_PRESETS_BY_ID[c.presets.id] = c.presets;
+    }
+    const sel = document.getElementById('m-campaign');
+    sel.innerHTML = '<option value="">— no campaign (default image) —</option>';
+    for (const c of MINT_CAMPAIGNS) {
+      const preset = c.preset_id ? MINT_PRESETS_BY_ID[c.preset_id] : null;
+      const built  = preset && preset.current_image_tag;
+      const tag = preset ? (built ? 'built' : 'preset NOT BUILT') : 'no preset';
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = `${c.name} (${tag})`;
+      opt.dataset.presetId = c.preset_id || '';
+      opt.dataset.presetBuilt = built ? '1' : '0';
+      sel.appendChild(opt);
+    }
+  } catch (_) { /* non-fatal: dropdown still works without campaigns */ }
+}
+
+async function sweepOrphans() {
+  const btn    = document.getElementById('sweep-btn');
+  const status = document.getElementById('sweep-status');
+  const result = document.getElementById('sweep-result');
+  if (!confirm('Sweep orphans? This will destroy every Fly machine in the candidate pool that is not tied to an active token. Cannot be undone.')) return;
+  btn.disabled = true; btn.textContent = 'Sweeping…';
+  status.className = 'status'; status.textContent = '';
+  result.innerHTML = '';
+  try {
+    const r = await api('/cyborg/admin/fly/cleanup-orphans', { method: 'POST', body: JSON.stringify({}) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.ok) {
+      status.className = 'status err';
+      status.textContent = d.error || d.detail || `Error (${r.status}).`;
+      return;
+    }
+    status.className = 'status ok';
+    status.textContent = `Scanned ${d.total}. Kept ${d.kept}. Destroyed ${d.destroyed}${d.errors.length ? ` (${d.errors.length} failed).` : '.'}`;
+    if (d.machines_destroyed && d.machines_destroyed.length) {
+      result.innerHTML = `
+        <table style="margin-top:12px;">
+          <thead><tr><th>Name</th><th>ID</th><th>State at sweep</th></tr></thead>
+          <tbody>${d.machines_destroyed.map(m =>
+            `<tr><td>${escapeHtml(m.name || '')}</td><td class="mono">${escapeHtml(m.id)}</td><td>${escapeHtml(m.state || '')}</td></tr>`
+          ).join('')}</tbody>
+        </table>`;
+    }
+    if (d.errors && d.errors.length) {
+      result.innerHTML += `
+        <div style="margin-top:10px; padding:8px 10px; border-radius:6px; background:#fbe9e7; border:1px solid #e8b8af; color:#6e2618; font-size:0.84rem;">
+          <strong>Errors:</strong>
+          <ul style="margin:4px 0 0 18px; padding:0;">${d.errors.map(e =>
+            `<li>${escapeHtml(e.machine_id)} — ${escapeHtml(e.error || e.body || `HTTP ${e.status}`)}</li>`
+          ).join('')}</ul>
+        </div>`;
+    }
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = `Network error: ${e.message || e}`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sweep orphans';
+  }
+}
+
+function updateMintCampaignWarn() {
+  const sel = document.getElementById('m-campaign');
+  const warn = document.getElementById('m-campaign-warn');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt && opt.dataset.presetId && opt.dataset.presetBuilt !== '1') {
+    warn.style.display = 'block';
+    warn.textContent = "This campaign's preset hasn't been built yet. The candidate will get the default image until Build is run from the Presets card above.";
+  } else {
+    warn.style.display = 'none';
+  }
+}
 
 async function api(path, opts = {}) {
   return fetch(path, {
@@ -396,6 +510,7 @@ async function mintToken() {
   const label = document.getElementById('m-label').value.trim();
   const days  = parseInt(document.getElementById('m-days').value, 10) || 8;
   const notes = document.getElementById('m-notes').value.trim();
+  const campaignId = document.getElementById('m-campaign').value || null;
   const status = document.getElementById('mint-status');
   const result = document.getElementById('mint-result');
   status.className = 'status'; status.textContent = '';
@@ -403,7 +518,7 @@ async function mintToken() {
 
   const r = await api('/cyborg/mint', {
     method: 'POST',
-    body: JSON.stringify({ label: label || null, days, notes: notes || null }),
+    body: JSON.stringify({ label: label || null, days, notes: notes || null, campaign_id: campaignId }),
   });
   const d = await r.json();
   if (!r.ok || !d.ok) {

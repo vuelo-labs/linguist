@@ -456,6 +456,7 @@ function renderPresetsList() {
         <td>${cfgEscapeHtml(lastAt)}</td>
         <td><button class="btn small" onclick="buildPreset('${cfgEscapeHtml(p.slug)}')" ${buildDisabled}>${buildLabel}</button></td>
       </tr>
+      ${renderPresetPoolRow(p)}
     `;
   }).join('');
   body.innerHTML = `
@@ -470,6 +471,173 @@ function renderPresetsList() {
       pollPresetBuildStatus(p.slug);
     }
   }
+}
+
+// ── Pool status sub-row (V1.2 Phase D-C) ──────────────────────────────────
+// Renders below each preset's build-status row. Shows the live pool count
+// + target/max, an inline target editor, a drain button, and a "View
+// machines" details toggle that lazy-loads the full per-machine table from
+// /cyborg/admin/presets/pool.
+//
+// Warmer-as-implicit-warm-signal: there is no explicit "Warm pool" button.
+// Setting target_pool_size > 0 IS the warm signal; the warmer process picks
+// it up on its next tick (~60s) and spawns up to `target` machines.
+
+function renderPresetPoolRow(p) {
+  const counts = p.pool_counts || { ready: 0, warming: 0, claimed: 0, destroying: 0, failed: 0 };
+  const target = p.target_pool_size == null ? 0 : p.target_pool_size;
+  const max = p.max_pool_size == null ? 5 : p.max_pool_size;
+  const slug = cfgEscapeHtml(p.slug);
+  const presetId = cfgEscapeHtml(p.id);
+
+  const pills = [
+    pillIfNonZero(counts.ready,      'active',  'ready'),
+    pillIfNonZero(counts.warming,    'pending', 'warming'),
+    pillIfNonZero(counts.claimed,    'used',    'claimed'),
+    pillIfNonZero(counts.destroying, 'revoked', 'destroying'),
+    pillIfNonZero(counts.failed,     'revoked', 'failed'),
+  ].filter(Boolean).join(' ');
+
+  const summary = pills || '<span style="font-size:0.82rem;color:var(--w-muted);">empty</span>';
+  const targetLabel = target === 0
+    ? '<span style="color:var(--w-muted);">target 0 (cold start)</span>'
+    : `target ${target}`;
+
+  return `
+    <tr class="preset-pool-row" data-preset-id="${presetId}">
+      <td colspan="5" style="padding-top:4px;padding-bottom:10px;background:var(--w-bg-card);">
+        <div class="pool-status" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:0.84rem;">
+          <span style="color:var(--w-muted);font-weight:500;">Pool:</span>
+          <span>${summary}</span>
+          <span style="color:var(--w-muted);">${targetLabel} (max ${max})</span>
+          <span style="flex:1;"></span>
+          <span style="display:inline-flex;gap:6px;align-items:center;">
+            <input type="number" class="pool-target-input" data-preset-id="${presetId}"
+                   value="${target}" min="0" max="${max}" step="1"
+                   style="width:64px;padding:4px 8px;font-size:0.84rem;" />
+            <button class="btn small" onclick="setPoolTarget('${presetId}','${slug}')">Update</button>
+            <button class="btn ghost small" onclick="drainPool('${presetId}','${slug}')">Drain pool</button>
+            <button class="btn ghost small" onclick="togglePoolMachines('${presetId}','${slug}')">View machines</button>
+          </span>
+        </div>
+        <div class="pool-machines" id="pool-machines-${presetId}" style="display:none;margin-top:10px;"></div>
+        <div class="pool-row-status" id="pool-status-${presetId}" style="margin-top:6px;font-size:0.82rem;"></div>
+      </td>
+    </tr>
+  `;
+}
+
+function pillIfNonZero(n, pillClass, label) {
+  if (!n) return '';
+  return `<span class="pill ${pillClass}">${n} ${label}</span>`;
+}
+
+function showPoolRowStatus(presetId, msg, kind) {
+  const el = document.getElementById(`pool-status-${presetId}`);
+  if (!el) return;
+  el.className = kind ? `status ${kind}` : 'pool-row-status';
+  el.style.marginTop = '6px';
+  el.style.fontSize = '0.82rem';
+  el.textContent = msg || '';
+}
+
+async function setPoolTarget(presetId, slug) {
+  const input = document.querySelector(`.pool-target-input[data-preset-id="${presetId}"]`);
+  if (!input) return;
+  const target = parseInt(input.value, 10);
+  if (!Number.isFinite(target) || target < 0) {
+    showPoolRowStatus(presetId, 'target must be a non-negative integer.', 'err');
+    return;
+  }
+  showPoolRowStatus(presetId, 'Saving…');
+  const r = await cfgApi('/cyborg/admin/presets/pool', {
+    method: 'POST',
+    body: JSON.stringify({ preset_id: presetId, action: 'set_target', target_pool_size: target }),
+  });
+  if (r.status === 401) { location.reload(); return; }
+  const d = await r.json().catch(() => null);
+  if (!r.ok || !d || !d.ok) {
+    const errBase = (d && d.error) || `Update failed (${r.status})`;
+    const errDetail = d && d.detail ? ` — ${d.detail}` : '';
+    showPoolRowStatus(presetId, errBase + errDetail, 'err');
+    return;
+  }
+  const msg = target === 0
+    ? `Pool target set to 0. Warmer will drain existing rows on next tick (~60s).`
+    : `Pool target set to ${target}. Warmer will spawn machines on next tick (~60s).`;
+  showPoolRowStatus(presetId, msg, 'ok');
+  await loadPresets();
+}
+
+async function drainPool(presetId, slug) {
+  if (!confirm(`Drain the pool for ${slug}? This destroys every ready/warming machine now. Cannot be undone.`)) return;
+  showPoolRowStatus(presetId, 'Draining…');
+  const r = await cfgApi('/cyborg/admin/presets/pool', {
+    method: 'POST',
+    body: JSON.stringify({ preset_id: presetId, action: 'drain' }),
+  });
+  if (r.status === 401) { location.reload(); return; }
+  const d = await r.json().catch(() => null);
+  if (!r.ok || !d || !d.ok) {
+    const errBase = (d && d.error) || `Drain failed (${r.status})`;
+    const errDetail = d && d.detail ? ` — ${d.detail}` : '';
+    showPoolRowStatus(presetId, errBase + errDetail, 'err');
+    return;
+  }
+  const errCount = Array.isArray(d.errors) ? d.errors.length : 0;
+  const okMsg = `Drained ${d.destroyed} machine(s)${errCount ? ` (${errCount} failed)` : ''}.`;
+  showPoolRowStatus(presetId, okMsg, errCount ? 'err' : 'ok');
+  await loadPresets();
+}
+
+async function togglePoolMachines(presetId, slug) {
+  const host = document.getElementById(`pool-machines-${presetId}`);
+  if (!host) return;
+  if (host.style.display === 'block') {
+    host.style.display = 'none';
+    return;
+  }
+  host.style.display = 'block';
+  host.innerHTML = '<div style="font-size:0.82rem;color:var(--w-muted);">Loading…</div>';
+  const r = await cfgApi(`/cyborg/admin/presets/pool?preset_id=${encodeURIComponent(presetId)}`, { method: 'GET' });
+  if (r.status === 401) { location.reload(); return; }
+  const d = await r.json().catch(() => null);
+  if (!r.ok || !d || !d.ok) {
+    host.innerHTML = `<div class="status err" style="display:block;">Failed to load (${r.status}).</div>`;
+    return;
+  }
+  const machines = d.machines || [];
+  if (machines.length === 0) {
+    host.innerHTML = '<div style="font-size:0.82rem;color:var(--w-muted);">No pool rows for this preset yet.</div>';
+    return;
+  }
+  const rows = machines.map((m) => {
+    const stateClass = ({
+      ready: 'active', warming: 'pending', claimed: 'used',
+      destroying: 'revoked', failed: 'revoked',
+    })[m.state] || 'expired';
+    const warmed = m.warmed_at ? new Date(m.warmed_at).toLocaleString('en-GB') : '—';
+    const claimed = m.claimed_at ? new Date(m.claimed_at).toLocaleString('en-GB') : '—';
+    const claimedBy = m.claimed_by_token ? cfgEscapeHtml(m.claimed_by_token) : '—';
+    return `
+      <tr>
+        <td><span class="pill ${stateClass}">${cfgEscapeHtml(m.state || '')}</span></td>
+        <td class="mono" style="font-size:0.76rem;">${cfgEscapeHtml(m.fly_machine_id || '')}</td>
+        <td>${cfgEscapeHtml(m.fly_machine_name || '')}</td>
+        <td style="font-size:0.78rem;">${warmed}</td>
+        <td style="font-size:0.78rem;">${claimed}</td>
+        <td class="mono" style="font-size:0.74rem;">${claimedBy}</td>
+      </tr>
+    `;
+  }).join('');
+  host.innerHTML = `
+    <table style="font-size:0.82rem;">
+      <thead><tr>
+        <th>State</th><th>Fly ID</th><th>Name</th><th>Warmed</th><th>Claimed</th><th>By token</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
 }
 
 async function buildPreset(slug) {

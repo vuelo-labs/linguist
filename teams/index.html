@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For teams — Linguist</title>
+  <meta name="description" content="Raise the floor on how your engineering team works with AI. Linguist + Cyborg gives you a measured baseline, a shared vocabulary, and a post-training reassessment.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .site-header { position: sticky; top: 0; z-index: 10; background: var(--w-bg); border-bottom: 1px solid var(--w-border); display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; }
+    .site-logo { font-family: var(--sans); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--w-muted); text-decoration: none; }
+    .site-header-links { display: flex; align-items: center; gap: 1rem; }
+    .site-header-link { font-family: var(--sans); font-size: 0.82rem; color: var(--w-muted); text-decoration: none; }
+    .site-header-link:hover { color: var(--w-text); }
+    .site-header-cta { font-family: var(--sans); font-size: 0.82rem; color: var(--w-accent); text-decoration: none; border: 1px solid var(--w-border); padding: 0.4rem 1rem; border-radius: 3px; }
+    .site-header-cta:hover { border-color: var(--w-accent); background: var(--w-accent-light); }
+    @media (max-width: 480px) { .site-header { padding: 0.85rem 1rem; } .site-header-link { display: none; } .site-header-link.site-header-link--primary { display: inline; } }
+
+    main { max-width: 760px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+    .eyebrow { font-family: var(--sans); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--w-muted); margin-bottom: 1rem; }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; margin-bottom: 1.5rem; }
+    .lede { font-family: var(--serif); font-size: 1.15rem; line-height: 1.55; color: var(--w-text); margin-bottom: 2.5rem; max-width: 620px; }
+    h2 { font-family: var(--serif); font-size: 1.5rem; margin-top: 3rem; margin-bottom: 1rem; }
+    p, li { font-family: var(--sans); font-size: 0.95rem; line-height: 1.65; color: var(--w-text); }
+    ul { padding-left: 1.25rem; margin-bottom: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0; margin: 3rem 0; border-top: 1px solid var(--w-border); }
+    .pillar { padding: 1.75rem 1.5rem 2rem 0; border-bottom: 1px solid var(--w-border); }
+    .pillar h3 { font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--w-muted); margin: 0 0 0.65rem; }
+    .pillar p { font-size: 0.95rem; line-height: 1.55; margin: 0; max-width: 36ch; }
+    @media (min-width: 720px) {
+      .pillars { grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--w-border); }
+      .pillar { padding: 1.75rem 1.5rem 1.75rem 0; border-bottom: 0; border-right: 1px solid var(--w-border); }
+      .pillar:last-child { border-right: 0; padding-right: 0; }
+      .pillar:not(:first-child) { padding-left: 1.5rem; }
+    }
+
+    .audio-card { border: 1px solid var(--w-border); border-radius: 6px; padding: 1.5rem 1.75rem; margin: 2rem 0 3rem; background: var(--w-bg-card); display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+    .audio-card-body { flex: 1; min-width: 220px; }
+    .audio-card-eyebrow { font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--w-muted); margin: 0 0 0.3rem; }
+    .audio-card-title { font-family: var(--serif); font-size: 1.1rem; line-height: 1.4; color: var(--w-text); margin: 0 0 0.4rem; }
+    .audio-card-meta { font-family: var(--sans); font-size: 0.8rem; color: var(--w-faint); margin: 0; }
+    .audio-card audio { flex: 1 1 320px; min-width: 280px; height: 40px; }
+    .audio-card-placeholder { flex: 1 1 320px; min-width: 240px; padding: 0.75rem 1rem; border: 1px dashed var(--w-border); border-radius: 4px; font-family: var(--sans); font-size: 0.82rem; color: var(--w-faint); text-align: center; background: var(--w-bg); }
+    .form-card { border: 1px solid var(--w-border); border-radius: 6px; padding: 2rem; margin-top: 2rem; background: var(--w-bg-card); }
+    .form-card label { display: block; font-family: var(--sans); font-size: 0.8rem; color: var(--w-muted); margin-bottom: 0.35rem; margin-top: 1rem; }
+    .form-card input, .form-card textarea { width: 100%; font-family: var(--sans); font-size: 0.95rem; padding: 0.6rem 0.75rem; border: 1px solid var(--w-border); border-radius: 4px; background: var(--w-bg); color: var(--w-text); box-sizing: border-box; }
+    .form-card textarea { min-height: 110px; resize: vertical; }
+    .form-card button { margin-top: 1.5rem; font-family: var(--sans); font-size: 0.9rem; font-weight: 500; color: var(--w-bg); background: var(--w-accent); padding: 0.7rem 1.5rem; border: 0; border-radius: 4px; cursor: pointer; }
+    .form-card button:hover { opacity: 0.9; }
+    .form-note { font-family: var(--sans); font-size: 0.8rem; color: var(--w-muted); margin-top: 1rem; }
+
+    .site-footer { border-top: 1px solid var(--w-border); padding: 2rem; text-align: center; font-family: var(--sans); font-size: 0.8rem; color: var(--w-muted); }
+    .site-footer a { color: var(--w-muted); }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">Linguist</a>
+    <div class="site-header-links">
+      <a href="/course" class="site-header-link site-header-link--primary">Course</a>
+      <a href="/guide" class="site-header-link">Guide</a>
+      <a href="/manifesto" class="site-header-link">Manifesto</a>
+      <a href="/teams" class="site-header-link">For teams</a>
+      <a href="/see" class="site-header-cta">Take the 2-min test →</a>
+    </div>
+  </header>
+
+  <main>
+    <p class="eyebrow">For teams</p>
+    <h1>There's a thing your team is doing that nobody's measuring. Here's how to measure it.</h1>
+    <p class="lede" style="max-width:560px;">It costs minutes per task, hours per week. Most teams don't have a name for it yet. Linguist does — and a way to measure it.</p>
+
+    <div class="audio-card">
+      <div class="audio-card-body">
+        <p class="audio-card-eyebrow">The long version</p>
+        <p class="audio-card-title">Listen as you walk — the full pitch in four minutes.</p>
+        <p class="audio-card-meta">Or scroll for the read.</p>
+      </div>
+      <!-- Once listen.mp3 exists, replace placeholder with: <audio controls preload="none" src="/teams/audio/listen.mp3"></audio> -->
+      <div class="audio-card-placeholder">Audio coming — recording in progress</div>
+    </div>
+
+    <div class="pillars">
+      <div class="pillar">
+        <h3>Lower context-switch cost</h3>
+        <p>Re-grounding the AI is the hidden tax. Trained people pay it less.</p>
+      </div>
+      <div class="pillar">
+        <h3>Floor-raising</h3>
+        <p>Every completer reaches Enabled. The long tail goes away.</p>
+      </div>
+      <div class="pillar">
+        <h3>Measured, not guessed</h3>
+        <p>Each person scored in a sandbox against a published rubric. Before. And after.</p>
+      </div>
+    </div>
+
+    <h2>Here's how it goes.</h2>
+    <ul>
+      <li><strong>Free baseline.</strong> Each person sits a session in our Cyborg sandbox. Out: bracket placement and an org-level capability map.</li>
+      <li><strong>Six-week programme.</strong> Cohort or internal-only. Tracks shaped by baseline gaps. Mid-programme survey catches drift.</li>
+      <li><strong>Reassessment.</strong> Same sandbox, same rubric. Bracket movement, behavioural deltas, wellbeing deltas in one report.</li>
+    </ul>
+
+    <p style="margin-top:1.5rem;font-size:0.85rem;color:var(--w-muted);">
+      Optional add-ons (Advanced upgrade for engineers, quarterly refresh) are in <a href="/teams/one-pager">the one-pager</a> — also useful to forward.
+    </p>
+
+    <h2>Talk to us</h2>
+    <div class="form-card">
+      <form id="team-lead-form">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Work email</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="company">Company</label>
+        <input type="text" id="company" name="company">
+
+        <label for="size">Team size</label>
+        <input type="text" id="size" name="size" placeholder="e.g. 25 people">
+
+        <label for="notes">What are you trying to solve?</label>
+        <textarea id="notes" name="notes" placeholder="Optional — what would success look like for your team?"></textarea>
+
+        <button type="submit" id="team-lead-submit">Request a baseline audit →</button>
+      </form>
+      <p class="form-note" id="team-lead-status">We'll reply within two business days. The baseline audit is free and non-committal.</p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    const SUPABASE_URL      = 'https://odnzrykfmfgdfybnmcfd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kbnpyeWtmbWZnZGZ5Ym5tY2ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDUyNDQsImV4cCI6MjA4ODk4MTI0NH0.c17-eCaIsnBAD1csQBxqYpwe-u0fd2KaJtVuWH6AR1Y';
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function sessionId() {
+      let id = sessionStorage.getItem('lng_sid');
+      if (!id) { id = crypto.randomUUID(); sessionStorage.setItem('lng_sid', id); }
+      return id;
+    }
+
+    document.getElementById('team-lead-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const form = ev.target;
+      const btn = document.getElementById('team-lead-submit');
+      const status = document.getElementById('team-lead-status');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      const payload = {
+        session_id: sessionId(),
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        company: form.company.value.trim() || null,
+        team_size: form.size.value.trim() || null,
+        notes: form.notes.value.trim() || null,
+        referrer: document.referrer || null,
+        user_agent: navigator.userAgent,
+      };
+      const { error } = await client.from('team_leads').insert(payload);
+      if (error) {
+        btn.disabled = false;
+        btn.textContent = 'Request a baseline audit →';
+        status.textContent = 'Something went wrong. Please email hello@vuelolabs.com and we\'ll pick it up from there.';
+        status.style.color = 'var(--w-accent)';
+        return;
+      }
+      form.style.display = 'none';
+      status.textContent = 'Thanks — got it. We\'ll be in touch within two business days.';
+      status.style.color = 'var(--w-text)';
+      status.style.fontSize = '0.95rem';
+    });
+  </script>
+
+  <footer class="site-footer">
+    <p>Linguist · Vuelo Labs · <a href="/teams">For teams</a> · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
+  </footer>
+</body>
+</html>

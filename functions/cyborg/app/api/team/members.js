@@ -29,24 +29,28 @@ export async function onRequestPost({ request, env }) {
 
   if (!callerMembership) return json({ ok: false, reason: 'not_a_member_of_org' }, 403);
 
-  // Pull org member user_ids.
+  // Pull org members (full membership rows, not just user_ids).
   const { data: members } = await admin
     .from('organisation_members')
-    .select('user_id')
-    .eq('organisation_id', orgId);
+    .select('id, user_id, role, joined_at')
+    .eq('organisation_id', orgId)
+    .order('joined_at', { ascending: true });
 
   if (!members?.length) return json({ ok: true, profiles: [] });
 
-  // Get email + metadata from auth.users via admin API.
+  // Hydrate each with email + full_name from auth.users via admin API.
   const profiles = [];
   for (const m of members) {
     try {
       const { data, error } = await admin.auth.admin.getUserById(m.user_id);
       if (error || !data?.user) continue;
       profiles.push({
-        user_id:   data.user.id,
-        email:     data.user.email,
-        full_name: data.user.user_metadata?.full_name || null,
+        id:         m.id,
+        user_id:    m.user_id,
+        role:       m.role,
+        joined_at:  m.joined_at,
+        email:      data.user.email,
+        full_name:  data.user.user_metadata?.full_name || null,
       });
     } catch (e) {
       console.error('member lookup failed', m.user_id, e?.message || e);

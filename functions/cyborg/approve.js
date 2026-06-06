@@ -8,7 +8,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { hmacHex, timingSafeEqual, generateToken, htmlPage, fetchDadJokes, originFromRequest,
-         writeAuditLog, requestMeta } from './_lib.js';
+         writeAuditLog, requestMeta, sendEmailViaResend } from './_lib.js';
 
 const TOKEN_DAYS = 8;       // 7-day window + 1-day grace
 
@@ -18,7 +18,7 @@ export async function onRequestGet({ request, env }) {
   const decision  = url.searchParams.get('decision') || '';
   const sig       = url.searchParams.get('sig') || '';
 
-  if (!env.ADMIN_SECRET || !env.TINES_REQUEST_WEBHOOK) {
+  if (!env.ADMIN_SECRET || !env.RESEND_API_KEY) {
     return htmlPage(503, 'Service not configured', 'Approval endpoint is not fully wired up. Contact the operator.');
   }
   if (!requestId || !['approve', 'reject'].includes(decision) || !sig) {
@@ -106,21 +106,43 @@ export async function onRequestGet({ request, env }) {
     const installUrl = `${origin}/cyborg/?t=${encodeURIComponent(token)}`;
     const installCmd = `curl -fsSL https://raw.githubusercontent.com/vuelo-labs/cyborg_versions/main/install.sh | bash -s ${token}`;
 
-    await forwardToTines(env, {
-      event_type:   'cyborg_approval',
-      request_id:   requestId,
-      name:         claimed.name,
-      email:        claimed.email,
-      token,
-      expires_at:   expiresAt,
-      install_url:  installUrl,
-      install_cmd:  installCmd,
+    // Candidate approval email — Resend (was Tines until 2026-06-05).
+    const esc = s => String(s).replace(/[&<>"']/g, c => (
+      { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+    ));
+    const expiresDateText = new Date(expiresAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const candidateHtml = `
+<!DOCTYPE html>
+<html><body style="font-family:-apple-system,'Inter',sans-serif; background:#FAF8F4; color:#2A2420; margin:0; padding:32px;">
+  <div style="max-width:560px; margin:0 auto; background:#F2EDE6; border:1px solid #E5DFD6; border-radius:14px; padding:32px;">
+    <h1 style="font-family:'Newsreader',Georgia,serif; font-size:1.5rem; font-weight:500; margin:0 0 14px; color:#6B5540;">You're approved, ${esc(claimed.name.split(' ')[0] || claimed.name)}</h1>
+    <p style="line-height:1.55; color:#5E5450; margin:0 0 14px;">Your Cyborg assessment access is ready. Click the button below to start. Your access window is open until <strong>${esc(expiresDateText)}</strong>.</p>
+    <p style="margin:24px 0;">
+      <a href="${esc(installUrl)}" style="display:inline-block; background:#6B5540; color:#FAF8F4; text-decoration:none; padding:12px 24px; border-radius:9px; font-weight:500;">Open Cyborg</a>
+    </p>
+    <p style="line-height:1.55; color:#5E5450; font-size:0.88rem; margin:0 0 8px;">Or paste this link into your browser:</p>
+    <p style="line-height:1.4; font-size:0.82rem; color:#5E5450; word-break:break-all; margin:0 0 18px;"><a href="${esc(installUrl)}" style="color:#6B5540;">${esc(installUrl)}</a></p>
+    <p style="line-height:1.55; color:#8A7D77; font-size:0.82rem; margin:18px 0 0;">If anything goes wrong, reply to this email and we'll sort it.</p>
+  </div>
+</body></html>`;
+    const sendRes = await sendEmailViaResend(env, {
+      to:      claimed.email,
+      subject: `Your Cyborg assessment access is ready`,
+      html:    candidateHtml,
     });
+    if (!sendRes.ok) {
+      console.error('approve: candidate email send failed', sendRes.error);
+      // Token is minted; we don't roll back. Surface the failure so the
+      // operator can re-send manually or chase up.
+      return htmlPage(500, 'Approved but email failed',
+        `Token minted (${token.slice(0,8)}...) but the candidate email send failed: ${sendRes.error || '?'}. Re-send manually if needed.`,
+        '#974f0c');
+    }
 
     return htmlPage(200, 'Approved', `Token minted and emailed to ${claimed.email}. Window: ${TOKEN_DAYS} days.`, '#2d5a26');
   }
 
-  // Rejection branch — pull a few dad jokes and forward to Tines.
+  // Rejection branch — pull dad jokes + send the apology email.
   const jokes = await fetchDadJokes(3);
   await supabase.from('cyborg_token_requests')
     .update({ rejection_jokes: jokes })
@@ -132,33 +154,27 @@ export async function onRequestGet({ request, env }) {
     detail: { email: claimed.email }, ...meta,
   });
 
-  await forwardToTines(env, {
-    event_type:   'cyborg_rejection',
-    request_id:   requestId,
-    name:         claimed.name,
-    email:        claimed.email,
-    dad_jokes:    jokes,
+  const escR = s => String(s).replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+  const jokesHtml = jokes.length
+    ? `<ul style="line-height:1.55; color:#5E5450; padding-left:20px; margin:0 0 14px;">${jokes.map(j => `<li style="margin:0 0 8px;">${escR(j)}</li>`).join('')}</ul>`
+    : '';
+  const rejectHtml = `
+<!DOCTYPE html>
+<html><body style="font-family:-apple-system,'Inter',sans-serif; background:#FAF8F4; color:#2A2420; margin:0; padding:32px;">
+  <div style="max-width:560px; margin:0 auto; background:#F2EDE6; border:1px solid #E5DFD6; border-radius:14px; padding:32px;">
+    <h1 style="font-family:'Newsreader',Georgia,serif; font-size:1.4rem; font-weight:500; margin:0 0 14px; color:#6B5540;">Sorry — not this time</h1>
+    <p style="line-height:1.55; color:#5E5450; margin:0 0 14px;">Thanks for asking about Cyborg. We can't get you in on this batch. By way of apology, here are some dad jokes:</p>
+    ${jokesHtml}
+    <p style="line-height:1.55; color:#8A7D77; font-size:0.85rem; margin:18px 0 0;">No hard feelings if these are bad.</p>
+  </div>
+</body></html>`;
+  await sendEmailViaResend(env, {
+    to:      claimed.email,
+    subject: `Cyborg access — not this time (with dad jokes)`,
+    html:    rejectHtml,
   });
 
   return htmlPage(200, 'Rejected', `Apology email (with dad jokes) sent to ${claimed.email}.`, '#6e2618');
-}
-
-async function forwardToTines(env, payload) {
-  // Inject the shared secret into the body too (alongside the header) so the
-  // Tines filter can use either mechanism — header capture isn't always
-  // exposed in every Tines UI version, the body field always is.
-  const augmented = { webhook_secret: env.TINES_WEBHOOK_SECRET || '', ...payload };
-  try {
-    const r = await fetch(env.TINES_REQUEST_WEBHOOK, {
-      method:  'POST',
-      headers: {
-        'Content-Type':            'application/json',
-        'X-Cyborg-Webhook-Secret': env.TINES_WEBHOOK_SECRET || '',
-      },
-      body:    JSON.stringify(augmented),
-    });
-    if (!r.ok) console.error('Tines forward returned', r.status);
-  } catch (e) {
-    console.error('Tines forward error:', e);
-  }
 }

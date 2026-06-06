@@ -44,18 +44,18 @@
       <section class="module-hero">
         <p class="module-eyebrow">Advanced Practitioner · Module 05</p>
         <h1 class="module-title">Session Hygiene</h1>
-        <p class="module-objective">After this, you can scope a Claude Code session to a single task, use <code>/clear</code> when changing direction, and recognise when a session has accumulated enough unrelated context that starting fresh will produce better results.</p>
+        <p class="module-objective">After this, you can scope a Claude Code session to a single task, use <code>/clear</code> when changing direction and recognise when a session has accumulated enough unrelated context that starting fresh will produce better results.</p>
       </section>
 
       <div class="module-body">
 
         <h2>What you already know</h2>
 
-        <p>In E-06 you learned that conversations have a useful lifespan. When the AI starts repeating itself, forgetting your instructions, or drifting from your topic, it is faster to start fresh than to keep correcting. You learned to write a re-seed — a clean opening message that carries forward what was valuable from the old conversation.</p>
+        <p>In E-06 you learned that conversations have a useful lifespan. When the AI starts repeating itself, forgetting your instructions or drifting from your topic, it is faster to start fresh than to keep correcting. You learned to write a re-seed — a clean opening message that carries forward what was valuable from the old conversation.</p>
 
         <p>In B-08 you learned that the AI mirrors your session's accumulated style and context. The longer a conversation runs, the more its earlier content shapes later responses — sometimes helpfully, sometimes not.</p>
 
-        <p>Session hygiene in Claude Code is the same principle, applied more deliberately. Claude Code sessions accumulate context from tool calls, file reads, and multiple turns. When you switch tasks without clearing that context, the earlier task's details become background noise that affects the new task's output. The <code>/clear</code> command is how you reset without leaving the terminal. The session scoping habit is how you avoid needing to clear in the first place.</p>
+        <p>Session hygiene in Claude Code is the same principle, applied more deliberately. Claude Code sessions accumulate context from tool calls, file reads and multiple turns. When you switch tasks without clearing that context, the earlier task's details become background noise that affects the new task's output. The <code>/clear</code> command is how you reset without leaving the terminal. The session scoping habit is how you avoid needing to clear in the first place.</p>
 
         <h2>The three practices</h2>
 
@@ -94,13 +94,13 @@
 
         <h3>Session scoping: Coding</h3>
 
-        <p>Without: A developer debugs a Redis connection issue, then in the same session switches to building a new API endpoint. The session grows long and compacts. The summary now contains extensive context about Redis connection strings, retry logic, and environment variables — none of which is relevant to the API endpoint. The model's response to the new task is subtly contaminated: it adds unnecessary connection error handling to the endpoint code because it is "aware" of connectivity problems that were already resolved.</p>
+        <p>Without: A developer debugs a Redis connection issue, then in the same session switches to building a new API endpoint. The session grows long and compacts. The summary now contains extensive context about Redis connection strings, retry logic and environment variables — none of which is relevant to the API endpoint. The model's response to the new task is subtly contaminated: it adds unnecessary connection error handling to the endpoint code because it is "aware" of connectivity problems that were already resolved.</p>
 
         <p>With: After the Redis issue is resolved, the developer types <code>/clear</code>. The new session starts with only the endpoint task in context. The output is clean.</p>
 
         <h3>Session scoping: Content and research</h3>
 
-        <p>Without: A researcher investigates two separate competitive topics in one session — first a competitor's new product, then a second competitor's pricing changes. By the time they reach the second topic, the model's context is full of details about the first competitor. The compaction blends the two. The model draws comparisons between the two competitors that were not requested, and occasionally attributes features to the wrong company.</p>
+        <p>Without: A researcher investigates two separate competitive topics in one session — first a competitor's new product, then a second competitor's pricing changes. By the time they reach the second topic, the model's context is full of details about the first competitor. The compaction blends the two. The model draws comparisons between the two competitors that were not requested and occasionally attributes features to the wrong company.</p>
 
         <p>With: Two sessions. One per topic. Each starts with a clean brief. The research stays separate.</p>
 
@@ -118,13 +118,13 @@
 
         <h3>Front-loading constraints: Content and research</h3>
 
-        <p>Without: A product manager asks for help preparing for a difficult stakeholder meeting. The model produces a full preparation document: context summary, stakeholder profiles, recommended framing, complete question-and-answer prep, and talking points. The PM wanted three bullet points addressing one specific objection.</p>
+        <p>Without: A product manager asks for help preparing for a difficult stakeholder meeting. The model produces a full preparation document: context summary, stakeholder profiles, recommended framing, complete question-and-answer prep and talking points. The PM wanted three bullet points addressing one specific objection.</p>
 
         <p>With:</p>
 
         <blockquote>
           <p>Give me three bullet points — one to two sentences each — addressing the most likely objection from finance to a six-week roadmap delay: that the team underestimated the work.</p>
-          <p>Do not give me background context, a prep document, or framing advice. Just the three bullets.</p>
+          <p>Do not give me background context, a prep document or framing advice. Just the three bullets.</p>
         </blockquote>
 
         <h2>Connecting to B-08 and E-06</h2>
@@ -133,7 +133,7 @@
 
         <p><strong>B-08 (Recovery)</strong> taught you what to do when output goes wrong. <code>/clear</code> and session scoping are how you prevent the conditions that make recovery necessary in the first place. Clean sessions produce cleaner output; you recover less often.</p>
 
-        <p><strong>E-06 (Migration and Re-seed)</strong> taught you to recognise when a conversation has run its useful course and to start fresh with a re-seed. In Claude Code, <code>/clear</code> gives you a faster version of the same reset — you do not need to open a new conversation, just type <code>/clear</code> and write your opening message for the new task as a re-seed would.</p>
+        <p><strong>E-06 (Migration and Re-seed)</strong> taught you to recognise when a conversation has run its useful course and to start fresh with a re-seed. In Claude Code, <code>/clear</code> gives you a faster version of the same reset, you do not need to open a new conversation, just type <code>/clear</code> and write your opening message for the new task as a re-seed would.</p>
 
         <p>The re-seed format from E-06 works here:</p>
 
@@ -151,8 +151,8 @@
           [Verb] [the specific thing]. [Stopping condition — format, length, scope].</p>
           <p>Constraints:<br>
           - [What to leave alone or not change]<br>
-          - [Any tool, method, or boundary restriction]<br>
-          - [What not to add, suggest, or include]</p>
+          - [Any tool, method or boundary restriction]<br>
+          - [What not to add, suggest or include]</p>
           <p>Done when: [specific description of the finished output]</p>
         </blockquote>
 
@@ -161,7 +161,7 @@
         <ul>
           <li>[one-sentence description]: One task. If it takes more than one sentence to describe, you are probably scoping more than one session's worth of work. Split it.</li>
           <li>[Verb]: Start with a precise verb. Fix, draft, summarise, research, read, compare. Not "help me with" or "look at."</li>
-          <li>[Stopping condition]: Tell Claude Code when to stop. Word count, number of items, a specific format, or an explicit "stop here and wait for my feedback."</li>
+          <li>[Stopping condition]: Tell Claude Code when to stop. Word count, number of items, a specific format or an explicit "stop here and wait for my feedback."</li>
           <li>[What to leave alone]: Any constraint that protects something you want preserved. Anything Claude Code might change by default that you do not want changed.</li>
           <li>[Done when]: Describe the finished state specifically enough that you will know when you have arrived. "A draft" is not specific. "A 150-word draft email, professional tone, no sign-off" is specific.</li>
         </ul>

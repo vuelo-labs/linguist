@@ -944,20 +944,20 @@
 
         <div class="g-term">
           <p class="g-name">Token</p>
-          <p class="g-def" data-human>The unit of measurement AI models use to process text. Roughly 3–4 characters, or about ¾ of a word. Every prompt you send and every response you receive costs tokens. Most models have a limit on how many tokens they can process in one conversation — this is called the context window. Tokens also determine cost: the more you send, the more you pay on paid plans.</p>
+          <p class="g-def" data-human>The unit of measurement AI models use to process text. Roughly 3–4 characters or about ¾ of a word. Every prompt you send and every response you receive costs tokens. Most models have a limit on how many tokens they can process in one conversation — this is called the context window. Tokens also determine cost: the more you send, the more you pay on paid plans.</p>
           <p class="g-def" data-machine>Unit of AI text processing. ~¾ word. Tokens in = cost + context consumed. Controls pricing and context limits.</p>
         </div>
 
         <div class="g-term">
           <p class="g-name">Prompt</p>
-          <p class="g-def" data-human>What you type and send to an AI model. A good prompt gives the model enough context to understand what you need, who you are, and what a good response looks like. A bad prompt is vague, assumes too much, or buries the actual request in unnecessary preamble.</p>
+          <p class="g-def" data-human>What you type and send to an AI model. A good prompt gives the model enough context to understand what you need, who you are and what a good response looks like. A bad prompt is vague, assumes too much or buries the actual request in unnecessary preamble.</p>
           <p class="g-def" data-machine>Your input to the model. Contains: role + task + format + constraints. Quality of output is bounded by quality of prompt.</p>
         </div>
 
         <div class="g-term">
           <p class="g-name">Model</p>
-          <p class="g-def" data-human>The AI itself — the thing doing the thinking. Different models (Claude Sonnet, GPT-4o, Gemini 2.5 Pro) have different strengths, speeds, and costs. Picking the right model for the right task is part of getting good results without overspending.</p>
-          <p class="g-def" data-machine>The AI system generating responses. Each model has different capability, latency, and cost tradeoffs. Match model to task complexity.</p>
+          <p class="g-def" data-human>The AI itself — the thing doing the thinking. Different models (Claude Sonnet, GPT-4o, Gemini 2.5 Pro) have different strengths, speeds and costs. Picking the right model for the right task is part of getting good results without overspending.</p>
+          <p class="g-def" data-machine>The AI system generating responses. Each model has different capability, latency and cost tradeoffs. Match model to task complexity.</p>
         </div>
 
         <div class="g-term">
@@ -975,7 +975,7 @@
         <div class="g-term">
           <p class="g-name">System Prompt</p>
           <p class="g-def" data-human>A hidden block of instructions that runs before the conversation starts — usually set by the developer or platform, not visible to you as a user. When you set Custom Instructions on ChatGPT or Project instructions on Claude, they get compiled into the system prompt behind the scenes. You don't usually write these directly unless you're building your own AI tool.</p>
-          <p class="g-def" data-machine>Pre-conversation instruction block. Set by developer/platform. Custom Instructions, Gems, and CLAUDE.md all compile into the effective system prompt.</p>
+          <p class="g-def" data-machine>Pre-conversation instruction block. Set by developer/platform. Custom Instructions, Gems and CLAUDE.md all compile into the effective system prompt.</p>
         </div>
 
         <div class="g-term">
@@ -986,13 +986,13 @@
 
         <div class="g-term">
           <p class="g-name">Hallucination</p>
-          <p class="g-def" data-human>When an AI confidently states something that is wrong or made up — a date that doesn't exist, a citation for a paper that was never written, a function that doesn't exist in a library. It sounds plausible because the model is very good at generating fluent, confident text. Hallucinations are more likely when asking about very recent events, niche topics, or when the model is guessing at specifics.</p>
+          <p class="g-def" data-human>When an AI confidently states something that is wrong or made up — a date that doesn't exist, a citation for a paper that was never written, a function that doesn't exist in a library. It sounds plausible because the model is very good at generating fluent, confident text. Hallucinations are more likely when asking about very recent events, niche topics or when the model is guessing at specifics.</p>
           <p class="g-def" data-machine>Model output that is confident but factually incorrect. Higher risk: recent events, niche topics, specific citations. Mitigate: ask for sources, verify outputs, use retrieval-augmented tools.</p>
         </div>
 
         <div class="g-term">
           <p class="g-name">Reasoning Model</p>
-          <p class="g-def" data-human>A type of AI model that takes extra time to think through a problem before responding — working through intermediate steps internally before giving you an answer. This makes them slower and more expensive, but much better at logic, maths, strategy, and complex multi-step problems. Examples: Claude with extended thinking, OpenAI's o3, Google's Gemini 2.5 Pro with thinking enabled.</p>
+          <p class="g-def" data-human>A type of AI model that takes extra time to think through a problem before responding — working through intermediate steps internally before giving you an answer. This makes them slower and more expensive, but much better at logic, maths, strategy and complex multi-step problems. Examples: Claude with extended thinking, OpenAI's o3, Google's Gemini 2.5 Pro with thinking enabled.</p>
           <p class="g-def" data-machine>Model that performs internal chain-of-thought before responding. Higher latency + cost. Better at: logic, maths, planning, multi-step tasks. Examples: o3, Claude extended thinking, Gemini 2.5 Pro thinking.</p>
         </div>
 
@@ -1004,14 +1004,14 @@
 
         <div class="g-term">
           <p class="g-name">Temperature</p>
-          <p class="g-def" data-human>A setting that controls how creative or predictable the model's responses are. Low temperature (near 0) means the model picks the most likely next word at every step — useful for factual, consistent, or structured output. High temperature means more randomness and creativity — useful for brainstorming or creative writing. Most chat interfaces hide this setting, but it's useful to know it exists.</p>
+          <p class="g-def" data-human>A setting that controls how creative or predictable the model's responses are. Low temperature (near 0) means the model picks the most likely next word at every step — useful for factual, consistent or structured output. High temperature means more randomness and creativity — useful for brainstorming or creative writing. Most chat interfaces hide this setting, but it's useful to know it exists.</p>
           <p class="g-def" data-machine>Controls output randomness. Low (→0): deterministic, consistent, factual. High (→1+): creative, varied. Usually abstracted in chat UIs. Relevant when using the API directly.</p>
         </div>
 
         <div class="g-term">
           <p class="g-name">Re-seeding</p>
-          <p class="g-def" data-human>The practice of starting a new conversation thread and pasting in a summary of the context from a previous one. Useful when a thread has gone stale, hit the context limit, or wandered off track. Instead of trying to salvage a broken conversation, you start fresh and give the model exactly what it needs to know — no more, no less.</p>
-          <p class="g-def" data-machine>Starting a new thread with a distilled context summary from a previous one. Use when: thread is stale, context limit hit, or quality degraded. Carry signal, drop noise.</p>
+          <p class="g-def" data-human>The practice of starting a new conversation thread and pasting in a summary of the context from a previous one. Useful when a thread has gone stale, hit the context limit or wandered off track. Instead of trying to salvage a broken conversation, you start fresh and give the model exactly what it needs to know — no more, no less.</p>
+          <p class="g-def" data-machine>Starting a new thread with a distilled context summary from a previous one. Use when: thread is stale, context limit hit or quality degraded. Carry signal, drop noise.</p>
         </div>
 
       </div>
@@ -1044,7 +1044,7 @@
                 <span data-machine>Goal: better results per conversation</span>
               </p>
               <p class="orient-step-body">
-                <span data-human>Not by writing more — by writing better. The skill is clear communication: the right context, a specific ask, and knowing what a good answer looks like before you ask. That's it.</span>
+                <span data-human>Not by writing more — by writing better. The skill is clear communication: the right context, a specific ask and knowing what a good answer looks like before you ask. That's it.</span>
                 <span data-machine>Clarity + context control + result recognition. Communication fundamentals applied to AI.</span>
               </p>
             </div>
@@ -1141,14 +1141,14 @@
         </h1>
 
         <p class="subtext">
-          <span data-human>Each AI platform has different quirks, different settings, and a different feel. Pick the one you want to learn on — we'll walk you through getting set up before the first exercise starts.</span>
+          <span data-human>Each AI platform has different quirks, different settings and a different feel. Pick the one you want to learn on, we'll walk you through getting set up before the first exercise starts.</span>
           <span data-machine>Determines setup steps and exercise prompts. Choose one to continue.</span>
         </p>
 
         <div class="platform-grid">
           <button class="platform-card" data-p="claude" onclick="selectPlatform('claude',this)">
             <span class="platform-card-name">Claude</span>
-            <span class="platform-card-desc">Best for writing, reasoning, and long context. Most generous free tier.</span>
+            <span class="platform-card-desc">Best for writing, reasoning and long context. Most generous free tier.</span>
           </button>
           <button class="platform-card" data-p="chatgpt" onclick="selectPlatform('chatgpt',this)">
             <span class="platform-card-name">ChatGPT</span>
@@ -1382,7 +1382,7 @@
           human: 'Best balance of speed and capability. Sharp enough for complex work, fast enough for everyday tasks. Start here.',
           machine: 'Recommended. Best speed/quality ratio.' },
         { id: 'claude-opus-4', label: 'Claude Opus', rec: false,
-          human: 'Most capable model. Best for hard reasoning, nuanced writing, and anything where quality matters more than speed.',
+          human: 'Most capable model. Best for hard reasoning, nuanced writing and anything where quality matters more than speed.',
           machine: 'Most capable. Slower + pricier. Use for hard tasks.' },
         { id: 'claude-haiku-4-5', label: 'Claude Haiku', rec: false,
           human: 'Fastest and cheapest. Good for quick questions and high-volume tasks where speed matters more than depth.',
@@ -1390,10 +1390,10 @@
       ],
       chatgpt: [
         { id: 'gpt-4o', label: 'GPT-4o', rec: true,
-          human: "OpenAI's flagship model. Handles text, images, and voice. Fast and capable — the right default for most tasks.",
+          human: "OpenAI's flagship model. Handles text, images and voice. Fast and capable — the right default for most tasks.",
           machine: 'Recommended. Flagship. Multimodal.' },
         { id: 'o3', label: 'o3', rec: false,
-          human: 'A reasoning model — slower but thinks through complex problems step by step. Use it for strategy, maths, or careful planning.',
+          human: 'A reasoning model — slower but thinks through complex problems step by step. Use it for strategy, maths or careful planning.',
           machine: 'Reasoning model. Slower. Use for logic/strategy.' },
         { id: 'gpt-4o-mini', label: 'GPT-4o mini', rec: false,
           human: 'Fast and cheap. Good for quick questions and everyday tasks that do not need the full model.',
@@ -1413,7 +1413,7 @@
           human: 'Default in Claude Code. Fast enough for interactive sessions, capable enough for complex refactors. Start here.',
           machine: 'Default. Best balance for interactive coding.' },
         { id: 'claude-opus-4', label: 'Claude Opus', rec: false,
-          human: 'For hard architecture problems, complex debugging, and anything where you need the most capable model. Uses more of your budget.',
+          human: 'For hard architecture problems, complex debugging and anything where you need the most capable model. Uses more of your budget.',
           machine: 'Most capable. Architecture + hard bugs. More expensive.' },
       ],
     };
@@ -1422,15 +1422,15 @@
     var P = {
       claude: {
         name: 'Claude',
-        pitch_human: 'Excellent for writing, research, and working through complex problems. Has the most generous free tier for getting started.',
+        pitch_human: 'Excellent for writing, research and working through complex problems. Has the most generous free tier for getting started.',
         pitch_machine: 'Writing, research, long context. Best free tier.',
         signup: 'https://claude.ai',
         signup_label: 'claude.ai →',
-        free_human: 'Free tier gives you Claude in a standard conversation — enough to complete this course. <strong>Claude Pro ($20/mo)</strong> adds longer context, priority access, and Projects. Projects are the most useful feature in this course.',
+        free_human: 'Free tier gives you Claude in a standard conversation — enough to complete this course. <strong>Claude Pro ($20/mo)</strong> adds longer context, priority access and Projects. Projects are the most useful feature in this course.',
         free_machine: 'Free: standard access. Pro ($20/mo): Projects + longer context. Projects needed for Ex. 1.',
         first_human: 'Go to <strong>Settings → Profile</strong> and fill in "What would you like Claude to know about you?" — this follows you across every conversation. Then create a <strong>Project</strong> for any recurring work and add instructions there. These two settings are your foundation for everything that follows.',
         first_machine: '1. Settings → Profile → fill in your context. 2. Create a Project → add instructions. Do both before Ex. 1.',
-        mcp_human: 'Claude invented MCP (Model Context Protocol) — a way to connect it to external tools like your calendar, codebase, or browser so it can act, not just respond. You don\'t need this for the course. When you\'re ready: <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">modelcontextprotocol.io →</a>',
+        mcp_human: 'Claude invented MCP (Model Context Protocol) — a way to connect it to external tools like your calendar, codebase or browser so it can act, not just respond. You don\'t need this for the course. When you\'re ready: <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">modelcontextprotocol.io →</a>',
         mcp_machine: 'MCP available. Connects Claude to external tools. Not required for this course. <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Docs →</a>',
       },
       chatgpt: {
@@ -1439,22 +1439,22 @@
         pitch_machine: 'General purpose. Largest ecosystem.',
         signup: 'https://chat.openai.com',
         signup_label: 'chat.openai.com →',
-        free_human: 'Free tier is usable but limited. <strong>ChatGPT Plus ($20/mo)</strong> unlocks GPT-4o, longer context, and Custom GPTs. Worth it if you\'ll use it regularly.',
+        free_human: 'Free tier is usable but limited. <strong>ChatGPT Plus ($20/mo)</strong> unlocks GPT-4o, longer context and Custom GPTs. Worth it if you\'ll use it regularly.',
         free_machine: 'Free: limited. Plus ($20/mo): GPT-4o + Custom GPTs.',
-        first_human: 'Go to <strong>Settings → Personalisation → Custom Instructions</strong>. Fill in both fields: what you want it to know about you, and how you want it to respond. These apply to every conversation — set them before your first exercise.',
+        first_human: 'Go to <strong>Settings → Personalisation → Custom Instructions</strong>. Fill in both fields: what you want it to know about you and how you want it to respond. These apply to every conversation, set them before your first exercise.',
         first_machine: 'Settings → Personalisation → Custom Instructions. Fill both fields. Do this first.',
         mcp_human: 'ChatGPT now supports MCP servers — a way to connect it to external tools without copy-pasting data in. Optional for now. <a href="https://openai.com/index/model-context-protocol" target="_blank" rel="noopener">Learn more →</a>',
         mcp_machine: 'MCP supported. Optional. <a href="https://openai.com/index/model-context-protocol" target="_blank" rel="noopener">Docs →</a>',
       },
       gemini: {
         name: 'Gemini',
-        pitch_human: "Google's AI assistant. Best choice if you're already in Google Workspace — it connects to Drive, Gmail, and Calendar natively, without any extra setup.",
+        pitch_human: "Google's AI assistant. Best choice if you're already in Google Workspace, it connects to Drive, Gmail and Calendar natively, without any extra setup.",
         pitch_machine: 'Best with Google Workspace. Native Drive/Gmail/Calendar access.',
         signup: 'https://gemini.google.com',
         signup_label: 'gemini.google.com →',
         free_human: 'Free tier covers the basics. <strong>Gemini Advanced</strong> (Google One AI Premium, ~$20/mo) unlocks Gems — saved configurations that act as persistent instructions. Gems are important for this course.',
         free_machine: 'Free: basic. Advanced (~$20/mo): Gems (persistent instructions). Gems needed for Ex. 1.',
-        first_human: 'If you have Gemini Advanced: open the left sidebar and create a <strong>Gem</strong> for your main use case — give it a name, instructions, and a tone. If you\'re on free: go to Settings and connect your Google apps via Extensions.',
+        first_human: 'If you have Gemini Advanced: open the left sidebar and create a <strong>Gem</strong> for your main use case — give it a name, instructions and a tone. If you\'re on free: go to Settings and connect your Google apps via Extensions.',
         first_machine: 'Advanced: left sidebar → New Gem → add instructions. Free: Settings → Extensions → connect Google apps.',
         mcp_human: 'Google has official MCP servers for BigQuery and Google Cloud services. Only relevant if you work in Google infrastructure. <a href="https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services" target="_blank" rel="noopener">Learn more →</a>',
         mcp_machine: 'MCP: BigQuery + GCP only. <a href="https://cloud.google.com/blog/products/ai-machine-learning/announcing-official-mcp-support-for-google-services" target="_blank" rel="noopener">Docs →</a>',
@@ -1467,22 +1467,22 @@
         signup_label: 'tines.com →',
         free_human: '<strong>Community Edition is free</strong> — includes Workbench and MCP server creation. More than enough to run this course and start building real automations alongside it.',
         free_machine: 'Free (Community Edition). Includes Workbench + MCP.',
-        first_human: 'In Workbench, click the <strong>settings icon (top right)</strong> and open Custom Instructions. Important: unlike other platforms, changes here apply immediately to <em>all</em> existing conversations — not just new ones. Set your role, your connected tools, what to prioritise, and what to avoid.',
+        first_human: 'In Workbench, click the <strong>settings icon (top right)</strong> and open Custom Instructions. Important: unlike other platforms, changes here apply immediately to <em>all</em> existing conversations — not just new ones. Set your role, your connected tools, what to prioritise and what to avoid.',
         first_machine: 'Settings (top right) → Custom Instructions. Note: applies to ALL existing conversations immediately. Set role + constraints.',
         mcp_human: 'Tines is unique — you can <em>build</em> MCP servers directly from your own storyboards. Any Tines workflow can become a tool for an AI model. Available free on all plans. <a href="https://www.tines.com/docs/actions/templates/mcp-server/" target="_blank" rel="noopener">Learn more →</a>',
         mcp_machine: 'Can build MCP servers from storyboards. Free on all plans. <a href="https://www.tines.com/docs/actions/templates/mcp-server/" target="_blank" rel="noopener">Docs →</a>',
       },
       claudecode: {
         name: 'Claude Code',
-        pitch_human: 'Claude embedded in your terminal. It reads your codebase, writes and runs code, and executes tasks — this is a fundamentally different discipline from chat prompting.',
+        pitch_human: 'Claude embedded in your terminal. It reads your codebase, writes and runs code and executes tasks — this is a fundamentally different discipline from chat prompting.',
         pitch_machine: 'Claude in terminal. Reads + writes + runs code. Not chat.',
         signup: 'https://docs.anthropic.com/en/docs/claude-code',
         signup_label: 'Setup docs →',
         free_human: 'Requires a Claude Pro or API account. Usage is metered — a typical session costs cents, not dollars. Install via npm: <code>npm install -g @anthropic-ai/claude-code</code>',
         free_machine: 'Requires Pro or API key. Metered. Install: <code>npm install -g @anthropic-ai/claude-code</code>',
-        first_human: 'Create a <strong>CLAUDE.md</strong> file in your project root. This is your persistent context — it\'s version-controlled with the project and read at the start of every session. Cover: what the project is, the stack, conventions to follow, what not to touch, and what "done" looks like.',
+        first_human: 'Create a <strong>CLAUDE.md</strong> file in your project root. This is your persistent context — it\'s version-controlled with the project and read at the start of every session. Cover: what the project is, the stack, conventions to follow, what not to touch and what "done" looks like.',
         first_machine: 'Create <code>CLAUDE.md</code> in project root. Include: project overview, stack, conventions, out-of-bounds files, definition of done.',
-        mcp_human: 'Claude Code has deep MCP support — connect it to GitHub, databases, browser tools, and more. MCP servers run locally and give the agent access to your real environment. <a href="https://docs.anthropic.com/en/docs/claude-code/mcp" target="_blank" rel="noopener">Learn more →</a>',
+        mcp_human: 'Claude Code has deep MCP support — connect it to GitHub, databases, browser tools and more. MCP servers run locally and give the agent access to your real environment. <a href="https://docs.anthropic.com/en/docs/claude-code/mcp" target="_blank" rel="noopener">Learn more →</a>',
         mcp_machine: 'MCP: GitHub, DBs, browser, local tools. <a href="https://docs.anthropic.com/en/docs/claude-code/mcp" target="_blank" rel="noopener">Docs →</a>',
       },
     };

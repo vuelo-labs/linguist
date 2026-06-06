@@ -130,14 +130,14 @@
     throw new Error('no_invite');
   }
 
-  // Look up the invite. If invalid/expired/used, show the invalid-invite state.
-  const { data: invite } = await supabase
-    .from('organisation_invitations')
-    .select('email, organisation_id, organisations(name)')
-    .eq('token', inviteToken)
-    .is('accepted_at', null)
-    .gt('expires_at', new Date().toISOString())
-    .maybeSingle();
+  // Look up the invite via service-role endpoint (the invitee has no auth
+  // context yet, so the table's RLS would block a direct query).
+  let invite = null;
+  try {
+    const r = await fetch(`/cyborg/auth/invite-lookup?token=${encodeURIComponent(inviteToken)}`);
+    const d = await r.json();
+    if (r.ok && d.ok) invite = d;
+  } catch (_) { /* invite stays null */ }
 
   if (!invite) {
     document.getElementById('invalid-state').style.display = 'block';
@@ -145,7 +145,7 @@
   }
 
   document.getElementById('invited-state').style.display = 'block';
-  document.getElementById('invite-org-name').textContent = invite.organisations?.name || 'this organisation';
+  document.getElementById('invite-org-name').textContent = invite.org_name;
   document.getElementById('email').value = invite.email;
   document.getElementById('email').readOnly = true;
 

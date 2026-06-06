@@ -11,6 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   hmacHex, jsonResponse, originFromRequest,
   isDisposableEmail, checkIpRateLimit, checkDailyCap, findOpenRequestByEmail,
+  sendEmailViaResend, cleanInput,
 } from './_lib.js';
 
 const MAX_NAME    = 200;
@@ -19,8 +20,13 @@ const MAX_NOTES   = 2000;
 const MAX_BODY_KB = 8;
 
 export async function onRequestPost({ request, env }) {
-  if (!env.TINES_REQUEST_WEBHOOK) return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
-  if (!env.ADMIN_SECRET)          return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
+  // 2026-06-05: ported from Tines (capped at free-tier 3-story/2-flow) to
+  // Resend (already in use for team invites). ADMIN_EMAIL is who gets the
+  // approval notification — defaults to Liam's work address but should be
+  // set explicitly per deployment via wrangler.
+  if (!env.RESEND_API_KEY) return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
+  if (!env.ADMIN_SECRET)   return jsonResponse({ ok: false, reason: 'not_configured' }, 503);
+  const adminEmail = env.ADMIN_EMAIL || 'liam@vuelolabs.com';
 
   const ctype = request.headers.get('content-type') || '';
   if (!ctype.includes('application/json')) return jsonResponse({ ok: false, reason: 'bad_content_type' }, 415);
@@ -31,9 +37,9 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = JSON.parse(raw); } catch { return jsonResponse({ ok: false, reason: 'bad_json' }, 400); }
 
-  const name  = clean(body.name,  MAX_NAME);
-  const email = clean(body.email, MAX_EMAIL);
-  const notes = clean(body.notes, MAX_NOTES);
+  const name  = cleanInput(body.name,  MAX_NAME);
+  const email = cleanInput(body.email, MAX_EMAIL);
+  const notes = cleanInput(body.notes, MAX_NOTES);
   const hp    = (body.website || '').toString();   // honeypot
 
   if (hp)              return jsonResponse({ ok: true });   // pretend success, drop silently
@@ -115,47 +121,37 @@ export async function onRequestPost({ request, env }) {
   const approveUrl = `${origin}/cyborg/approve?req=${requestId}&decision=approve&sig=${approveSig}`;
   const rejectUrl  = `${origin}/cyborg/approve?req=${requestId}&decision=reject&sig=${rejectSig}`;
 
-  const tinesPayload = {
-    // Defence-in-depth shared secret — Tines filters on this BEFORE any
-    // branch fires. Also sent in X-Cyborg-Webhook-Secret header below.
-    webhook_secret: env.TINES_WEBHOOK_SECRET || '',
-    type:           'cyborg_token_request',
-    event_type:     'cyborg_token_request',   // for Tines branching
-    request_id:     requestId,
-    submitted_at:   data.created_at,
-    name, email, notes,
-    request_meta:   { ip, country, user_agent: ua },
-    approve_url:    approveUrl,
-    reject_url:     rejectUrl,
-  };
-
-  try {
-    const r = await fetch(env.TINES_REQUEST_WEBHOOK, {
-      method:  'POST',
-      headers: {
-        'Content-Type':            'application/json',
-        'X-Cyborg-Webhook-Secret': env.TINES_WEBHOOK_SECRET || '',
-      },
-      body:    JSON.stringify(tinesPayload),
-    });
-    if (!r.ok) {
-      console.error('Tines webhook returned', r.status);
-      return jsonResponse({ ok: false, reason: 'forward_failed' }, 502);
-    }
-  } catch (e) {
-    console.error('Tines webhook error', e);
-    return jsonResponse({ ok: false, reason: 'forward_error' }, 502);
+  // Admin notification email — Liam clicks approve/reject in this email.
+  const esc = s => String(s).replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+  const adminHtml = `
+<!DOCTYPE html>
+<html><body style="font-family:-apple-system,'Inter',sans-serif; background:#FAF8F4; color:#2A2420; margin:0; padding:32px;">
+  <div style="max-width:560px; margin:0 auto; background:#F2EDE6; border:1px solid #E5DFD6; border-radius:14px; padding:32px;">
+    <h1 style="font-family:'Newsreader',Georgia,serif; font-size:1.4rem; font-weight:500; margin:0 0 12px; color:#6B5540;">New Cyborg token request</h1>
+    <p style="line-height:1.55; color:#5E5450; margin:0 0 8px;"><strong>${esc(name)}</strong> &lt;${esc(email)}&gt;</p>
+    ${notes ? `<p style="line-height:1.55; color:#5E5450; margin:0 0 14px; padding:12px 14px; background:rgba(255,255,255,0.5); border-radius:8px; font-size:0.92rem;">${esc(notes).replace(/\n/g, '<br>')}</p>` : ''}
+    <p style="line-height:1.55; color:#8A7D77; font-size:0.85rem; margin:0 0 20px;">From ${esc(country || '?')} &middot; ${esc(ip || 'ip?')} &middot; request <code>${esc(requestId.slice(0, 8))}</code></p>
+    <p style="margin:24px 0;">
+      <a href="${esc(approveUrl)}" style="display:inline-block; background:#6B5540; color:#FAF8F4; text-decoration:none; padding:11px 22px; border-radius:9px; font-weight:500; margin-right:8px;">Approve</a>
+      <a href="${esc(rejectUrl)}" style="display:inline-block; background:transparent; color:#6B5540; text-decoration:none; padding:10px 21px; border-radius:9px; font-weight:500; border:1px solid #6B5540;">Reject</a>
+    </p>
+    <p style="line-height:1.55; color:#8A7D77; font-size:0.82rem; margin:24px 0 0;">One-shot links — first click wins.</p>
+  </div>
+</body></html>`;
+  const sendRes = await sendEmailViaResend(env, {
+    to:      adminEmail,
+    subject: `Cyborg token request: ${name} <${email}>`,
+    html:    adminHtml,
+    from:    'Cyborg Approvals <hello@vuelolabs.com>',
+  });
+  if (!sendRes.ok) {
+    return jsonResponse({ ok: false, reason: 'forward_failed', detail: sendRes.error }, 502);
   }
 
   return jsonResponse({ ok: true });
 }
 
-function clean(v, max) {
-  if (typeof v !== 'string') return '';
-  let s = '';
-  for (let i = 0; i < v.length; i++) {
-    const c = v.charCodeAt(i);
-    if (c === 9 || c === 10 || c === 13 || c >= 32) s += v[i];
-  }
-  return s.trim().slice(0, max);
-}
+// Local clean() removed 2026-06-05 — promoted to cleanInput() in _lib.js so
+// the admin paths (issue.js, invite.js) share the same surface.

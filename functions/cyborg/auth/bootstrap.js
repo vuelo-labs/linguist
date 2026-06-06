@@ -15,6 +15,13 @@
 // — bootstrap must be safe even if the function were called by anyone.
 
 import { createClient } from '@supabase/supabase-js';
+import { requestMeta, writeAuditLog } from '../_lib.js';
+
+// F-RLS-HARDCODED-PUBLISHABLE-KEY follow-up: see _middleware.js for the
+// same pattern. When the auth verification fails with a publishable-key-
+// shaped body, emit auth_key_mismatch{caller:'bootstrap'} so a stale key
+// surfaces in the audit log instead of a silent "invalid_token" rejection.
+const _KEY_BODY_HINTS = ['publishable', 'anon', 'api key', 'apikey'];
 
 export async function onRequestPost({ request, env }) {
   const auth = request.headers.get('authorization') || '';
@@ -41,6 +48,32 @@ export async function onRequestPost({ request, env }) {
   const { data: { user }, error: userErr } = await userSupabase.auth.getUser();
   if (userErr || !user) {
     console.error('bootstrap: invalid token', userErr?.message);
+    // Probe /auth/v1/user directly so we can inspect the raw 401 body for
+    // publishable-key-drift markers. The SDK wraps the fetch and only
+    // surfaces a generic AuthApiError; this lets us distinguish "JWT is
+    // genuinely bad" from "publishable key is stale".
+    try {
+      const probe = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'apikey':        env.SUPABASE_PUBLISHABLE_KEY,
+        },
+      });
+      if (probe.status === 401) {
+        const bodyText = await probe.text().catch(() => '');
+        const lower = bodyText.toLowerCase();
+        if (_KEY_BODY_HINTS.some((hint) => lower.includes(hint))) {
+          await writeAuditLog(admin, {
+            actorEmail: '(public)',
+            action:     'auth_key_mismatch',
+            target:     '/cyborg/auth/bootstrap',
+            success:    false,
+            detail:     { caller: 'bootstrap', body_preview: bodyText.slice(0, 200) },
+            ...requestMeta(request),
+          });
+        }
+      }
+    } catch (_) { /* never block on audit */ }
     return json({ ok: false, reason: 'invalid_token' }, 401);
   }
 

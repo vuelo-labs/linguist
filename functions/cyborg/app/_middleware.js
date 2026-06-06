@@ -13,6 +13,15 @@
 // passes the user id/email downstream via X-Cyborg-User-* request
 // headers.
 
+import { createClient } from '@supabase/supabase-js';
+import { requestMeta, writeAuditLog } from '../_lib.js';
+
+// F-RLS-HARDCODED-PUBLISHABLE-KEY follow-up: when /auth/v1/user 401s with
+// a body that mentions "publishable" / "anon" / "API key", emit
+// auth_key_mismatch{caller, body_preview} so a stale-key drift surfaces in
+// the audit log instead of as a quiet "invalid_token" rejection.
+const _KEY_BODY_HINTS = ['publishable', 'anon', 'api key', 'apikey'];
+
 export async function onRequest({ request, next, env }) {
   const url = new URL(request.url);
 
@@ -51,7 +60,28 @@ export async function onRequest({ request, next, env }) {
         'apikey':        env.SUPABASE_PUBLISHABLE_KEY,
       },
     });
-    if (!r.ok) return unauth('invalid_token');
+    if (!r.ok) {
+      if (r.status === 401 && env.SUPABASE_SERVICE_KEY) {
+        // Inspect body for publishable-key drift markers. Fire-and-forget
+        // audit write — never block the 401 response on it.
+        const bodyText = await r.clone().text().catch(() => '');
+        const lower = bodyText.toLowerCase();
+        if (_KEY_BODY_HINTS.some((hint) => lower.includes(hint))) {
+          try {
+            const adminClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+            await writeAuditLog(adminClient, {
+              actorEmail: '(public)',
+              action:     'auth_key_mismatch',
+              target:     '/cyborg/app/api/*',
+              success:    false,
+              detail:     { caller: '_middleware', body_preview: bodyText.slice(0, 200) },
+              ...requestMeta(request),
+            });
+          } catch (_) { /* never block on audit */ }
+        }
+      }
+      return unauth('invalid_token');
+    }
     user = await r.json();
   } catch {
     return unauth('verify_failed');

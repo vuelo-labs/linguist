@@ -60,6 +60,19 @@ export async function onRequestGet({ request, env }) {
   if (error)        return json({ ok: false, reason: 'lookup_failed' }, 500);
   if (!row)         return json({ ok: false, reason: 'unknown' }, 404);
 
+  // F-ACTIVE-TIME-UNAUTH-LOOKUP follow-up: usage telemetry. Rate-limit
+  // already covers attack patterns; this row gives admin visibility on
+  // legitimate probe volume. Token prefix only (cyb_ + 8 hex = 12 chars)
+  // so the audit log never carries a full token.
+  await writeAuditLog(supabase, {
+    actorEmail: '(public)',
+    action:     'active_time_probe',
+    target:     token.slice(0, 12),
+    success:    true,
+    detail:     { ip: meta.ip || null },
+    ...meta,
+  });
+
   // Compute used = stored accumulated + (now - last_resumed_at if running)
   const accumulated = row.active_time_used_seconds || 0;
   let currentPeriod = 0;

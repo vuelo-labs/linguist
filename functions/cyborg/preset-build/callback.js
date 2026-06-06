@@ -1,6 +1,12 @@
-// POST /cyborg/admin/presets/build-callback — GHA workflow (or local
+// POST /cyborg/preset-build/callback — GHA workflow (or local
 // build_preset.sh) posts here when a build finishes. Updates the preset
 // row with image tag + status. Admin UI polling sees the new state.
+//
+// Located OUTSIDE /cyborg/admin/* on purpose: that prefix is gated by
+// Cloudflare Access (302 redirect to login on any unauth request). GHA
+// can't carry an Access JWT, so the callback would never reach the
+// function. Bearer-token auth here gates the endpoint at the function
+// layer instead.
 //
 // Body:
 //   {
@@ -14,10 +20,9 @@
 //   }
 //
 // Auth: bearer token (Authorization: Bearer <LINGUIST_CALLBACK_TOKEN>).
-// CF Access is bypassed because GHA can't carry an Access JWT.
 
 import { createClient } from '@supabase/supabase-js';
-import { writeAuditLog, jsonResponse } from '../../_lib.js';
+import { writeAuditLog, jsonResponse } from '../_lib.js';
 
 export async function onRequestPost({ request, env }) {
   // Bearer-token auth (no CF Access — this is server-to-server).

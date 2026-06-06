@@ -1132,3 +1132,121 @@ html[class*="profile-"] .hero-default-cta { display: none; }
 .platform-option > p a {
   color: var(--w-accent);
 }
+
+.platform-option > p.platform-strength {
+  padding-top: 0.5rem;
+  padding-bottom: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--w-muted);
+  border-bottom: 1px dashed var(--w-border);
+  margin-bottom: 0.25rem;
+}
+
+.platform-option > p.platform-strength strong {
+  color: var(--w-text);
+  font-weight: 600;
+}
+
+.platform-hint {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--w-muted);
+  margin-top: -0.4rem;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.platform-undecided {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--w-text);
+  margin-top: 1.5rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--w-border);
+}
+
+/* ---- Module callouts (book-style sidebars) ---- */
+.callout {
+  display: block;
+  position: relative;
+  margin: 1.75rem 0;
+  padding: 1.1rem 1.25rem 1.1rem 1.5rem;
+  background: var(--w-bg-card);
+  border-left: 3px solid var(--w-accent);
+  border-radius: 0 4px 4px 0;
+  font-family: var(--serif);
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--w-text);
+}
+
+.callout::before {
+  content: attr(data-label);
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--w-accent);
+  margin-bottom: 0.5rem;
+}
+
+.callout p { margin: 0 0 0.6rem; }
+.callout p:last-child { margin-bottom: 0; }
+.callout strong { font-weight: 600; }
+
+.callout--notice {
+  border-left-color: var(--w-muted);
+}
+.callout--notice::before { color: var(--w-muted); }
+
+.callout--pause {
+  background: transparent;
+  border-left-color: var(--w-faint);
+  border-top: 1px solid var(--w-border);
+  border-bottom: 1px solid var(--w-border);
+  border-radius: 0;
+  padding-left: 1.5rem;
+}
+.callout--pause::before { color: var(--w-faint); }
+
+/* Section-level mode labels.
+   Understated. Sit above an H2. The colour comes from the warm/cool palette
+   so they read as a quiet textural cue, not a banner. */
+.section-mode {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--w-faint);
+  margin: 1.75rem 0 0.25rem;
+  font-weight: 500;
+}
+.section-mode--human { color: var(--w-accent); }
+.section-mode--machine { color: var(--c-accent); font-family: var(--mono); }
+.section-mode + h2 { margin-top: 0.2rem; }
+
+/* "Stay with it" — the anti-context-switch callout.
+   Visually distinct: warm full-rule, slight indent, italic body. */
+.callout--stay {
+  background: var(--w-bg);
+  border: 1px solid var(--w-accent-light, #e8d8c5);
+  border-left: 4px solid var(--w-accent);
+  border-radius: 4px;
+  padding: 1.25rem 1.4rem 1.25rem 1.5rem;
+  font-style: italic;
+}
+.callout--stay::before {
+  color: var(--w-accent);
+  letter-spacing: 0.16em;
+}
+.callout--stay strong { font-style: normal; }
+
+@media (max-width: 600px) {
+  .callout { padding: 1rem 1rem 1rem 1.25rem; font-size: 0.95rem; }
+}

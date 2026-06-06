@@ -52,6 +52,69 @@ p{line-height:1.55;color:#5E5450;margin:0 0 14px;}
     { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
+// Send a transactional email via Resend's REST API.
+// Returns { ok: boolean, status?: number, error?: string }. Never throws.
+//
+// env.RESEND_API_KEY — Resend API token (already used by team/invite.js).
+// `from` defaults to 'Cyborg <hello@vuelolabs.com>' (matches the team-invite
+// sender so candidates see one consistent brand). Pass an override when the
+// audience is operator/internal rather than candidate-facing.
+//
+// 2026-06-05 — added to port the candidate-token email flow (request-token.js
+// + approve.js) off Tines (capped at 3-story/2-flow, see project_poster
+// memory). Same Resend API the team-invite flow has been using since W3.
+export async function sendEmailViaResend(env, { to, subject, html, from }) {
+  if (!env.RESEND_API_KEY) {
+    console.error('sendEmailViaResend: RESEND_API_KEY missing — email NOT sent');
+    return { ok: false, error: 'RESEND_API_KEY missing' };
+  }
+  if (!to || !subject || !html) {
+    console.error('sendEmailViaResend: missing required field');
+    return { ok: false, error: 'missing to/subject/html' };
+  }
+  const recipients = Array.isArray(to) ? to : [to];
+  const sender = from || 'Cyborg <hello@vuelolabs.com>';
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method:  'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify({ from: sender, to: recipients, subject, html }),
+    });
+    const text = await r.text().catch(() => '');
+    if (!r.ok) {
+      console.error('sendEmailViaResend: send failed', r.status, text.slice(0, 300));
+      return { ok: false, status: r.status, error: text.slice(0, 300) };
+    }
+    return { ok: true, status: r.status };
+  } catch (e) {
+    console.error('sendEmailViaResend: fetch threw', e?.message || e);
+    return { ok: false, error: String(e?.message || e) };
+  }
+}
+
+// Strip control characters (except tab/LF/CR), trim, length-cap.
+// Promoted from request-token.js on 2026-06-05 so the admin paths
+// (issue.js, invite.js) can share the same input-cleansing surface.
+// Catches unicode-shape attacks (RTL override, zero-width chars), bell
+// characters, anything that would render weirdly in the admin UI or in
+// outbound emails. Safe to call on any user-supplied string field.
+export function cleanInput(v, max) {
+  if (typeof v !== 'string') return '';
+  let s = '';
+  for (let i = 0; i < v.length; i++) {
+    const c = v.charCodeAt(i);
+    if (c === 9 || c === 10 || c === 13 || c >= 32) s += v[i];
+  }
+  return s.trim().slice(0, max);
+}
+
+// Liberal RFC-loose email regex. Same expression used in request-token.js
+// and issue.js — kept here so invite.js and any future caller can share it.
+export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function fetchDadJokes(n = 3) {
   // icanhazdadjoke.com — free, no auth, JSON when Accept header is set.
   const jokes = [];

@@ -26,17 +26,39 @@ export async function onRequestPost({ request, env }) {
   const label = (body.label || '').toString().slice(0, 200) || null;
   const days  = Number.isFinite(body.days) ? Math.min(Math.max(body.days, 1), 30) : DEFAULT_DAYS;
   const notes = body.notes ? String(body.notes).slice(0, 500) : null;
+  const campaignId = body.campaign_id ? String(body.campaign_id).trim() : null;
 
   const token = generateToken();
   const expiresAt = new Date(Date.now() + days * 86400000).toISOString();
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+
+  let campaignOrgId = null;
+  if (campaignId) {
+    const { data: campaign, error: campaignErr } = await supabase
+      .from('campaigns')
+      .select('id, organisation_id')
+      .eq('id', campaignId)
+      .maybeSingle();
+    if (campaignErr || !campaign) {
+      await writeAuditLog(supabase, {
+        actorEmail: access.email, action: 'mint',
+        target: label, success: false,
+        detail: { error: 'campaign_id not found', campaign_id: campaignId }, ...meta,
+      });
+      return json({ error: 'Campaign not found.' }, 400);
+    }
+    campaignOrgId = campaign.organisation_id;
+  }
+
   const { error } = await supabase.from('cyborg_tokens').insert({
     token,
     candidate_label: label,
     expires_at:      expiresAt,
     approved_at:     new Date().toISOString(),   // admin-minted = pre-approved
     notes,
+    campaign_id:     campaignId,
+    organisation_id: campaignOrgId,
   });
   if (error) {
     console.error('mint insert error:', error.message);
@@ -51,7 +73,7 @@ export async function onRequestPost({ request, env }) {
   await writeAuditLog(supabase, {
     actorEmail: access.email, action: 'mint',
     target: token, success: true,
-    detail: { label, days, expires_at: expiresAt }, ...meta,
+    detail: { label, days, expires_at: expiresAt, campaign_id: campaignId }, ...meta,
   });
 
   return json({

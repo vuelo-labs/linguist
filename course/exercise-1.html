@@ -632,7 +632,7 @@
           <div class="goal-row">
             <span class="goal-row-label">Outcome</span>
             <span class="goal-row-content">
-              <span data-human>A working setup you'll actually use — not a demo. By the end you'll have real persistent instructions in place for both modes, and you'll have felt the difference between writing each one.</span>
+              <span data-human>A working setup you'll actually use — not a demo. By the end you'll have real persistent instructions in place for both modes and you'll have felt the difference between writing each one.</span>
               <span data-machine>Working persistent instructions for both modes. Usable immediately.</span>
             </span>
           </div>
@@ -690,14 +690,14 @@
           <div class="bad-example-why">
             <span class="why-label">Why</span>
             <span>
-              <span data-human>This tells the model nothing useful. You're spending tokens on politeness. The model reads it and learns you're friendly — that's not context. It changes nothing about the output.</span>
+              <span data-human>This tells the model nothing useful. You're spending tokens on politeness. The model reads it and learns you're friendly, that's not context. It changes nothing about the output.</span>
               <span data-machine>Zero signal. Pleasantries consume tokens and calibrate nothing. Model learns: you're polite. Irrelevant to output.</span>
             </span>
           </div>
         </div>
 
         <div class="bad-example">
-          <div class="bad-example-prompt">"I need you to help me with everything I work on. I'm a marketing manager but also sometimes I do strategy and occasionally I help with product decisions. I want responses that are professional but also friendly, not too long but detailed enough to be useful, and please always consider..."  <em>[continues for 300 more words]</em></div>
+          <div class="bad-example-prompt">"I need you to help me with everything I work on. I'm a marketing manager but also sometimes I do strategy and occasionally I help with product decisions. I want responses that are professional but also friendly, not too long but detailed enough to be useful and please always consider..."  <em>[continues for 300 more words]</em></div>
           <div class="bad-example-why">
             <span class="why-label">Why</span>
             <span>
@@ -768,7 +768,7 @@
 
       <!-- ── Tines note ── -->
       <div class="platform-note" id="tines-note">
-        <strong>Note on Tines:</strong> Workbench has one global instruction set — you can't create two separate projects the way other platforms can. The workaround: set your Machine Mode instructions globally (most automation work is structured and benefits from precision), and keep your Human Mode instructions as a short block of text you paste at the start of explorative conversations. Label the paste clearly: <code>// Human Mode — exploratory, push back, ask questions.</code>
+        <strong>Note on Tines:</strong> Workbench has one global instruction set — you can't create two separate projects the way other platforms can. The workaround: set your Machine Mode instructions globally (most automation work is structured and benefits from precision) and keep your Human Mode instructions as a short block of text you paste at the start of explorative conversations. Label the paste clearly: <code>// Human Mode — exploratory, push back, ask questions.</code>
       </div>
 
       <!-- ── What good looks like ── -->
@@ -777,7 +777,7 @@
           <span data-human>What a good response looks like</span>
           <span data-machine>Expected output</span>
         </strong><br>
-        <span data-human>When you paste either prompt, the model should ask you one focused question — then produce structured instructions based on your answer. If it skips the question and writes generic boilerplate, or asks you five questions at once, your setup isn't working yet. Good instructions are specific, scannable, and under 15 lines.</span>
+        <span data-human>When you paste either prompt, the model should ask you one focused question, then produce structured instructions based on your answer. If it skips the question and writes generic boilerplate or asks you five questions at once, your setup isn't working yet. Good instructions are specific, scannable and under 15 lines.</span>
         <span data-machine>Model should: ask 1 question → receive answer → produce structured instructions (&lt;15 lines). Red flags: generic boilerplate · 5 questions at once · no questions at all.</span>
       </div>
 
@@ -843,9 +843,9 @@
         human_where_machine: 'New Project → name (e.g. "Human Mode") → Project Settings → Instructions field.',
         machine_where_human: 'Create a second Project — name it something that signals precision and output (<em>Work Output</em>, <em>Machine Mode</em>, a specific domain). Same process: Project Settings → Instructions.',
         machine_where_machine: 'Second Project → name (e.g. "Machine Mode" or domain name) → Project Settings → Instructions.',
-        human_prompt_human: `I'm setting up a Human Mode project on Claude — for work where I'm exploring, thinking out loud, or haven't fully formed the question yet.
+        human_prompt_human: `I'm setting up a Human Mode project on Claude — for work where I'm exploring, thinking out loud or haven't fully formed the question yet.
 
-I'll describe my work in a moment. First, ask me one question to understand it better — what I do, who I work with, or what I usually bring here when I'm stuck.
+I'll describe my work in a moment. First, ask me one question to understand it better — what I do, who I work with or what I usually bring here when I'm stuck.
 
 Then write two things:
 
@@ -858,7 +858,7 @@ Then write two things:
 2. A Profile field entry for Settings → Profile (under 6 lines) — personal defaults that follow me across everything.
 
 —
-Note to the reader: Notice how these instructions describe a working relationship, not a task list. You're setting expectations for how to collaborate — not what to produce. That's the shape of Human Mode. It's warmer, more flexible, and built for uncertainty.`,
+Note to the reader: Notice how these instructions describe a working relationship, not a task list. You're setting expectations for how to collaborate — not what to produce. That's the shape of Human Mode. It's warmer, more flexible and built for uncertainty.`,
 
         human_prompt_machine: `Setting up Human Mode project on Claude.
 
@@ -907,7 +907,7 @@ Note: Machine Mode instructions are a spec, not a relationship. Every word is si
 
       chatgpt: {
         title: 'Custom Instructions + Custom GPTs on ChatGPT',
-        concept_human: '<p>ChatGPT has two mechanisms for persistent context.</p><p><strong>Custom Instructions</strong> (Settings → Personalisation) apply globally — every conversation. There are two fields: what you want it to know about you, and how you want it to respond. These are your global defaults.</p><p><strong>Custom GPTs</strong> (if you have Plus) are separate assistants you configure with their own instructions, tone, and even tools. This is where you create your two modes: one GPT for Human Mode work, one for Machine Mode. Each has its own instruction set and lives in your sidebar.</p><p>If you\'re on the free plan, use Custom Instructions for one mode and override with a pasted block at the start of conversations for the other.</p>',
+        concept_human: '<p>ChatGPT has two mechanisms for persistent context.</p><p><strong>Custom Instructions</strong> (Settings → Personalisation) apply globally — every conversation. There are two fields: what you want it to know about you and how you want it to respond. These are your global defaults.</p><p><strong>Custom GPTs</strong> (if you have Plus) are separate assistants you configure with their own instructions, tone and even tools. This is where you create your two modes: one GPT for Human Mode work, one for Machine Mode. Each has its own instruction set and lives in your sidebar.</p><p>If you\'re on the free plan, use Custom Instructions for one mode and override with a pasted block at the start of conversations for the other.</p>',
         concept_machine: '<p><strong>Custom Instructions:</strong> Settings → Personalisation → global. Two fields: your context / output preferences.</p><p><strong>Custom GPTs (Plus):</strong> separate assistants, each with own instructions. Create one per mode. Free tier: use Custom Instructions for one mode, paste override block for the other.</p>',
         human_where_human: 'If you have ChatGPT Plus: go to <strong>Explore GPTs → Create</strong>. Name it something exploratory. If on free: go to <strong>Settings → Personalisation → Custom Instructions</strong> and set these as your global defaults.',
         human_where_machine: 'Plus: Explore GPTs → Create → name (Human Mode). Free: Settings → Personalisation → Custom Instructions (field 1 + 2).',
@@ -980,7 +980,7 @@ Note: Machine Mode = spec sheet. Test: could a junior hire follow these instruct
         human_where_machine: 'Sidebar → New Gem → name (Human Mode) → Instructions field.',
         machine_where_human: 'Create a second Gem — name it for structured output. Same process: New Gem → name it → Instructions field.',
         machine_where_machine: 'Second Gem → name (Machine Mode or domain) → Instructions field.',
-        human_prompt_human: `I'm setting up a Human Mode Gem on Gemini — for work where I'm exploring, thinking through problems, or haven't fully formed the question yet.
+        human_prompt_human: `I'm setting up a Human Mode Gem on Gemini — for work where I'm exploring, thinking through problems or haven't fully formed the question yet.
 
 I'll describe my work. First, ask me one question to understand it better.
 
@@ -1037,7 +1037,7 @@ Note: Machine Mode = behavioural spec. Every line must earn its place.`,
 
       tines: {
         title: 'Custom Instructions on Tines Workbench',
-        concept_human: '<p>Tines Workbench has one global instruction set — set via the settings icon in the top right. Unlike other platforms, you can\'t create separate project contexts for Human Mode and Machine Mode. One set of instructions applies to everything.</p><p>The important caveat: changes here apply immediately to <em>all</em> existing conversations, not just new ones.</p><p>The recommended approach for this exercise: set Machine Mode instructions globally (most automation work is structured and benefits from precision), and use a short paste-in block at the start of any exploratory conversation to switch context to Human Mode.</p>',
+        concept_human: '<p>Tines Workbench has one global instruction set — set via the settings icon in the top right. Unlike other platforms, you can\'t create separate project contexts for Human Mode and Machine Mode. One set of instructions applies to everything.</p><p>The important caveat: changes here apply immediately to <em>all</em> existing conversations, not just new ones.</p><p>The recommended approach for this exercise: set Machine Mode instructions globally (most automation work is structured and benefits from precision) and use a short paste-in block at the start of any exploratory conversation to switch context to Human Mode.</p>',
         concept_machine: '<p><strong>Settings (top right) → Custom Instructions.</strong> One global set. Applies to all existing conversations immediately.</p><p><strong>Recommended:</strong> set Machine Mode globally. Paste Human Mode block at conversation start for exploratory sessions.</p>',
         human_where_human: 'There\'s no separate project for Human Mode in Tines. Instead, copy the Human Mode block below and paste it at the start of any exploratory conversation. It overrides the global instructions locally.',
         human_where_machine: 'No separate project. Paste Human Mode block at conversation start to override globally.',
@@ -1060,7 +1060,7 @@ Note: Tines has no separate projects. Mode switch = manual paste.`,
 
         machine_prompt_human: `I'm setting up persistent instructions for Tines Workbench — my global Machine Mode setup.
 
-I\'ll describe my work. First, ask me one question: what automation or security task do I do most often, and what does a good output look like?
+I\'ll describe my work. First, ask me one question: what automation or security task do I do most often and what does a good output look like?
 
 Then write Custom Instructions (under 15 lines) that cover:
 - My role and the kind of work I do
@@ -1076,7 +1076,7 @@ Note to the reader: In Tines, your one instruction set is your Machine Mode setu
 
         machine_prompt_machine: `Setting up Tines Workbench Custom Instructions.
 
-Ask me 1 question: what automation task do I do most, and what's a good output?
+Ask me 1 question: what automation task do I do most and what's a good output?
 
 Output: Custom Instructions (<15 lines)
 - Role · tools · integrations
@@ -1095,9 +1095,9 @@ Note: Global + immediate. Machine Mode only — Human Mode is a manual paste ove
         human_where_machine: 'Create CLAUDE.md in an exploratory/research project. Paste prompt into Claude Code session in that directory.',
         machine_where_human: 'Create a second <strong>CLAUDE.md</strong> in a project where you do structured, repeatable work — a codebase, an automation, a report pipeline. This is your Machine Mode template.',
         machine_where_machine: 'Create CLAUDE.md in a structured/code project. Paste prompt into Claude Code session in that directory.',
-        human_prompt_human: `You're helping me write a CLAUDE.md for a Human Mode project — one I use for exploratory work, research, planning, and thinking through things I haven't resolved yet.
+        human_prompt_human: `You're helping me write a CLAUDE.md for a Human Mode project — one I use for exploratory work, research, planning and thinking through things I haven't resolved yet.
 
-Ask me one question about this project — what it is, what kind of work I do here, or what "helpful" looks like in an exploratory context.
+Ask me one question about this project — what it is, what kind of work I do here or what "helpful" looks like in an exploratory context.
 
 Then write a CLAUDE.md draft (under 25 lines) that covers:
 - What this project is and what kind of work happens here (2–3 lines)
@@ -1122,7 +1122,7 @@ Note: Human Mode CLAUDE.md = collaboration contract. Not a task spec.`,
 
         machine_prompt_human: `You're helping me write a CLAUDE.md for a Machine Mode project — structured, repeatable work where consistency and precision matter.
 
-Ask me one question about this project — what it does, what it's built with, or what the most common task type is.
+Ask me one question about this project — what it does, what it's built with or what the most common task type is.
 
 Then write a CLAUDE.md draft (under 30 lines) that covers:
 - Project overview and stack (2–3 lines)

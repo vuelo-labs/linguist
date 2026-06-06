@@ -44,32 +44,32 @@
       <section class="module-hero">
         <p class="module-eyebrow">Advanced Practitioner · Module 01</p>
         <h1 class="module-title">Mental Model Refresher for Claude Code</h1>
-        <p class="module-objective">After this, you can explain what Claude Code is actually doing when it responds — and use that understanding to write messages that produce the result you intended, not the result the AI guessed at.</p>
+        <p class="module-objective">After this, you can explain what Claude Code is actually doing when it responds and use that understanding to write messages that produce the result you intended, not the result the AI guessed at.</p>
       </section>
 
       <div class="module-body">
 
         <h2>What you already know</h2>
 
-        <p>In the Enabled User stage you learned that context is fuel: the more relevant information you give the AI, the better its response. That is true, and it stays true here.</p>
+        <p>In the Enabled User stage you learned that context is fuel: the more relevant information you give the AI, the better its response. That is true and it stays true here.</p>
 
-        <p>In Claude Code you will encounter a second truth that sits alongside the first. The container for all that fuel is finite. As your session runs longer, earlier content gets compressed to make room for new content. Both things are true — context is fuel, and the tank has a size limit. They operate at different scales. Context is fuel describes what happens within a message. The finite container describes what happens across a long session. You will learn to manage both.</p>
+        <p>In Claude Code you will encounter a second truth that sits alongside the first. The container for all that fuel is finite. As your session runs longer, earlier content gets compressed to make room for new content. Both things are true — context is fuel and the tank has a size limit. They operate at different scales. Context is fuel describes what happens within a message. The finite container describes what happens across a long session. You will learn to manage both.</p>
 
         <p>This module covers the three-part mental model that underpins everything in the advanced track. Get these three ideas solid and every subsequent module will make sense immediately.</p>
 
         <h2>Part 1: Claude Code executes your message, not your intent</h2>
 
-        <p>Claude Code processes the text you send and produces a response. It has no access to what you meant, what you assumed, or what you left unstated. Where your message is ambiguous, Claude Code fills the gap with its own judgement — which may or may not match what you had in mind.</p>
+        <p>Claude Code processes the text you send and produces a response. It has no access to what you meant, what you assumed or what you left unstated. Where your message is ambiguous, Claude Code fills the gap with its own judgement — which may or may not match what you had in mind.</p>
 
         <p>Every decision Claude Code makes on your behalf is one you did not control. The way to control the output is to reduce the decisions left to Claude Code's judgement.</p>
 
-        <p>This is the same principle you learned in E-01 when you studied verb choice. In Claude Code, it applies across every dimension of your message: the verb, the scope, the format, the constraints, and the target.</p>
+        <p>This is the same principle you learned in E-01 when you studied verb choice. In Claude Code, it applies across every dimension of your message: the verb, the scope, the format, the constraints and the target.</p>
 
         <h3>Without / With: Coding</h3>
 
         <p>Without: "Fix the modal."</p>
 
-        <p>Claude Code reads the component, decides the whole structure is outdated, rewrites the close logic, extracts a new hook, adds keyboard handling, and reformats the layout. The original bug — a missing click handler — is fixed somewhere in a 200-line change you did not ask for.</p>
+        <p>Claude Code reads the component, decides the whole structure is outdated, rewrites the close logic, extracts a new hook, adds keyboard handling and reformats the layout. The original bug, a missing click handler, is fixed somewhere in a 200-line change you did not ask for.</p>
 
         <p>With: "Add onClick={onClose} to the overlay div. Do not change anything else."</p>
 
@@ -79,7 +79,7 @@
 
         <p>Without: "Research how Notion positions their product."</p>
 
-        <p>Claude Code produces a general overview of Notion's product, brand voice, pricing philosophy, and feature set. You wanted specifically how their enterprise tier is differentiated from their standard tier — what it emphasises, what objections it addresses. The general research is accurate but it answers the wrong question.</p>
+        <p>Claude Code produces a general overview of Notion's product, brand voice, pricing philosophy and feature set. You wanted specifically how their enterprise tier is differentiated from their standard tier — what it emphasises, what objections it addresses. The general research is accurate but it answers the wrong question.</p>
 
         <p>With:</p>
 
@@ -95,7 +95,7 @@
 
         <h2>Part 2: The context window is finite and degrades over time</h2>
 
-        <p>Everything Claude Code knows about your task lives in the context window. What is not there does not exist. As your session grows longer, Claude Code automatically compacts the earlier parts of the conversation into a summary to make room for new content. That summary replaces the original messages — some details may not survive.</p>
+        <p>Everything Claude Code knows about your task lives in the context window. What is not there does not exist. As your session grows longer, Claude Code automatically compacts the earlier parts of the conversation into a summary to make room for new content. That summary replaces the original messages, some details may not survive.</p>
 
         <p>What tends to survive compaction: things you stated explicitly as standalone facts, named constraints, specific decisions you confirmed.</p>
 
@@ -134,17 +134,17 @@
 
         <h2>Part 3: Tools are how Claude Code acts in the world</h2>
 
-        <p>Claude Code cannot read your files, search your codebase, run commands, or launch a subagent without tools. Each of those actions is a tool call. Understanding which tools exist and what they cost lets you guide Claude Code toward the right approach rather than letting it choose the most expensive path by default.</p>
+        <p>Claude Code cannot read your files, search your codebase, run commands or launch a subagent without tools. Each of those actions is a tool call. Understanding which tools exist and what they cost lets you guide Claude Code toward the right approach rather than letting it choose the most expensive path by default.</p>
 
         <p>A vague request triggers expensive tool chains. A targeted request may need only one tool call. The difference is how precisely you frame the task.</p>
 
-        <p>The full tool hierarchy and cost comparison are covered in A-07. For now, the key insight: if you name the tool and the target explicitly, Claude Code uses exactly what you named. If you describe a vague goal, Claude Code decides how to get there — and may take a longer route than necessary.</p>
+        <p>The full tool hierarchy and cost comparison are covered in A-07. For now, the key insight: if you name the tool and the target explicitly, Claude Code uses exactly what you named. If you describe a vague goal, Claude Code decides how to get there and may take a longer route than necessary.</p>
 
         <h3>Without / With: Coding</h3>
 
         <p>Without: "How does currency formatting work in this codebase?"</p>
 
-        <p>Claude Code does not know the function name. It searches multiple files to find candidates, reads several of them, and eventually finds the right one. More time, more tokens.</p>
+        <p>Claude Code does not know the function name. It searches multiple files to find candidates, reads several of them and eventually finds the right one. More time, more tokens.</p>
 
         <p>With: "Read the formatCurrency function and explain how it works. Don't look at any other files."</p>
 
@@ -154,16 +154,16 @@
 
         <p>Without: "Find out how many employees Stripe has."</p>
 
-        <p>Claude Code may use training data (which may be outdated), or run a vague web search that returns a blog post with a stale figure, or launch an extended research process. The path and the reliability vary.</p>
+        <p>Claude Code may use training data (which may be outdated) or run a vague web search that returns a blog post with a stale figure or launch an extended research process. The path and the reliability vary.</p>
 
         <p>With:</p>
 
         <blockquote>
-          <p>Use WebSearch to find Stripe's current employee count. Search for "Stripe employees 2026" and prioritise results from LinkedIn, Crunchbase, or Stripe's own website.</p>
-          <p>Report the number, the source URL, and the date of the source.</p>
+          <p>Use WebSearch to find Stripe's current employee count. Search for "Stripe employees 2026" and prioritise results from LinkedIn, Crunchbase or Stripe's own website.</p>
+          <p>Report the number, the source URL and the date of the source.</p>
         </blockquote>
 
-        <p>The instruction specifies the tool, the query, the sources to prefer, and the output format. Claude Code cannot take a shortcut.</p>
+        <p>The instruction specifies the tool, the query, the sources to prefer and the output format. Claude Code cannot take a shortcut.</p>
 
         <h2>The three parts, together</h2>
 

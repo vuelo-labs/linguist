@@ -1,193 +1,474 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your First Message · Linguist</title>
-  <meta name="description" content="Send a message to an AI, read the response, and know that nothing broke.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/course/course.css">
-  <script src="/profile.js"></script>
-  <script src="/progress.js"></script>
-</head>
-<body class="module-page stage-beginner">
-  <header class="site-header">
-    <a href="/" class="site-logo">Linguist</a>
-    <div class="site-header-links">
-      <a href="/course" class="site-header-link">Course</a>
-      <a href="/start" class="site-header-link">Where to start</a>
-      <a href="/guide" class="site-header-link">Guide</a>
-    </div>
-  </header>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sending Your First Message · Linguist</title>
+        <meta
+            name="description"
+            content="Send a message to an AI, read the response and know that nothing broke."
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="/style.css" />
+        <link rel="stylesheet" href="/course/course.css" />
+        <script src="/profile.js"></script>
+        <script src="/progress.js"></script>
+    </head>
+    <body class="module-page stage-beginner">
+        <header class="site-header">
+            <a href="/" class="site-logo">Linguist</a>
+            <div class="site-header-links">
+                <a href="/course" class="site-header-link">Course</a>
+                <a href="/start" class="site-header-link">Where to start</a>
+                <a href="/guide" class="site-header-link">Guide</a>
+            </div>
+        </header>
 
-  <div class="module-nav-bar">
-    <div class="module-nav-crumb">
-      <a href="/course">Course</a>
-      <span class="sep">›</span>
-      <span>Beginner</span>
-      <span class="sep">›</span>
-      <span>B-01</span>
-    </div>
-    <div class="module-nav-actions">
-      <span id="module-nav-top-prev"></span>
-      <span class="module-nav-top-sep" id="module-nav-top-sep" style="display:none">·</span>
-      <span id="module-nav-top-next"></span>
-      <button class="module-already-done" id="module-already-done" onclick="LinguistProgress.markDoneAndNext()">Already done this</button>
-    </div>
-  </div>
-
-  <main>
-    <div class="container">
-
-      <section class="module-hero">
-        <p class="module-eyebrow">Beginner · Module 01</p>
-        <h1 class="module-title">Your First Message</h1>
-        <p class="module-objective">After this, you will have sent a message to an AI, read the response, and know that nothing broke.</p>
-      </section>
-
-      <div class="module-body">
-
-        <h2>Intro</h2>
-
-        <div data-profile="newrole">
-          <p class="profile-context">You are about to start a job where people will probably assume you already know how to use this. That assumption is mostly fine — there is not much to know yet. What you need right now is to get one message sent so the tool stops feeling like something you need to figure out before you can use it. This is a dry run. Nothing you type here matters.</p>
+        <div class="module-nav-bar">
+            <div class="module-nav-crumb">
+                <a href="/course">Course</a>
+                <span class="sep">›</span>
+                <span>Beginner</span>
+                <span class="sep">›</span>
+                <span>B-01</span>
+            </div>
+            <div class="module-nav-actions">
+                <span id="module-nav-top-prev"></span>
+                <span
+                    class="module-nav-top-sep"
+                    id="module-nav-top-sep"
+                    style="display: none"
+                    >·</span
+                >
+                <span id="module-nav-top-next"></span>
+                <button
+                    class="module-already-done"
+                    id="module-already-done"
+                    onclick="LinguistProgress.markDoneAndNext()"
+                >
+                    Already done this
+                </button>
+            </div>
         </div>
 
-        <p>You do not need to know anything about AI to do this. You do not need to be good at technology. You are going to type one sentence, press send, and read what comes back. That is the whole exercise.</p>
+        <main>
+            <div class="container">
+                <section class="module-hero">
+                    <p class="module-eyebrow">Beginner · Module 01</p>
+                    <h1 class="module-title">Your First Message</h1>
+                    <p class="module-objective">
+                        After this, you will have sent a message to an AI, read
+                        the response and know that nothing broke.
+                    </p>
+                </section>
 
-        <h2>Open your AI tool</h2>
+                <div class="module-body">
+                    <h2>Intro</h2>
 
-        <p>Pick the platform you are using and follow the short setup steps. You only need to do this once — after this you will have it open and ready.</p>
+                    <div data-profile="newrole">
+                        <p class="profile-context">
+                            You are about to start a job where people will
+                            probably assume you already know how to use this.
+                            That assumption is mostly fine — there is not much
+                            to know yet. What you need right now is to get one
+                            message sent so the tool stops feeling like
+                            something you need to figure out before you can use
+                            it. This is a dry run. Nothing you type here
+                            matters.
+                        </p>
+                    </div>
 
-        <div class="platform-picker">
+                    <p>
+                        You do not need to know anything about AI to do this.
+                        You do not need to be good at technology. You are going
+                        to type one sentence, press send and read what comes
+                        back. That is the whole exercise.
+                    </p>
 
-          <details class="platform-option">
-            <summary>Claude <span class="platform-url">claude.ai</span></summary>
-            <p>Go to <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a> and sign in (or create a free account). You will see a large text area in the centre of the screen. That is where you type or paste your messages. Press <strong>Enter</strong> or click the arrow button to send. To start a fresh conversation later, click <strong>New chat</strong> in the top-left corner.</p>
-          </details>
+                    <h2>Open your AI tool</h2>
 
-          <details class="platform-option">
-            <summary>ChatGPT <span class="platform-url">chatgpt.com</span></summary>
-            <p>Go to <a href="https://chatgpt.com" target="_blank" rel="noopener">chatgpt.com</a> and sign in (or create a free account). You will see a text area at the bottom of the screen. Type or paste your message there. Press <strong>Enter</strong> or click the send button to send. To start a new conversation, click <strong>New chat</strong> in the sidebar.</p>
-          </details>
+                    <p>
+                        Pick the platform you are using and follow the short
+                        setup steps. You only need to do this once — after this
+                        you will have it open and ready.
+                    </p>
 
-          <details class="platform-option">
-            <summary>Gemini <span class="platform-url">gemini.google.com</span></summary>
-            <p>Go to <a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a> and sign in with your Google account. You will see a text area at the bottom of the screen. Type or paste your message there. Press <strong>Enter</strong> or click the send button to send. To start a new conversation, click <strong>New chat</strong> in the sidebar.</p>
-          </details>
+                    <p class="platform-hint">
+                        Tap any one to expand the setup. Each card shows what
+                        the tool is strongest at, so if you are not sure which
+                        to pick, this is the place to look.
+                    </p>
 
-          <details class="platform-option">
-            <summary>Claude Code <span class="platform-url">terminal</span></summary>
-            <p>Claude Code is a command-line tool for developers. If this is your platform, the <strong>Advanced track</strong> (A-series, starting at A-00) is the better fit. Open your terminal and type <code>claude</code> to start. The beginner exercises below still work — just type your message at the prompt instead of pasting into a text area.</p>
-          </details>
+                    <div class="platform-picker">
+                        <details class="platform-option">
+                            <summary>
+                                Claude
+                                <span class="platform-url">claude.ai</span>
+                            </summary>
+                            <p class="platform-strength">
+                                <strong>Strongest at:</strong> writing, code,
+                                careful reasoning. Calm and easy to talk to.
+                                Good for long, considered work.
+                            </p>
+                            <p>
+                                Go to
+                                <a
+                                    href="https://claude.ai"
+                                    target="_blank"
+                                    rel="noopener"
+                                    >claude.ai</a
+                                >
+                                and sign in (or create a free account). You will
+                                see a large text area in the centre of the
+                                screen. That is where you type or paste your
+                                messages. Press <strong>Enter</strong> or click
+                                the arrow button to send. To start a fresh
+                                conversation later, click
+                                <strong>New chat</strong> in the top-left
+                                corner.
+                            </p>
+                        </details>
 
-        </div>
+                        <details class="platform-option">
+                            <summary>
+                                ChatGPT
+                                <span class="platform-url">chatgpt.com</span>
+                            </summary>
+                            <p class="platform-strength">
+                                <strong>Strongest at:</strong> a bit of
+                                everything. Code, writing, image generation,
+                                video generation, voice. The most
+                                general-purpose if you want one tool for many
+                                jobs.
+                            </p>
+                            <p>
+                                Go to
+                                <a
+                                    href="https://chatgpt.com"
+                                    target="_blank"
+                                    rel="noopener"
+                                    >chatgpt.com</a
+                                >
+                                and sign in (or create a free account). You will
+                                see a text area at the bottom of the screen.
+                                Type or paste your message there. Press
+                                <strong>Enter</strong> or click the send button
+                                to send. To start a new conversation, click
+                                <strong>New chat</strong> in the sidebar.
+                            </p>
+                        </details>
 
-        <h2>The exercise</h2>
+                        <details class="platform-option">
+                            <summary>
+                                Gemini
+                                <span class="platform-url"
+                                    >gemini.google.com</span
+                                >
+                            </summary>
+                            <p class="platform-strength">
+                                <strong>Strongest at:</strong> anything inside
+                                the Google world. Shopping research, image,
+                                audio and video generation, real-time search.
+                                Sensible default if you already live in Gmail,
+                                Docs and Drive.
+                            </p>
+                            <p>
+                                Go to
+                                <a
+                                    href="https://gemini.google.com"
+                                    target="_blank"
+                                    rel="noopener"
+                                    >gemini.google.com</a
+                                >
+                                and sign in with your Google account. You will
+                                see a text area at the bottom of the screen.
+                                Type or paste your message there. Press
+                                <strong>Enter</strong> or click the send button
+                                to send. To start a new conversation, click
+                                <strong>New chat</strong> in the sidebar.
+                            </p>
+                        </details>
 
-        <p>This takes under three minutes. Two steps. The first is required. The second is optional.</p>
+                        <details class="platform-option">
+                            <summary>
+                                Claude Code
+                                <span class="platform-url">terminal</span>
+                            </summary>
+                            <p class="platform-strength">
+                                <strong>Strongest at:</strong> working directly
+                                with code on your own machine. Reads your files,
+                                runs commands, edits in place. For software
+                                people, not for everyday writing.
+                            </p>
+                            <p>
+                                Claude Code is a command-line tool for
+                                developers. If this is your platform, the
+                                <strong>Advanced track</strong> (A-series,
+                                starting at A-00) is the better fit. Open your
+                                terminal and type <code>claude</code> to start.
+                                The beginner exercises below still work — just
+                                type your message at the prompt instead of
+                                pasting into a text area.
+                            </p>
+                        </details>
+                    </div>
 
-        <div class="exercise-set">
+                    <p class="platform-undecided">
+                        Still not sure? Pick whichever you can sign into
+                        fastest. The exercise below works the same on any of
+                        them. You can always switch later — most people end up
+                        using two or three of these depending on the task.
+                    </p>
 
-          <!-- Default exercise -->
-          <div class="exercise exercise--default">
-            <h3>Step 1: Send one message</h3>
+                    <p class="section-mode section-mode--machine">Machine mode</p>
+                    <h2>The exercise</h2>
 
-            <p>Copy this message exactly as written:</p>
+                    <p>
+                        This takes under three minutes. Two steps. The first is
+                        required. The second is optional.
+                    </p>
 
-            <blockquote>
-              <p>What is the capital of France?</p>
-            </blockquote>
+                    <div class="exercise-set">
+                        <!-- Default exercise -->
+                        <div class="exercise exercise--default">
+                            <h3>Step 1: Send one message</h3>
 
-            <p>Paste it into the text area on your platform (not sure which one? See 'Open your AI tool' above). Press send.</p>
+                            <p>Copy this message exactly as written:</p>
 
-            <p>The AI will respond with something about Paris. It may include extra information. It may be a single sentence. It may be a paragraph. Any of those are fine.</p>
+                            <blockquote>
+                                <p>What is the capital of France?</p>
+                            </blockquote>
 
-            <p>That is your first message sent. The AI answered. It did not ask why you wanted to know. It did not judge the question. Nothing broke.</p>
+                            <p>
+                                Paste it into the text area on your platform
+                                (not sure which one? See 'Open your AI tool'
+                                above). Press send.
+                            </p>
 
-            <h3>Step 2: Now make it yours (optional)</h3>
+                            <aside class="callout callout--stay" data-label="This is human mode">
+                                <p>
+                                    The machine is doing what you asked it to
+                                    do. The machine is fine. Your job, while
+                                    you wait, is to stay with the question —
+                                    what you asked, why you asked it, what
+                                    would tell you "yes, that's it" when the
+                                    answer lands.
+                                </p>
+                                <p>
+                                    Humans aren't naturally good at this. Most
+                                    of us reach for the phone the second the
+                                    dot starts. The machine is enabling you,
+                                    not the other way round. Stay with your
+                                    own thought while it works.
+                                </p>
+                            </aside>
 
-            <p>Here is a second message you can try:</p>
+                            <p>
+                                The AI will respond with something about Paris.
+                                It may include extra information. It may be a
+                                single sentence. It may be a paragraph. Any of
+                                those are fine.
+                            </p>
 
-            <blockquote>
-              <p>What are three things I could cook for dinner tonight using chicken and rice?</p>
-            </blockquote>
+                            <p>
+                                That is your first message sent. The AI
+                                answered. It did not ask why you wanted to know.
+                                It did not judge the question. Nothing broke.
+                            </p>
 
-            <p>Before you send this one, change it to match what you actually have. Replace "chicken and rice" with whatever ingredients are in your kitchen right now.</p>
+                            <h3>Step 2: Now make it yours (optional)</h3>
 
-            <p>This is a pattern you will use throughout the course: start with a message someone else wrote, then change the parts that should be yours. The next module (B-02) walks through this step by step. For now, just swap those two ingredients and send it.</p>
-          </div>
+                            <p>Here is a second message you can try:</p>
 
-          <!-- New role exercise variant -->
-          <div class="exercise exercise--newrole">
-            <h3>Step 1: Send one message</h3>
+                            <blockquote>
+                                <p>
+                                    What are three things I could cook for
+                                    dinner tonight using chicken and rice?
+                                </p>
+                            </blockquote>
 
-            <p>Copy this message exactly as written:</p>
+                            <p>
+                                Before you send this one, change it to match
+                                what you actually have. Replace "chicken and
+                                rice" with whatever ingredients are in your
+                                kitchen right now.
+                            </p>
 
-            <blockquote>
-              <p>I'm starting a new job at a marketing agency next month. What are three things I could do in my first week to make a good impression?</p>
-            </blockquote>
+                            <p>
+                                This is a pattern you will use throughout the
+                                course: start with a message someone else wrote,
+                                then change the parts that should be yours. The
+                                next module (B-02) walks through this step by
+                                step. For now, just swap those two ingredients
+                                and send it.
+                            </p>
+                        </div>
 
-            <p>Paste it into the text area on your platform (not sure which one? See 'Open your AI tool' above). Press send.</p>
+                        <!-- New role exercise variant -->
+                        <div class="exercise exercise--newrole">
+                            <h3>Step 1: Send one message</h3>
 
-            <p>The AI will respond with a list of suggestions. It may be bullet points. It may be paragraphs. It may include context you did not ask for. Any of those are fine.</p>
+                            <p>Copy this message exactly as written:</p>
 
-            <p>That is your first message sent. The AI answered. Nothing broke.</p>
+                            <blockquote>
+                                <p>
+                                    I'm starting a new job at a marketing agency
+                                    next month. What are three things I could do
+                                    in my first week to make a good impression?
+                                </p>
+                            </blockquote>
 
-            <h3>Step 2: Now make it yours (optional)</h3>
+                            <p>
+                                Paste it into the text area on your platform
+                                (not sure which one? See 'Open your AI tool'
+                                above). Press send.
+                            </p>
 
-            <p>Here is a second message you can try:</p>
+                            <p>
+                                The AI will respond with a list of suggestions.
+                                It may be bullet points. It may be paragraphs.
+                                It may include context you did not ask for. Any
+                                of those are fine.
+                            </p>
 
-            <blockquote>
-              <p>I'm starting a new job at [type of company or team] next month as a [your job title]. What are three things I could do in my first week to make a good impression?</p>
-            </blockquote>
+                            <p>
+                                That is your first message sent. The AI
+                                answered. Nothing broke.
+                            </p>
 
-            <p>Before you send this one, replace the parts in square brackets with your actual situation. This is the pattern that runs through the rest of the course: start with a message someone else wrote, change the parts that should be yours, send it. B-02 walks through that in full.</p>
-          </div>
+                            <h3>Step 2: Now make it yours (optional)</h3>
 
-        </div>
+                            <p>Here is a second message you can try:</p>
 
-        <h2>If your response looks different from what you expected</h2>
+                            <blockquote>
+                                <p>
+                                    I'm starting a new job at [type of company
+                                   or team] next month as a [your job title].
+                                    What are three things I could do in my first
+                                    week to make a good impression?
+                                </p>
+                            </blockquote>
 
-        <p>That is normal. Every conversation with an AI is slightly different, even when you send the same message twice. The wording, the length, and the level of detail will vary. If the response was clearly about the right topic, it worked. If it seemed completely unrelated to what you asked, start a new conversation and try sending the same message again. Starting a new conversation is instant and free — the AI has no memory of previous conversations, so there is nothing to lose.</p>
+                            <p>
+                                Before you send this one, replace the parts in
+                                square brackets with your actual situation. This
+                                is the pattern that runs through the rest of the
+                                course: start with a message someone else wrote,
+                                change the parts that should be yours, send it.
+                                B-02 walks through that in full.
+                            </p>
+                        </div>
+                    </div>
 
-        <h2>If it asks you to upgrade</h2>
+                    <aside class="callout" data-label="Read this if your response looks different">
+                        <p>
+                            That is normal. Every conversation with an AI is
+                            slightly different, even when you send the same
+                            message twice. The wording, the length and the
+                            level of detail will vary. If the response was
+                            clearly about the right topic, it worked.
+                        </p>
+                        <p>
+                            If it seemed completely unrelated to what you
+                            asked, start a new conversation and try sending the
+                            same message again. Starting a new conversation is
+                            instant and free — the AI has no memory of previous
+                            conversations, so there is nothing to lose.
+                        </p>
+                    </aside>
 
-        <p>Free accounts have a message limit. If you see a prompt asking you to subscribe or upgrade, you have not done anything wrong — you have used your free allowance. It resets, usually within a few hours. Come back and continue then, or try a different platform in the meantime.</p>
+                    <h2>If it asks you to upgrade</h2>
 
-        <ul>
-          <li><strong>Claude.ai</strong> — a usage note appears when you are near the limit. The limit resets daily.</li>
-          <li><strong>ChatGPT</strong> — a rolling message limit applies on the free plan. An upgrade prompt appears when it is reached.</li>
-          <li><strong>Gemini</strong> — free accounts may switch to a lighter model when daily limits are reached. This is automatic and usually does not affect everyday tasks.</li>
-        </ul>
+                    <p>
+                        Free accounts have a message limit. If you see a prompt
+                        asking you to subscribe or upgrade, you have not done
+                        anything wrong — you have used your free allowance. It
+                        resets, usually within a few hours. Come back and
+                        continue then or try a different platform in the
+                        meantime.
+                    </p>
 
-        <h2>A note on data</h2>
+                    <ul>
+                        <li>
+                            <strong>Claude.ai</strong> — a usage note appears
+                            when you are near the limit. The limit resets daily.
+                        </li>
+                        <li>
+                            <strong>ChatGPT</strong> — a rolling message limit
+                            applies on the free plan. An upgrade prompt appears
+                            when it is reached.
+                        </li>
+                        <li>
+                            <strong>Gemini</strong> — free accounts may switch
+                            to a lighter model when daily limits are reached.
+                            This is automatic and usually does not affect
+                            everyday tasks.
+                        </li>
+                    </ul>
 
-        <p>Before you paste work documents or other sensitive content into any AI tool, check the platform's data policy. On some free plans, the AI company may use your conversations to improve the product — paid plans typically do not. If you are using a tool provided by your employer, ask your IT team what applies. For this exercise, you are typing one test sentence, so there is nothing sensitive at stake. But it is a good habit to know the policy before you share anything that matters.</p>
+                    <aside class="callout callout--pause" data-label="Pause — read this before you paste">
+                        <p>
+                            Before you paste work documents or other sensitive
+                            content into any AI tool, check the platform's data
+                            policy. On some free plans, the AI company may use
+                            your conversations to improve the product, paid
+                            plans typically do not.
+                        </p>
+                        <p>
+                            If you are using a tool provided by your employer,
+                            ask your IT team what applies. For this exercise
+                            you are typing one test sentence, so there is
+                            nothing sensitive at stake. But it is a good habit
+                            to know the policy before you share anything that
+                            matters.
+                        </p>
+                    </aside>
 
-        <h2>Next</h2>
+                    <h2>Next</h2>
 
-        <p>Now that you have sent a message and read a response, the next step is learning how to take any starting message and make it fit your own situation. That is B-02: Copy, Personalise, Use.</p>
+                    <p>
+                        Now that you have sent a message and read a response,
+                        the next step is learning how to take any starting
+                        message and make it fit your own situation. That is
+                        B-02: Copy, Personalise, Use.
+                    </p>
 
-        <nav class="module-pagination">
-          <span class="module-pagination-spacer"></span>
-          <a href="/course/b/02" class="module-pagination-next">
-            <span class="module-pagination-label">Next</span>
-            <span class="module-pagination-title">B-02: Copy, Personalise, Use →</span>
-          </a>
-        </nav>
+                    <nav class="module-pagination">
+                        <span class="module-pagination-spacer"></span>
+                        <a href="/course/b/02" class="module-pagination-next">
+                            <span class="module-pagination-label">Next</span>
+                            <span class="module-pagination-title"
+                                >B-02: Copy, Personalise, Use →</span
+                            >
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </main>
 
-      </div>
-    </div>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <p>Linguist · Vuelo Labs · <a href="https://ko-fi.com/linguistthinkfirst" target="_blank" rel="noopener">Buy us a coffee ☕</a> · <a href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00" target="_blank" rel="noopener">Read on Medium</a></p>
-    </div>
-  </footer>
-
-</body>
+        <footer class="site-footer">
+            <div class="container">
+                <p>
+                    Linguist · Vuelo Labs ·
+                    <a
+                        href="https://ko-fi.com/linguistthinkfirst"
+                        target="_blank"
+                        rel="noopener"
+                        >Buy us a coffee ☕</a
+                    >
+                    ·
+                    <a
+                        href="https://medium.com/@lcroash/i-find-myself-yawning-more-da2422e68e00"
+                        target="_blank"
+                        rel="noopener"
+                        >Read on Medium</a
+                    >
+                </p>
+            </div>
+        </footer>
+    </body>
 </html>

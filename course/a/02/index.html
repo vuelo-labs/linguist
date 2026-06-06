@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cost, Tokens, and What Things Actually Cost · Linguist</title>
+  <title>Cost, Tokens and What Things Actually Cost · Linguist</title>
   <meta name="description" content="Build a mental model of Claude Code costs so you can make deliberate spend decisions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -43,15 +43,15 @@
 
       <section class="module-hero">
         <p class="module-eyebrow">Advanced Practitioner · Module 02</p>
-        <h1 class="module-title">Cost, Tokens, and What Things Actually Cost</h1>
-        <p class="module-objective">After this, you can estimate the cost of a Claude Code session before starting, read token usage after, and understand what makes sessions expensive.</p>
+        <h1 class="module-title">Cost, Tokens and What Things Actually Cost</h1>
+        <p class="module-objective">After this, you can estimate the cost of a Claude Code session before starting, read token usage after and understand what makes sessions expensive.</p>
       </section>
 
       <div class="module-body">
 
         <h2>Before You Go Further</h2>
 
-        <p>You have run your first session. You know what Claude Code can do — it reads files, writes files, runs commands, and reports back. You have approved your first tool call and seen your first response.</p>
+        <p>You have run your first session. You know what Claude Code can do — it reads files, writes files, runs commands and reports back. You have approved your first tool call and seen your first response.</p>
 
         <p>Before you go further, know what it costs.</p>
 
@@ -74,7 +74,7 @@
           <li><strong>Output tokens</strong> — what Claude Code generates. Its responses, any files it writes, any plans it explains. Output tokens cost more per token than input tokens.</li>
         </ul>
 
-        <p><strong>Tool calls add up.</strong> Every time Claude Code reads a file, searches your folders, or runs a command, the action and its result both contribute tokens. A session with 15 tool calls uses significantly more tokens than a session with 2.</p>
+        <p><strong>Tool calls add up.</strong> Every time Claude Code reads a file, searches your folders or runs a command, the action and its result both contribute tokens. A session with 15 tool calls uses significantly more tokens than a session with 2.</p>
 
         <p><strong>Different models, different costs.</strong> Claude Code can use different models depending on the task:</p>
 
@@ -104,13 +104,13 @@
 
         <h3>Long sessions</h3>
 
-        <p>Claude Code resends the conversation history with every message. The longer a session runs, the more context accumulates, and the more tokens are sent with each new exchange. Message 25 in a session costs more than message 3, even if both messages are the same length.</p>
+        <p>Claude Code resends the conversation history with every message. The longer a session runs, the more context accumulates and the more tokens are sent with each new exchange. Message 25 in a session costs more than message 3, even if both messages are the same length.</p>
 
         <p>Keep sessions focused on one task. When you finish, start a new session for the next task. Use <code>/clear</code> to reset context when you change direction within a session. (A-05 covers this in full.) Fresh sessions are cheaper.</p>
 
         <h3>Agent delegation</h3>
 
-        <p>When Claude Code spawns a subagent — a separate AI instance that handles part of the work — that subagent runs its own context window. It reads its own files, generates its own responses, and costs its own tokens. Delegation multiplies cost because you are paying for two or more AI sessions at once.</p>
+        <p>When Claude Code spawns a subagent — a separate AI instance that handles part of the work — that subagent runs its own context window. It reads its own files, generates its own responses and costs its own tokens. Delegation multiplies cost because you are paying for two or more AI sessions at once.</p>
 
         <p>A-08 covers agent delegation in detail. For now, know that it exists and that it is the single biggest cost multiplier in Claude Code. Do not use delegation until you reach that module.</p>
 
@@ -159,13 +159,13 @@
 
         <h3>Rough benchmarks</h3>
 
-        <p>These are honest approximations to build your intuition. Actual costs depend on the model, the length of your messages, and the size of files involved.</p>
+        <p>These are honest approximations to build your intuition. Actual costs depend on the model, the length of your messages and the size of files involved.</p>
 
         <ul>
           <li><strong>Short focused session</strong> (5-10 messages, no large file reads, minimal tool calls): a few cents. This is your typical "summarise this document" or "rewrite this paragraph" session.</li>
           <li><strong>Medium working session</strong> (20-30 messages, several file reads, back-and-forth iteration): tens of cents to low single-digit dollars. This is a realistic session where you are working through a task with some complexity.</li>
           <li><strong>Long session with many tool calls</strong> (30+ messages, reading and writing across multiple files, running searches and commands): several dollars. This is a deep research or multi-file editing session.</li>
-          <li><strong>Agent delegation on a complex task</strong> (subagents reading and writing across many files, running their own tool chains): $5-20 depending on scope. This is the high end, and you will not reach it until A-08.</li>
+          <li><strong>Agent delegation on a complex task</strong> (subagents reading and writing across many files, running their own tool chains): $5-20 depending on scope. This is the high end and you will not reach it until A-08.</li>
         </ul>
 
         <p>The pattern is simple: more tokens in, more tokens out, more cost. You now have the mental model to predict which sessions will be cheap and which will not.</p>
@@ -175,7 +175,7 @@
         <p>From here in the course, two modules carry a cost warning before their exercises:</p>
 
         <ul>
-          <li><strong>A-07: Tool Fluency</strong> — where you learn to guide Claude Code's tool selection. Each tool call costs tokens, and some tools are more expensive than others.</li>
+          <li><strong>A-07: Tool Fluency</strong> — where you learn to guide Claude Code's tool selection. Each tool call costs tokens and some tools are more expensive than others.</li>
           <li><strong>A-08: Agent Delegation</strong> — where you learn to delegate tasks to subagents. Delegation multiplies cost because each subagent runs its own context window.</li>
         </ul>
 
@@ -183,7 +183,7 @@
 
         <h2>Next</h2>
 
-        <p>You understand what tokens are, how billing works, what makes sessions expensive, and how to set a mental budget.</p>
+        <p>You understand what tokens are, how billing works, what makes sessions expensive and how to set a mental budget.</p>
 
         <p>Continue to A-03: CLAUDE.md — where you store standing instructions for every Claude Code session.</p>
 

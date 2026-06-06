@@ -573,7 +573,7 @@
             <span data-machine>Goal</span>
           </span>
           <span style="font-family:var(--sans);font-size:0.84rem;color:var(--muted);">
-            <span data-human>Feel the difference one opening message makes — and pick your primary project.</span>
+            <span data-human>Feel the difference one opening message makes and pick your primary project.</span>
             <span data-machine>Run the same task in both projects. Pick your primary.</span>
           </span>
         </div>
@@ -595,7 +595,7 @@
           <div class="goal-row">
             <span class="goal-row-label">Watch for</span>
             <span class="goal-row-content">
-              <span data-human>Which response asked you a question before producing output? Which one just started? Did one feel more useful for this specific task? The answer tells you which mode this task belongs in — and probably tells you something about how you currently default.</span>
+              <span data-human>Which response asked you a question before producing output? Which one just started? Did one feel more useful for this specific task? The answer tells you which mode this task belongs in and probably tells you something about how you currently default.</span>
               <span data-machine>Which project asked before executing? Which just ran? Which output is more useful? That's your mode signal for this task type.</span>
             </span>
           </div>
@@ -621,16 +621,16 @@
           <p class="concept-title">Four elements — always in this order</p>
         </div>
         <div class="concept-body">
-          <p data-human><strong>1. Role.</strong> Who is speaking and why does it matter for this task? One sentence. Not a title — a calibration. "I'm a product manager preparing a brief for an engineering team" tells the model what level of detail, what vocabulary, and what kind of output will be useful. Without it, the model guesses.</p>
+          <p data-human><strong>1. Role.</strong> Who is speaking and why does it matter for this task? One sentence. Not a title — a calibration. "I'm a product manager preparing a brief for an engineering team" tells the model what level of detail, what vocabulary and what kind of output will be useful. Without it, the model guesses.</p>
           <p data-machine><strong>1. Role.</strong> Who is speaking · why it matters for this task. One sentence. Calibrates vocabulary, depth, output type.</p>
 
-          <p data-human><strong>2. Task.</strong> Verb first, then object, then scope. "Write a one-page brief" not "I need some help with a brief." The verb sets the blast radius — write, draft, summarise, analyse, and refactor all imply different scopes. Choose deliberately.</p>
+          <p data-human><strong>2. Task.</strong> Verb first, then object, then scope. "Write a one-page brief" not "I need some help with a brief." The verb sets the blast radius — write, draft, summarise, analyse and refactor all imply different scopes. Choose deliberately.</p>
           <p data-machine><strong>2. Task.</strong> Verb + object + scope. Verb sets blast radius — choose deliberately. Not "I need help with X."</p>
 
-          <p data-human><strong>3. Context.</strong> Only what the model needs to do this task well. Apply the load-bearing test: if removing a piece of context wouldn't change the output, cut it. Background that's interesting but not task-relevant is noise — and noise degrades output.</p>
+          <p data-human><strong>3. Context.</strong> Only what the model needs to do this task well. Apply the load-bearing test: if removing a piece of context wouldn't change the output, cut it. Background that's interesting but not task-relevant is noise and noise degrades output.</p>
           <p data-machine><strong>3. Context.</strong> Minimum that makes the task possible at target quality. Load-bearing test: if removing it wouldn't change output, cut it.</p>
 
-          <p data-human><strong>4. Done criteria.</strong> What does the output look like when it's finished? Format, length, audience, tone — and the finish line. Without a finish line, iteration is unbounded and you have no basis for knowing you've arrived.</p>
+          <p data-human><strong>4. Done criteria.</strong> What does the output look like when it's finished? Format, length, audience, tone and the finish line. Without a finish line, iteration is unbounded and you have no basis for knowing you've arrived.</p>
           <p data-machine><strong>4. Done criteria.</strong> Format · length · audience · tone · finish line. No finish line = unbounded iteration.</p>
         </div>
       </div>
@@ -667,7 +667,7 @@
 
         <div class="prompt-section">
           <p class="prompt-label">
-            <span data-human>Open a new conversation in your Human Mode project and paste this — then fill in the brackets with your actual task</span>
+            <span data-human>Open a new conversation in your Human Mode project and paste this, then fill in the brackets with your actual task</span>
             <span data-machine>New conversation · Human Mode project · fill brackets with real task</span>
           </p>
           <div class="prompt-wrap">
@@ -732,7 +732,7 @@
           </li>
         </ol>
         <p class="convergence-note">
-          <span data-human><strong>From Exercise 3 onwards, you'll work from your primary project.</strong> Pick the one that produced more useful output for most of your work — or the one whose instructions feel most like how you actually want to work. Your second project isn't deleted; it's a reference point. When a task clearly belongs in the other mode, you'll know — and you'll know what to open.</span>
+          <span data-human><strong>From Exercise 3 onwards, you'll work from your primary project.</strong> Pick the one that produced more useful output for most of your work or the one whose instructions feel most like how you actually want to work. Your second project isn't deleted; it's a reference point. When a task clearly belongs in the other mode, you'll know and you'll know what to open.</span>
           <span data-machine><strong>From Exercise 3: one primary project.</strong> Pick the one with more useful output for your typical work. Second project = reference, not deleted. You'll know when a task needs the other mode.</span>
         </p>
       </div>
@@ -767,10 +767,10 @@ What I'm trying to figure out: [your actual question or goal — it can be fuzzy
 
 What would make this conversation useful: [a rough plan, a set of options, a first draft, a set of questions to answer — whatever would help you move forward]
 
-I'm in my Human Mode project — so ask questions if my goal isn't clear, push back if my framing seems off, and help me think before we produce anything.
+I'm in my Human Mode project — so ask questions if my goal isn't clear, push back if my framing seems off and help me think before we produce anything.
 
 —
-Note: Read what this opening does. It tells the model who you are in this conversation (someone working through something, not dispatching a task), what you're working on, what you're trying to figure out, and what "useful" looks like. It also signals the working style — exploratory, questioning welcome. The model will respond to all of this. Compare it to the Machine Mode opening you're about to write.`,
+Note: Read what this opening does. It tells the model who you are in this conversation (someone working through something, not dispatching a task), what you're working on, what you're trying to figure out and what "useful" looks like. It also signals the working style — exploratory, questioning welcome. The model will respond to all of this. Compare it to the Machine Mode opening you're about to write.`,
 
         human_prompt_machine: `Context: [brief description of task + situation]
 Goal: think through [X] before producing output
@@ -791,14 +791,14 @@ Context:
 
 Constraints:
 - Format: [bullets / prose / table / code]
-- Length: [specific — word count, page count, or number of sections]
+- Length: [specific — word count, page count or number of sections]
 - Audience: [who reads this and what they need]
 - Exclude: [what not to include]
 
 Done when: [what the finished output looks like]
 
 —
-Note: Read this against the Human Mode opening. Every line is a constraint. No pleasantries, no "I hope you can help," no backstory that isn't task-relevant. The model has your role (who's speaking), your task (what to produce), your context (minimum needed), your constraints (hard edges), and your done criteria (when to stop). If removing any line wouldn't change the output, it shouldn't be there.`,
+Note: Read this against the Human Mode opening. Every line is a constraint. No pleasantries, no "I hope you can help," no backstory that isn't task-relevant. The model has your role (who's speaking), your task (what to produce), your context (minimum needed), your constraints (hard edges) and your done criteria (when to stop). If removing any line wouldn't change the output, it shouldn't be there.`,
 
         machine_prompt_machine: `Role: [role] · [domain]
 Task: [verb] [object]
@@ -826,7 +826,7 @@ What I'm trying to figure out: [your actual question or goal — fuzzy is fine a
 
 What would make this conversation useful: [a rough plan, a set of options, a first draft, questions to answer]
 
-I want to think out loud here — so ask me questions if my goal isn't clear, push back if my framing is off, and help me get to a brief worth dispatching before we produce anything.
+I want to think out loud here — so ask me questions if my goal isn't clear, push back if my framing is off and help me get to a brief worth dispatching before we produce anything.
 
 —
 Note: This opening signals exploration, not execution. The model will respond with questions and options rather than a finished output. That's the Human Mode working style. Now write the same task as a Machine Mode opening and compare what comes back.`,

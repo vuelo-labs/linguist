@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linguist for Teams — One-pager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-card: #f3efe7;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --faint: #a0a0a0;
+      --border: #e5e0d6;
+      --accent: #6b4226;
+      --serif: 'Newsreader', Georgia, serif;
+      --sans: 'Inter', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2.5rem 3rem;
+      background: var(--bg);
+    }
+    .header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+    .brand { font-family: var(--sans); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+    .doctype { font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+
+    h1 { font-family: var(--serif); font-weight: 400; font-size: 1.85rem; line-height: 1.15; margin: 0 0 0.5rem; }
+    .lede { font-family: var(--serif); font-size: 1.05rem; line-height: 1.45; color: var(--text); margin: 0 0 1.25rem; max-width: 640px; }
+
+    h2 { font-family: var(--sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 1.5rem 0 0.6rem; }
+    p { margin: 0 0 0.7rem; }
+    ul { margin: 0 0 0.7rem; padding-left: 1.1rem; }
+    li { margin-bottom: 0.25rem; }
+    strong { color: var(--text); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    .pillar { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 0.85rem 1rem; }
+    .pillar h3 { font-family: var(--sans); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.35rem; }
+    .pillar p { font-size: 0.83rem; margin: 0; }
+
+    .price-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.4rem; }
+    .price-table th, .price-table td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border); }
+    .price-table th { font-weight: 600; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .price-table td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    .promise { background: var(--bg-card); border-left: 3px solid var(--accent); padding: 0.9rem 1.1rem; margin: 1rem 0; border-radius: 0 4px 4px 0; }
+    .promise p { margin: 0; font-family: var(--serif); font-size: 1rem; line-height: 1.45; }
+
+    .footer { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--border); margin-top: 1.75rem; padding-top: 0.85rem; font-size: 0.78rem; color: var(--muted); }
+    .footer a { color: var(--muted); }
+
+    .note { font-size: 0.78rem; color: var(--faint); font-style: italic; }
+
+    @media print {
+      body { background: white; font-size: 9.5pt; line-height: 1.4; }
+      .page { padding: 1cm 1.3cm; max-width: none; }
+      .pillar { background: #f7f3ea; padding: 0.55rem 0.7rem; }
+      .pillar p { font-size: 0.78rem; }
+      .promise { background: #f7f3ea; padding: 0.6rem 0.85rem; margin: 0.6rem 0; }
+      .promise p { font-size: 0.92rem; }
+      .no-print { display: none; }
+      h1 { font-size: 1.35rem; margin-bottom: 0.35rem; }
+      .lede { font-size: 0.9rem; margin-bottom: 0.85rem; }
+      h2 { margin: 0.7rem 0 0.35rem; font-size: 0.65rem; }
+      p, li { font-size: 0.82rem; }
+      ul { margin-bottom: 0.5rem; }
+      li { margin-bottom: 0.18rem; }
+      .price-table th, .price-table td { padding: 0.3rem 0.5rem; font-size: 0.78rem; }
+      .header { margin-bottom: 0.85rem; padding-bottom: 0.55rem; }
+      .footer { margin-top: 1rem; padding-top: 0.55rem; }
+      @page { size: A4; margin: 0; }
+    }
+
+    .toolbar { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--border); padding: 0.6rem 1rem; text-align: right; font-family: var(--sans); font-size: 0.8rem; }
+    .toolbar a { color: var(--muted); text-decoration: none; margin-left: 1rem; }
+    .toolbar button { background: var(--accent); color: white; border: 0; padding: 0.4rem 0.9rem; border-radius: 3px; font-family: var(--sans); font-size: 0.8rem; cursor: pointer; }
+    .toolbar button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="toolbar no-print">
+    <a href="/teams">← Back to /teams</a>
+    <a href="/">Linguist home</a>
+    <a href="/teams/one-pager/linguist-for-teams.pdf">Download PDF</a>
+    <button onclick="window.print()">Print</button>
+  </div>
+
+  <div class="page">
+    <div class="header">
+      <span class="brand">Linguist · Vuelo Labs</span>
+      <span class="doctype">For teams · Capability programme</span>
+    </div>
+
+    <h1>The hidden tax on AI work isn't burnout. It's context-switching.</h1>
+    <p class="lede">Every time someone on your team picks up where they left off, they re-pay the same tax. Re-pasting context. Re-explaining the goal. Or letting one thread accumulate enough drift that quality dips and nobody catches it. Linguist names the cost. Measures it. Trains it down.</p>
+
+    <h2>The problem</h2>
+    <p>Token spend, "feels draining", inconsistent output — those are symptoms. The cause is that everyone on your team is re-paying the same context tax. New conversation, same explanation. Or one long thread that drifts until quality dips and nobody notices when. You can feel it. You can't name it. So nobody fixes it.</p>
+
+    <h2>What we deliver</h2>
+    <div class="grid-3">
+      <div class="pillar">
+        <h3>Lower context-switch cost</h3>
+        <p>The headline outcome. People re-ground the AI faster and notice when a thread has gone stale.</p>
+      </div>
+      <div class="pillar">
+        <h3>Floor-raising</h3>
+        <p>Every completer reaches the <strong>Enabled</strong> tier — competent, deliberate use of AI for real work.</p>
+      </div>
+      <div class="pillar">
+        <h3>Measured</h3>
+        <p>Instrumented sandbox + published rubric. Bracket placement before. Movement after.</p>
+      </div>
+    </div>
+
+    <h2>How it goes</h2>
+    <ul>
+      <li><strong>Free baseline session</strong> — each person runs a standardised scenario in Cyborg. Output: bracket placement, org-level capability map, wellbeing baseline (NASA-TLX + agency/trust).</li>
+      <li><strong>6-week Enabled programme</strong> — cohort or internal-only. Tracks informed by baseline gaps. Mid-programme survey catches drift.</li>
+      <li><strong>Advanced upgrade (optional)</strong> — for engineers using Claude Code: cost awareness, session hygiene, agent delegation.</li>
+      <li><strong>Post-training reassessment</strong> — same rubric, same sandbox. Report: bracket movement, behavioural deltas, wellbeing deltas.</li>
+    </ul>
+
+    <h2>Pricing — indicative</h2>
+    <table class="price-table">
+      <thead>
+        <tr><th>Component</th><th>Per seat</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Baseline audit</td><td class="num">€0</td><td>Pre-engagement, included.</td></tr>
+        <tr><td>Enabled programme (6 wk)</td><td class="num">€800</td><td>Cohort or internal-only.</td></tr>
+        <tr><td>Post-training assessment</td><td class="num">€200</td><td>Same rubric, same sandbox.</td></tr>
+        <tr><td>Advanced upgrade</td><td class="num">€600</td><td>Engineers on Claude Code.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Indicative. Minimum 10 seats. Volume terms above 50. Optional quarterly refresh available post-engagement.</p>
+
+    <h2>Our promise</h2>
+    <div class="promise">
+      <p>Every completer reaches the Enabled tier as defined by our published rubric, or we extend the programme at no additional cost until they do.</p>
+    </div>
+
+    <p style="margin-top:0.6rem;font-size:0.82rem;">Linguist is the only published rubric for AI-fluency capability. Cyborg is the only instrumented sandbox built around it. <strong>Next step:</strong> a 30-min call to scope your team and book the free baseline — linguist.vuelolabs.com/teams</p>
+
+    <div class="footer">
+      <span>linguist.vuelolabs.com/teams · hello@vuelolabs.com</span>
+      <span>v0 · 2026-05-06</span>
+    </div>
+  </div>
+
+  <script>
+    if (window.location.search.includes('print=1')) {
+      window.addEventListener('load', () => setTimeout(() => window.print(), 500));
+    }
+  </script>
+</body>
+</html>

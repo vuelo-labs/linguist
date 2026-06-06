@@ -273,7 +273,7 @@
         Launch your workspace
       </button>
       <p class="muted" id="launch-hint" style="margin-top:14px">
-        Takes about 30 seconds to spin up. You'll be redirected to your workspace once it's ready. Your session lasts 7 days from now (or until you submit, whichever comes first).
+        Takes about a minute to spin up. We'll show you some orientation while it boots. Your session lasts 7 days from now (or until you submit, whichever comes first).
       </p>
 
       <details class="local-fallback" style="margin-top:24px; padding-top:18px; border-top:1px solid var(--w-border);">
@@ -325,7 +325,7 @@
 
 <script>
 const VALIDATE_URL = '/cyborg/validate';
-const LAUNCH_URL   = '/cyborg/launch';
+// /cyborg/launch is POSTed from the orientation page; this file just hands off.
 let _os = autoOs();
 let _validToken = null;
 
@@ -353,72 +353,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-async function launchWorkspace() {
+function launchWorkspace() {
+  // V1.2 cold-start-is-default: the heavy lifting (POSTing to /cyborg/launch,
+  // polling /cyborg/launch-status, surfacing the wait as orientation copy)
+  // happens on the dedicated orientation page. From here we just hand the
+  // candidate over with their validated token in the URL.
+  //
+  // The orientation page itself is what closes the wait gap — instead of a
+  // blank "Starting your workspace…" hint on this page, the candidate sees
+  // 3 short paragraphs of framing while the machine boots, and an Enter
+  // workspace button that activates the moment /healthz returns 200.
   if (!_validToken) return;
-  const btn   = document.getElementById('launch-btn');
-  const hint  = document.getElementById('launch-hint');
-  const status = document.getElementById('status');
-
+  const btn = document.getElementById('launch-btn');
   btn.disabled = true;
-  btn.textContent = 'Starting your workspace…';
-
-  // Live elapsed-time counter so the candidate sees progress during the
-  // 30-60s spawn. Updates the hint every second.
-  const launchStart = Date.now();
-  const progressMessages = [
-    [0,  'Reserving your workspace…'],
-    [10, 'Pulling environment image…'],
-    [25, 'Booting the desktop…'],
-    [45, 'Almost ready — finalising warehouse…'],
-    [70, 'Taking longer than usual. Hang tight.'],
-  ];
-  const progressTimer = setInterval(() => {
-    const elapsedS = Math.floor((Date.now() - launchStart) / 1000);
-    let msg = progressMessages[0][1];
-    for (const [threshold, m] of progressMessages) {
-      if (elapsedS >= threshold) msg = m;
-    }
-    hint.textContent = `${msg} (${elapsedS}s elapsed)`;
-  }, 1000);
-
-  try {
-    const r = await fetch(LAUNCH_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ token: _validToken }),
-    });
-    const d = await r.json();
-    if (d.ok && d.url) {
-      clearInterval(progressTimer);
-      hint.textContent = 'Workspace ready — redirecting…';
-      // Brief pause so the message is visible.
-      setTimeout(() => { window.location.href = d.url; }, 600);
-      return;
-    }
-    clearInterval(progressTimer);
-
-    // Error path — surface what happened, re-enable the button so the candidate can retry.
-    btn.disabled = false;
-    btn.textContent = 'Try again';
-    status.className = 'status err';
-    const msg = ({
-      'not_configured':   'The hosted workspace is not yet available. Try the local install option below, or contact the assessment owner.',
-      'already_used':     'This token has already been used. Each token is single-use — contact the assessment owner if you believe this is an error.',
-      'expired':          'This token has expired.',
-      'revoked':          'This token has been revoked.',
-      'spawn_failed':     'Could not start your workspace. Try again in a moment, or contact the assessment owner if it keeps failing.',
-      'spawn_timeout':    'Your workspace is taking longer than expected to start. Wait a minute and click again — if it was successfully started in the background, you\'ll be redirected to it.',
-    })[d.reason] || 'Could not launch the workspace. Try again or contact the assessment owner.';
-    status.textContent = msg;
-    hint.textContent = '';
-  } catch (e) {
-    clearInterval(progressTimer);
-    btn.disabled = false;
-    btn.textContent = 'Try again';
-    status.className = 'status err';
-    status.textContent = 'Could not reach the launch server. Check your connection and try again.';
-    hint.textContent = '';
-  }
+  btn.textContent = 'Opening orientation…';
+  window.location.href = '/cyborg/launch/?t=' + encodeURIComponent(_validToken);
 }
 
 function setOs(os) {

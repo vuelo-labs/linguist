@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tool Fluency · Linguist</title>
-  <meta name="description" content="Name the right tool for a given task, understand why tool choice affects quality and cost, and guide Claude Code away from expensive tools when cheaper ones will do.">
+  <meta name="description" content="Name the right tool for a given task, understand why tool choice affects quality and cost and guide Claude Code away from expensive tools when cheaper ones will do.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
@@ -44,7 +44,7 @@
       <section class="module-hero">
         <p class="module-eyebrow">Advanced Practitioner · Module 07</p>
         <h1 class="module-title">Tool Fluency</h1>
-        <p class="module-objective">After this, you can name the right tool for a given task in your message, understand why tool choice affects both quality and cost, and guide Claude Code away from expensive tools when cheaper ones will do the job.</p>
+        <p class="module-objective">After this, you can name the right tool for a given task in your message, understand why tool choice affects both quality and cost and guide Claude Code away from expensive tools when cheaper ones will do the job.</p>
       </section>
 
       <div class="module-body">
@@ -53,19 +53,19 @@
 
         <p>In A-06, you learned to separate planning from execution — asking Claude Code to describe its approach before it acts. That module was about when Claude Code starts work. This one is about how it works once it does.</p>
 
-        <p>When Claude Code takes on a task, it chooses from a set of tools: reading files, searching for patterns, running commands, or launching a separate session. Left to its own judgement, it will make a reasonable choice. But reasonable is not always the right choice for your task, and it is not always the cheapest one.</p>
+        <p>When Claude Code takes on a task, it chooses from a set of tools: reading files, searching for patterns, running commands or launching a separate session. Left to its own judgement, it will make a reasonable choice. But reasonable is not always the right choice for your task and it is not always the cheapest one.</p>
 
         <p>Naming the tool in your message is how you close that gap.</p>
 
         <h2>The tool hierarchy</h2>
 
-        <p><strong>Read</strong> — opens a specific file and reads its full contents. Use this when you know exactly which file you need. It reads one file, costs a predictable amount, and gives you exactly what you asked for.</p>
+        <p><strong>Read</strong> — opens a specific file and reads its full contents. Use this when you know exactly which file you need. It reads one file, costs a predictable amount and gives you exactly what you asked for.</p>
 
         <p><strong>Glob</strong> — finds files matching a pattern across your project. Think of it as a file name search: "find every file called config.json" or "find all files ending in .md". Use this when you need to locate files, not read them.</p>
 
         <p><strong>Grep</strong> — searches inside files for specific text or patterns. Use this when you need to find where something appears across multiple files. "Find every file that mentions the word 'deadline'" is a Grep task.</p>
 
-        <p><strong>Bash</strong> — runs a terminal command. This is powerful and flexible, but it is also more expensive than the dedicated tools above, and some commands are irreversible. Only reach for Bash when Read, Glob, and Grep genuinely cannot do what you need.</p>
+        <p><strong>Bash</strong> — runs a terminal command. This is powerful and flexible, but it is also more expensive than the dedicated tools above and some commands are irreversible. Only reach for Bash when Read, Glob and Grep genuinely cannot do what you need.</p>
 
         <p><strong>WebSearch</strong> — fetches live information from the web. Use this when you need current data that is not in your project files — competitor pricing, public documentation, recent news. It is in the same cost bracket as Bash: more expensive than the file tools, but far cheaper than Agent.</p>
 
@@ -156,7 +156,7 @@
           <p>Use Grep to find every mention of [the same word or phrase] across files in this project. Show me the file name and matching line. Don't read any full files.</p>
         </blockquote>
 
-        <p>After both, compare the token counts shown at the end of each response. The second version will typically be equal or cheaper, and the scope of the result will be more predictable.</p>
+        <p>After both, compare the token counts shown at the end of each response. The second version will typically be equal or cheaper and the scope of the result will be more predictable.</p>
 
         <h2>Copy, Personalise, Use</h2>
 
@@ -177,7 +177,7 @@
 
         <h2>What good looks like</h2>
 
-        <p>Claude Code uses the tool you named. The tool call appears in the output before you approve it — you can see that it is using Grep, not Agent, before anything happens. The result is scoped to what you asked for: matching lines from Grep, not a full file read; the specific file from Read, not a sweep of the folder.</p>
+        <p>Claude Code uses the tool you named. The tool call appears in the output before you approve it, you can see that it is using Grep, not Agent, before anything happens. The result is scoped to what you asked for: matching lines from Grep, not a full file read; the specific file from Read, not a sweep of the folder.</p>
 
         <p>You are not guessing what Claude Code did. You can see it.</p>
 
@@ -189,11 +189,11 @@
           <p>Why did you use [X] instead of [Y]?</p>
         </blockquote>
 
-        <p>The answer will tell you one of two things: either your instruction was ambiguous and the task description pulled Claude Code toward a different interpretation, or the task genuinely required the more expensive tool — Grep cannot do what you asked for, or Read would have missed something. Both answers are useful. The first tells you how to rewrite the message. The second tells you the task is bigger than you thought.</p>
+        <p>The answer will tell you one of two things: either your instruction was ambiguous and the task description pulled Claude Code toward a different interpretation or the task genuinely required the more expensive tool — Grep cannot do what you asked for or Read would have missed something. Both answers are useful. The first tells you how to rewrite the message. The second tells you the task is bigger than you thought.</p>
 
         <h2>Next</h2>
 
-        <p>A-08 covers the Agent tool — the final and most expensive tool in the hierarchy. Delegation is not just about naming a tool. It is about deciding whether a task belongs in your main session at all, and writing a brief that gives a separate session everything it needs to do the job.</p>
+        <p>A-08 covers the Agent tool — the final and most expensive tool in the hierarchy. Delegation is not just about naming a tool. It is about deciding whether a task belongs in your main session at all and writing a brief that gives a separate session everything it needs to do the job.</p>
 
         <nav class="module-pagination">
           <a href="/course/a/06" class="module-pagination-prev">

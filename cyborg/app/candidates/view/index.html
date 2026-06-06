@@ -35,8 +35,9 @@
     <a class="app-logo" href="/cyborg/app/">Cyborg</a>
     <nav class="app-nav">
       <a href="/cyborg/app/" class="nav-link">Dashboard</a>
-      <a href="/cyborg/app/candidates/" class="nav-link nav-current">Candidates</a>
       <a href="/cyborg/app/team/" class="nav-link">Team</a>
+      <a href="/cyborg/app/candidates/" class="nav-link nav-current">Candidates</a>
+      <a href="/cyborg/app/reports/" class="nav-link">Reports</a>
     </nav>
     <div class="app-user-menu">
       <span class="org-name" id="hdr-org-name">…</span>
@@ -108,9 +109,11 @@
   document.addEventListener('click', () => { document.getElementById('user-popover').hidden = true; });
   document.getElementById('signout-link').addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.replace('/cyborg/signin/'); });
 
-  // Extract token from URL path: /cyborg/app/candidates/<token>/
-  const m = location.pathname.match(/\/cyborg\/app\/candidates\/([^\/]+)/);
-  const token = m ? decodeURIComponent(m[1]) : '';
+  // Extract token from URL query: /cyborg/app/candidates/view/?token=<token>
+  // Renamed 2026-06-05 from /cyborg/app/candidates/<token>/ — Cloudflare
+  // Pages doesn't dynamic-route static [token] dirs (only Functions do),
+  // so a path-segment URL 404'd. Query-param keeps the static page.
+  const token = new URLSearchParams(location.search).get('token') || '';
   if (!token) { document.getElementById('container').innerHTML = `<div class="empty">Token missing from URL.</div>`; throw new Error('no token'); }
 
   const { data: memberships } = await supabase
@@ -164,33 +167,87 @@
     <li><span class="k">Workspace URL</span><span class="v">${cand.machine_url ? `<a href="${cand.machine_url}" target="_blank" rel="noopener noreferrer" style="color:var(--w-accent);">Open</a>` : '—'}</span></li>
   `;
 
-  // Reports if scored.
-  if (cand.used_at) {
-    const { data: reports } = await supabase
-      .from('reports')
-      .select('id, status, scored_at, cost_usd, duration_ms, master_url, candidate_url, manager_url, technical_url, recruiter_url')
-      .eq('candidate_token', cand.token)
-      .maybeSingle();
+  // Reports for THIS candidate — always shown (even pre-submission, to make
+  // it obvious where the reports will land). Uses the server-side list
+  // endpoint scoped to this single candidate_token; RLS-safe.
+  // 2026-06-05: rewrote to use /cyborg/app/api/reports/list + authed blob
+  // open (was hitting CF-Access-gated /cyborg/admin/report which 401'd
+  // for org members).
+  {
+    const listRes = await fetch('/cyborg/app/api/reports/list', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ organisation_id: org.id, candidate_token: cand.token }),
+    });
+    const listJson = await listRes.json().catch(() => ({ ok: false }));
+    const subs    = listJson.submissions || [];
+    const reports = listJson.reports     || [];
+    const reportBySubId = Object.fromEntries(reports.map(r => [r.submission_id, r]));
 
-    if (reports && reports.status === 'ready') {
-      document.getElementById('report-card').style.display = 'block';
-      document.getElementById('report-meta').textContent = `Scored ${formatRelative(reports.scored_at)} · cost $${(reports.cost_usd || 0).toFixed(4)} · ${Math.round((reports.duration_ms || 0) / 1000)}s`;
-      const tiers = ['master', 'candidate', 'manager', 'technical', 'recruiter'];
-      document.getElementById('report-links').innerHTML = tiers.map(t => {
-        const has = reports[`${t}_url`];
-        if (!has) return '';
-        const url = `/cyborg/admin/report?submission=${encodeURIComponent(reports.id)}&tier=${t}`;
-        return `<a class="report-link" href="${url}" target="_blank" rel="noopener noreferrer">${t.charAt(0).toUpperCase() + t.slice(1)}</a>`;
-      }).filter(Boolean).join('');
-    } else if (reports && reports.status === 'needs_review') {
-      document.getElementById('report-card').style.display = 'block';
-      document.getElementById('report-meta').innerHTML = `<strong>Needs review</strong> — the safety classifier couldn't run on this submission. Inspect the work product manually before any report is shared with the candidate.`;
-    } else if (reports && reports.status === 'rejected') {
-      document.getElementById('report-card').style.display = 'block';
-      document.getElementById('report-meta').innerHTML = `<strong>Rejected</strong> — the safety classifier flagged this submission. No report rendered.`;
-    } else if (reports && reports.status === 'processing') {
-      document.getElementById('report-card').style.display = 'block';
-      document.getElementById('report-meta').textContent = 'Processing — the scoring worker is currently running. Refresh in a minute.';
+    document.getElementById('report-card').style.display = 'block';
+    if (!subs.length) {
+      document.getElementById('report-meta').innerHTML = `<em>No submission yet.</em> When this candidate submits, their scored report will appear here across all five tiers.`;
+      document.getElementById('report-links').innerHTML = '';
+    } else {
+      // One row per submission. Most candidates submit once, but the table
+      // supports multiple — e.g. a re-submission after a paused session.
+      const blocks = subs.map((s, idx) => {
+        const r = reportBySubId[s.id];
+        const status = r ? (r.status || 'pending') : 'pending';
+        const ts = s.received_at ? new Date(s.received_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+        const metaLine = r && r.status === 'ready'
+          ? `Submitted ${ts} · scored on ${r.model_used || '?'} · cost $${(r.cost_usd || 0).toFixed(4)} · ${Math.round((r.duration_ms || 0) / 1000)}s`
+          : r && r.status === 'processing'
+          ? `Submitted ${ts} — scoring in progress, refresh in a minute.`
+          : r && r.status === 'rejected'
+          ? `Submitted ${ts} — rejected by safety classifier. No report rendered.`
+          : r && r.status === 'needs_review'
+          ? `Submitted ${ts} — needs manual review (safety classifier couldn't run).`
+          : r && r.status === 'failed'
+          ? `Submitted ${ts} — scoring failed: ${r.error || 'unknown'}`
+          : `Submitted ${ts} — not yet scored.`;
+        const tierLinks = (r && r.status === 'ready')
+          ? ['master', 'candidate', 'manager', 'technical', 'recruiter'].map(t =>
+              `<button class="report-link tier-btn" data-sub="${s.id}" data-tier="${t}">${t.charAt(0).toUpperCase() + t.slice(1)}</button>`
+            ).join('')
+          : '';
+        return `
+          <div style="margin-top:${idx === 0 ? '0' : '14px'}; padding-top:${idx === 0 ? '0' : '14px'}; border-top:${idx === 0 ? 'none' : '1px solid var(--w-border)'};">
+            <p class="page-lede" style="margin:0 0 8px;">${metaLine}</p>
+            ${tierLinks ? `<div class="reports-grid">${tierLinks}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+      document.getElementById('report-meta').innerHTML = '';
+      document.getElementById('report-links').innerHTML = blocks;
+
+      // Wire tier buttons → authed fetch → blob URL → new tab.
+      document.querySelectorAll('.tier-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const sub  = btn.getAttribute('data-sub');
+          const tier = btn.getAttribute('data-tier');
+          const orig = btn.textContent;
+          btn.textContent = '…'; btn.disabled = true;
+          try {
+            const r = await fetch('/cyborg/app/api/reports/view', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+              body: JSON.stringify({ submission_id: Number(sub), tier }),
+            });
+            if (!r.ok) {
+              const d = await r.json().catch(() => ({}));
+              alert(`Could not load ${tier}: ${d.reason || r.status}`);
+              return;
+            }
+            const html = await r.text();
+            const url  = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+            window.open(url, '_blank', 'noopener,noreferrer');
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+          } finally {
+            btn.textContent = orig; btn.disabled = false;
+          }
+        });
+      });
     }
   }
 

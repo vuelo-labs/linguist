@@ -3,3 +3,21 @@ node_modules/
 *.log
 .env
 .env.*
+
+# Cloudflare Wrangler local cache — contains wrangler-account.json with credentials.
+.wrangler/
+
+# Cloudflare zero-trust token file (kept locally only).
+cf-zero.txt
+
+# MCP / Playwright-MCP local config + cache.
+.mcp.json
+.playwright-mcp/
+
+# Local working notes / conversation dumps (kept off the repo).
+conv_for_pm_bot_only.txt
+content_design_workings/voice-mode/
+
+# Local-only artefacts created by previous runs.
+audio/
+feedback/
