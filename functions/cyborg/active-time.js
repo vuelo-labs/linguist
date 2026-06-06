@@ -4,8 +4,16 @@
 //
 // Active time = sum of all (resume → pause/submit) periods.
 // Currently-running period (last_resumed_at NOT NULL) is added on the fly.
+//
+// F-ACTIVE-TIME-UNAUTH-LOOKUP: public + unauthenticated by design (the
+// candidate Flask server proxies without holding admin credentials), but
+// rate-limited per IP so it can't be used as a token-existence probe oracle.
 
 import { createClient } from '@supabase/supabase-js';
+import { requestMeta, writeAuditLog, checkEndpointRateLimit } from './_lib.js';
+
+const RATE_LIMIT_WINDOW_SEC = 60;
+const RATE_LIMIT_MAX_PER_IP = 60;  // ~1/s; badge refreshes ~1/min in normal use
 
 export async function onRequestGet({ request, env }) {
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) {
@@ -17,6 +25,32 @@ export async function onRequestGet({ request, env }) {
   if (!token) return json({ ok: false, reason: 'missing_token' }, 400);
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+  const meta = requestMeta(request);
+
+  if (meta.ip) {
+    const rl = await checkEndpointRateLimit(
+      supabase,
+      `active-time:ip:${meta.ip}`,
+      RATE_LIMIT_WINDOW_SEC,
+      RATE_LIMIT_MAX_PER_IP,
+    );
+    if (!rl.ok) {
+      await writeAuditLog(supabase, {
+        actorEmail: '(public)',
+        action:     'rate_limit_hit',
+        target:     '/cyborg/active-time',
+        success:    true,
+        detail:     { count: rl.count, limit: rl.limit, token_prefix: token.slice(0, 8) },
+        ...meta,
+      });
+      return json(
+        { ok: false, reason: 'rate_limited', retry_after: rl.retryAfter },
+        429,
+        { 'Retry-After': String(rl.retryAfter) },
+      );
+    }
+  }
+
   const { data: row, error } = await supabase
     .from('cyborg_tokens')
     .select('token, expires_at, used_at, revoked_at, active_time_used_seconds, last_resumed_at, active_time_cap_seconds')
@@ -52,7 +86,7 @@ export async function onRequestGet({ request, env }) {
   });
 }
 
-function json(data, status = 200) {
+function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -60,6 +94,7 @@ function json(data, status = 200) {
       'Cache-Control': 'no-store',
       // Allow the candidate Flask server (any origin) to proxy this.
       'Access-Control-Allow-Origin': '*',
+      ...extraHeaders,
     },
   });
 }

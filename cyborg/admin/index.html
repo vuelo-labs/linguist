@@ -73,6 +73,75 @@
     <a class="btn small" href="/cyborg/admin/orgs/" style="text-decoration:none;">Manage orgs →</a>
   </div>
 
+  <!-- Configuration & Diagnostics -->
+  <div class="card" id="config-card">
+    <div class="toolbar">
+      <h2 style="margin:0;">Configuration &amp; Diagnostics</h2>
+      <div class="cfg-tabs" role="tablist">
+        <button type="button" class="cfg-tab active" data-tab="policy" onclick="switchConfigTab('policy')" role="tab" aria-selected="true">Policy</button>
+        <button type="button" class="cfg-tab" data-tab="trace" onclick="switchConfigTab('trace')" role="tab" aria-selected="false">Trace</button>
+      </div>
+    </div>
+
+    <!-- Policy tab — per-campaign session_policy editor -->
+    <div class="cfg-panel" id="cfg-panel-policy">
+      <div id="cfg-policy-status" class="status"></div>
+
+      <details id="cfg-create-campaign" style="margin-bottom:14px;">
+        <summary style="cursor:pointer; font-size:0.86rem; color:var(--w-muted); margin-bottom:8px;">+ Create a new campaign</summary>
+        <div class="row" style="margin-top:10px;">
+          <div class="field" style="flex:2;">
+            <label for="cc-name">Campaign name</label>
+            <input type="text" id="cc-name" placeholder="e.g. Engineering hiring 2026 Q3" />
+          </div>
+          <div class="field" style="flex:1;">
+            <label for="cc-org">Organisation</label>
+            <select id="cc-org"></select>
+          </div>
+        </div>
+        <button class="btn small" onclick="createCampaign()">Create</button>
+      </details>
+
+      <div class="toolbar" style="margin-bottom:8px;">
+        <div class="field" style="flex:1; margin:0;">
+          <label for="cfg-campaign-select">Edit campaign policy</label>
+          <select id="cfg-campaign-select" onchange="loadCampaignPolicy(this.value)"></select>
+        </div>
+        <button class="btn ghost small" onclick="loadCampaignList()" style="align-self:flex-end;">Refresh</button>
+      </div>
+
+      <div id="cfg-policy-form" style="display:none;">
+        <div id="cfg-knob-fields"></div>
+        <div style="margin-top:14px; padding:10px 12px; border-radius:7px; background:#fdf6e3; border:1px solid #d4c790; font-size:0.84rem; color:#6b5022;">
+          Saved policies apply to <strong>candidate machines spawned after the change</strong>. In-flight candidate sessions continue with the policy they spawned with.
+        </div>
+        <div style="margin-top:12px;">
+          <button class="btn" onclick="saveCampaignPolicy()">Save policy</button>
+          <button class="btn ghost small" onclick="resetPolicyForm()" style="margin-left:6px;">Reset</button>
+        </div>
+      </div>
+      <div id="cfg-policy-empty" class="empty" style="display:none;">
+        No campaigns yet. Create one above to start tuning policy.
+      </div>
+    </div>
+
+    <!-- Trace tab — token-centric diagnostic view -->
+    <div class="cfg-panel" id="cfg-panel-trace" style="display:none;">
+      <div class="toolbar" style="margin-bottom:10px;">
+        <div class="field" style="flex:1; margin:0;">
+          <label for="cfg-trace-token">Candidate token</label>
+          <input type="text" id="cfg-trace-token" placeholder="cyb_..." />
+        </div>
+        <button class="btn small" onclick="traceTokenLookup()" style="align-self:flex-end;">Trace</button>
+      </div>
+      <div id="cfg-trace-status" class="status"></div>
+      <div id="cfg-trace-result"></div>
+      <div id="cfg-trace-empty" class="empty">
+        Paste a candidate token to see its lifecycle, audit trail, and submission/report state.
+      </div>
+    </div>
+  </div>
+
   <!-- Mint -->
   <div class="card" id="mint-card">
     <h2>Mint a token</h2>
@@ -206,12 +275,75 @@
   #rm-iframe {
     flex: 1; width: 100%; border: none; background: #fff;
   }
+
+  /* Configuration card tabs + helpers */
+  .cfg-tabs { display: flex; gap: 4px; }
+  .cfg-tab {
+    background: transparent; border: 1px solid transparent;
+    padding: 5px 12px; border-radius: 6px;
+    font-size: 0.82rem; font-family: inherit; cursor: pointer;
+    color: var(--w-muted, #666);
+  }
+  .cfg-tab:hover { background: var(--w-bg-input, #fff); color: var(--w-text); }
+  .cfg-tab.active {
+    background: var(--w-bg-input, #fff); border-color: var(--w-border, #ddd);
+    color: var(--w-text); font-weight: 600;
+  }
+  .cfg-knob {
+    padding: 10px 0; border-bottom: 1px solid var(--w-border);
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .cfg-knob:last-child { border-bottom: none; }
+  .cfg-knob-meta { flex: 1; }
+  .cfg-knob-label {
+    font-size: 0.9rem; font-weight: 500; color: var(--w-text); margin-bottom: 2px;
+  }
+  .cfg-knob-spine {
+    font-family: var(--c-mono); font-size: 0.72rem; color: var(--w-faint);
+  }
+  .cfg-knob-input { flex: 1; max-width: 320px; }
+  .cfg-knob-input input, .cfg-knob-input select { width: 100%; }
+  .cfg-knob-input.bool { display: flex; align-items: center; }
+  .cfg-tool-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .cfg-tool-tag {
+    background: var(--w-bg-input); border: 1px solid var(--w-border);
+    border-radius: 12px; padding: 3px 9px; font-size: 0.78rem;
+    cursor: pointer; user-select: none;
+  }
+  .cfg-tool-tag.selected {
+    background: var(--w-accent); color: var(--w-bg); border-color: var(--w-accent);
+  }
+  .cfg-trace-section { margin-top: 14px; }
+  .cfg-trace-section h3 {
+    font-size: 0.92rem; font-weight: 500; margin: 0 0 6px;
+    color: var(--w-text); font-family: var(--serif, inherit);
+  }
+  .cfg-trace-timeline {
+    border-left: 2px solid var(--w-border); padding-left: 14px; margin-left: 6px;
+  }
+  .cfg-trace-event {
+    margin-bottom: 8px; padding: 6px 8px;
+    background: var(--w-bg-card); border-radius: 6px;
+    font-size: 0.82rem;
+  }
+  .cfg-trace-event time { color: var(--w-muted); font-family: var(--c-mono); font-size: 0.76rem; }
+  .cfg-trace-event .cfg-evt-action { font-weight: 600; }
+  .cfg-trace-event.cfg-evt-fail { background: #fbe9e7; }
+  .cfg-trace-event.cfg-evt-ratelimit { background: #fdf6e3; }
+  .cfg-trace-meta {
+    font-family: var(--c-mono); font-size: 0.78rem; color: var(--w-muted);
+    background: var(--w-bg-input); padding: 8px 10px; border-radius: 6px;
+    white-space: pre-wrap; word-break: break-all;
+  }
 </style>
 
+<script src="/cyborg/admin/config.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   loadTokens();
   loadReports();
+  loadCampaignList();
+  loadOrgListForCampaignForm();
 });
 
 async function api(path, opts = {}) {

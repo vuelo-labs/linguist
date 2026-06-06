@@ -27,9 +27,13 @@ export async function onRequestPost({ request, env }) {
   const inviteToken = body.inviteToken ? body.inviteToken.toString().trim() : null;
 
   // Important: we use the user's JWT so RLS applies. The publishable key
-  // is safe to embed (it's designed to be exposed client-side).
-  const PUBLISHABLE_KEY = 'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo';
-  const userSupabase = createClient(env.SUPABASE_URL, PUBLISHABLE_KEY, {
+  // is safe to embed (it's designed to be exposed client-side), but we read
+  // it from env so rotating the key doesn't require finding-and-replacing
+  // duplicates across files (see F-RLS-HARDCODED-PUBLISHABLE-KEY).
+  if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY || !env.SUPABASE_SERVICE_KEY) {
+    return json({ ok: false, reason: 'not_configured' }, 503);
+  }
+  const userSupabase = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
   });

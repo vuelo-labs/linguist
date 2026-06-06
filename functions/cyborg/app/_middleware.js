@@ -38,13 +38,17 @@ export async function onRequest({ request, next, env }) {
 
   if (!accessToken) return unauth('no_session');
 
+  if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
+    return unauth('not_configured');
+  }
+
   // Verify the token with the Auth API. Cheap; ~50ms.
   let user;
   try {
     const r = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
-        'apikey':        'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+        'apikey':        env.SUPABASE_PUBLISHABLE_KEY,
       },
     });
     if (!r.ok) return unauth('invalid_token');

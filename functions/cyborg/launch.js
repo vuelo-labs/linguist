@@ -27,6 +27,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { requestMeta, writeAuditLog, checkEndpointRateLimit } from './_lib.js';
+import { policyToEnvVars } from './admin/config/_knobs.js';
 
 const FLY_API_BASE = 'https://api.machines.dev/v1';
 const DEFAULT_REGION = 'lhr';
@@ -84,7 +85,7 @@ export async function onRequestPost({ request, env }) {
   }
   const { data: tokenRow, error: lookupErr } = await supabase
     .from('cyborg_tokens')
-    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, fly_machine_id, machine_url, launched_at, active_time_used_seconds, active_time_cap_seconds, last_resumed_at')
+    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, campaign_id, fly_machine_id, machine_url, launched_at, active_time_used_seconds, active_time_cap_seconds, last_resumed_at')
     .eq('token', token)
     .maybeSingle();
 
@@ -155,6 +156,25 @@ export async function onRequestPost({ request, env }) {
     console.warn('launch: stale machine_id for token, respawning', tokenRow.fly_machine_id, 'state:', state);
   }
 
+  // ── Resolve per-campaign session policy ──────────────────────────────
+  // Per planning/control-spine.md § KNOBS, billable per-campaign knobs are
+  // overlaid onto the Fly machine env. The campaign's `settings` JSONB is
+  // validated at write time (admin/config/_knobs.js::validatePolicy); we
+  // trust it at read time and just translate to env var keys.
+  let policyEnv = {};
+  if (tokenRow.campaign_id) {
+    const { data: campaign, error: campaignErr } = await supabase
+      .from('campaigns')
+      .select('id, settings')
+      .eq('id', tokenRow.campaign_id)
+      .maybeSingle();
+    if (campaignErr) {
+      console.error('campaign lookup failed at spawn time', campaignErr.message);
+    } else if (campaign && campaign.settings) {
+      policyEnv = policyToEnvVars(campaign.settings);
+    }
+  }
+
   // ── Spawn ─────────────────────────────────────────────────────────────
   const machineConfig = {
     name: `cyborg-${token.slice(-12)}`,
@@ -166,6 +186,7 @@ export async function onRequestPost({ request, env }) {
         SUBMISSION_ENDPOINT: env.SUBMISSION_ENDPOINT,
         DEADLINE:            tokenRow.expires_at,
         PROFILE:             env.PROFILE || 'v5-recruiter_full',
+        ...policyEnv,
       },
       services: [{
         ports: [
@@ -243,8 +264,14 @@ export async function onRequestPost({ request, env }) {
     .update(updatePayload)
     .eq('token', token);
   if (updateErr) {
-    // Don't fail the launch — the candidate URL is still valid. Just log.
-    console.error('cyborg_tokens update failed (machine spawned anyway)', updateErr.message);
+    // F-LAUNCH-ORPHAN-MACHINE: the machine is running and billing but no
+    // token row references it; a re-click would spawn a second machine.
+    // Stop the orphan and return 500 so the candidate retries cleanly.
+    console.error('cyborg_tokens update failed; stopping orphan machine', updateErr.message);
+    await stopFlyMachine(env, machine.id).catch((stopErr) => {
+      console.error('orphan stop also failed', stopErr.message);
+    });
+    return json({ ok: false, reason: 'persist_failed' }, 500);
   }
 
   return json({
@@ -254,6 +281,18 @@ export async function onRequestPost({ request, env }) {
     expires_at: tokenRow.expires_at,
     reused: false,
   });
+}
+
+async function stopFlyMachine(env, machineId) {
+  const url = `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}/stop`;
+  const r = await fetch(url, {
+    method:  'POST',
+    headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` },
+  });
+  if (!r.ok) {
+    const errText = await r.text().catch(() => '');
+    throw new Error(`fly stop ${r.status}: ${errText}`);
+  }
 }
 
 async function getMachineState(env, machineId) {
