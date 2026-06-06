@@ -481,7 +481,11 @@ async function buildPreset(slug) {
   if (r.status === 401) { location.reload(); return; }
   const d = await r.json().catch(() => null);
   if (!r.ok || !d || !d.ok) {
-    cfgShowStatus('presets-status', (d && d.error) || `Dispatch failed (${r.status}).`, 'err');
+    const errBase = (d && d.error) || `Dispatch failed (${r.status})`;
+    const errDetail = d && d.detail ? ` — ${d.detail}` : '';
+    const errStatus = d && d.status ? ` [github ${d.status}]` : '';
+    cfgShowStatus('presets-status', errBase + errStatus + errDetail, 'err');
+    console.error('buildPreset failure', { http: r.status, response: d });
     return;
   }
   cfgShowStatus('presets-status', `Build dispatched for ${slug}. Polling…`, 'ok');
