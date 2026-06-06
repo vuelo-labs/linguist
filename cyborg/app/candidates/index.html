@@ -90,6 +90,13 @@
         <label for="m-days">Days valid</label>
         <input type="number" id="m-days" value="8" min="1" max="30" />
       </div>
+      <div class="field">
+        <label for="m-campaign">Campaign</label>
+        <select id="m-campaign">
+          <option value="">— no campaign (default image) —</option>
+        </select>
+        <div id="m-campaign-warn" style="display:none; font-size:0.8rem; color:#974f0c; margin-top:4px;"></div>
+      </div>
       <div class="status" id="issue-status"></div>
       <div class="modal-actions">
         <button type="button" class="btn secondary" id="issue-cancel">Cancel</button>
@@ -227,11 +234,61 @@
   const issueForm = document.getElementById('issue-form');
   const issueResult = document.getElementById('issue-result');
 
-  document.getElementById('issue-btn').addEventListener('click', () => {
+  // Cache campaigns + presets (loaded once per page load).
+  let CACHED_CAMPAIGNS = [];
+  let CACHED_PRESETS_BY_ID = {};
+  async function loadCampaignsForIssueModal() {
+    try {
+      const r = await fetch(`/cyborg/app/api/campaigns/list?organisation_id=${encodeURIComponent(org.id)}`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || !d.ok) return;
+      CACHED_CAMPAIGNS = d.campaigns || [];
+      CACHED_PRESETS_BY_ID = {};
+      for (const p of (d.presets || [])) CACHED_PRESETS_BY_ID[p.id] = p;
+    } catch (_) {}
+  }
+
+  function renderCampaignSelect() {
+    const sel = document.getElementById('m-campaign');
+    sel.innerHTML = '<option value="">— no campaign (default image) —</option>';
+    for (const c of CACHED_CAMPAIGNS) {
+      const preset = c.preset_id ? CACHED_PRESETS_BY_ID[c.preset_id] : null;
+      const built  = preset && preset.current_image_tag;
+      const tag = preset
+        ? (built ? `built` : 'preset NOT BUILT')
+        : 'no preset';
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = `${c.name} (${tag})`;
+      opt.dataset.presetId = c.preset_id || '';
+      opt.dataset.presetBuilt = built ? '1' : '0';
+      sel.appendChild(opt);
+    }
+  }
+
+  function updateCampaignWarn() {
+    const sel = document.getElementById('m-campaign');
+    const warn = document.getElementById('m-campaign-warn');
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.presetId && opt.dataset.presetBuilt !== '1') {
+      warn.style.display = 'block';
+      warn.textContent = 'This campaign\'s preset hasn\'t been built yet. The candidate will get the default image until your platform admin runs Build.';
+    } else {
+      warn.style.display = 'none';
+    }
+  }
+  document.getElementById('m-campaign').addEventListener('change', updateCampaignWarn);
+
+  document.getElementById('issue-btn').addEventListener('click', async () => {
     issueForm.style.display = 'block'; issueResult.style.display = 'none';
     document.getElementById('m-name').value  = '';
     document.getElementById('m-email').value = '';
     document.getElementById('issue-status').className = 'status'; document.getElementById('issue-status').textContent = '';
+    await loadCampaignsForIssueModal();
+    renderCampaignSelect();
+    updateCampaignWarn();
     modal.classList.add('show');
     setTimeout(() => document.getElementById('m-name').focus(), 50);
   });
@@ -267,10 +324,11 @@
     // formatted ("Name (email)") so the candidates table still reads cleanly.
     const label = email ? `${name} (${email})` : name;
 
+    const campaignId = document.getElementById('m-campaign').value || null;
     const r = await fetch('/cyborg/app/api/candidates/issue', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ organisation_id: org.id, label, candidate_email: email, days }),
+      body: JSON.stringify({ organisation_id: org.id, label, candidate_email: email, days, campaign_id: campaignId }),
     });
     const d = await r.json().catch(() => ({}));
     if (!d.ok) {
