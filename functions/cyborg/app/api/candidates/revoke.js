@@ -70,20 +70,29 @@ export async function onRequestPost({ request, env }) {
   }
   if (!claimed) return json({ ok: false, reason: 'already_revoked' }, 409);
 
-  // Stop the candidate's Fly machine if running. Fire-and-forget.
-  let machineStopAttempted = false;
-  let machineStopSuccess   = null;
+  // Destroy the candidate's Fly machine if running (was: stop, but Fly
+  // auto-restarts stopped machines on the next request and the resurrected
+  // machine still has the old token's env → "token not recognised" for a
+  // freshly-issued token in the same app. Destroy is permanent and correct
+  // for a revoked candidate). Saw the ghost-machine class 2026-06-06; see
+  // cyborg/planning/backlog-decisions.md § "Revoke leaves restartable
+  // machine".
+  let machineDestroyAttempted = false;
+  let machineDestroySuccess   = null;
   if (claimed.fly_machine_id && env.FLY_API_TOKEN && env.FLY_APP_NAME) {
-    machineStopAttempted = true;
+    machineDestroyAttempted = true;
     try {
+      // ?force=true to allow destroying a started machine without an
+      // explicit stop step. Idempotent: 404 on an already-destroyed machine
+      // is treated as success (we already had the row revoked in DB).
       const r = await fetch(
-        `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(claimed.fly_machine_id)}/stop`,
-        { method: 'POST', headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` } }
+        `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(claimed.fly_machine_id)}?force=true`,
+        { method: 'DELETE', headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` } }
       );
-      machineStopSuccess = r.ok;
+      machineDestroySuccess = r.ok || r.status === 404;
     } catch (e) {
-      machineStopSuccess = false;
-      console.error('revoke: fly stop error', e?.message || e);
+      machineDestroySuccess = false;
+      console.error('revoke: fly destroy error', e?.message || e);
     }
   }
 
@@ -91,17 +100,17 @@ export async function onRequestPost({ request, env }) {
     actorEmail: userEmail, action: 'revoke_candidate_token',
     target: token, success: true,
     detail: {
-      candidate_label:        tokenRow.candidate_label,
-      organisation_id:        tokenRow.organisation_id,
-      fly_machine_id:         claimed.fly_machine_id,
-      machine_stop_attempted: machineStopAttempted,
-      machine_stop_success:   machineStopSuccess,
-      member_role:            membership.role,
+      candidate_label:           tokenRow.candidate_label,
+      organisation_id:           tokenRow.organisation_id,
+      fly_machine_id:            claimed.fly_machine_id,
+      machine_destroy_attempted: machineDestroyAttempted,
+      machine_destroy_success:   machineDestroySuccess,
+      member_role:               membership.role,
     },
     ...meta,
   });
 
-  return json({ ok: true, token, machine_stopped: machineStopSuccess });
+  return json({ ok: true, token, machine_destroyed: machineDestroySuccess });
 }
 
 function json(data, status = 200) {
