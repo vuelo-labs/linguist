@@ -255,6 +255,7 @@ export async function onRequestPost({ request, env }) {
   // ── Create the Fly app ───────────────────────────────────────────────
   // POST /v1/apps. 422 "app already exists" is treated as idempotent success
   // (re-spawn against a prior half-created app). Anything else → 502.
+  let appWasCreated = false;
   try {
     const appRes = await fetch(`${FLY_API_BASE}/apps`, {
       method:  'POST',
@@ -268,7 +269,9 @@ export async function onRequestPost({ request, env }) {
         network:  'default',
       }),
     });
-    if (!appRes.ok) {
+    if (appRes.ok) {
+      appWasCreated = true;
+    } else {
       const errText = await appRes.text().catch(() => '');
       // Fly returns 422 when the app name is already taken. Anything in the
       // body referencing 'already' / 'taken' is treated as idempotent reuse.
@@ -283,6 +286,39 @@ export async function onRequestPost({ request, env }) {
   } catch (e) {
     console.error('fly app create error', e?.message || e);
     return json({ ok: false, reason: 'app_create_failed' }, 502);
+  }
+
+  // ── Allocate shared IPv4 so the app is reachable on *.fly.dev ────────
+  // Fly's Machines API creates the app but does NOT auto-allocate public
+  // IPs — without this call, the new <app>.fly.dev hostname returns 404 at
+  // the edge. Skipped on idempotent reuse (existing app already has IPs).
+  // GraphQL endpoint (api.fly.io/graphql) is used because the Machines API
+  // doesn't expose IP allocation as REST yet; requires org-scoped token
+  // (app-scoped deploy tokens 403 — same constraint as POST /v1/apps).
+  if (appWasCreated) {
+    try {
+      const ipRes = await fetch('https://api.fly.io/graphql', {
+        method:  'POST',
+        headers: {
+          'Authorization': `Bearer ${env.FLY_API_TOKEN}`,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({
+          query: `mutation($input: AllocateIPAddressInput!) {
+            allocateIpAddress(input: $input) { ipAddress { address type } }
+          }`,
+          variables: { input: { appId: appName, type: 'shared_v4' } },
+        }),
+      });
+      const ipBody = await ipRes.json().catch(() => null);
+      if (!ipRes.ok || (ipBody && ipBody.errors)) {
+        console.error('fly allocate shared v4 failed', ipRes.status, JSON.stringify(ipBody?.errors || ipBody));
+        return json({ ok: false, reason: 'ip_allocate_failed', status: ipRes.status }, 502);
+      }
+    } catch (e) {
+      console.error('fly allocate shared v4 error', e?.message || e);
+      return json({ ok: false, reason: 'ip_allocate_failed' }, 502);
+    }
   }
 
   // ── Spawn the machine inside the per-candidate app ───────────────────
