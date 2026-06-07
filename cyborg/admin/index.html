@@ -388,13 +388,6 @@
     white-space: pre-wrap; word-break: break-all;
   }
 
-  /* V1.2 Phase D-C — pre-warmed machine pool sub-row on the Presets card.
-     The inline target_pool_size editor + pool-status pills are rendered by
-     renderPresetPoolRow() in config.js; these rules just nest the sub-row
-     visually under the preset's build row. */
-  .preset-pool-row > td { border-top: none; }
-  .pool-status .pill { vertical-align: middle; }
-  .pool-target-input { font-family: inherit; }
 </style>
 
 <script src="/cyborg/admin/config.js"></script>
@@ -455,23 +448,44 @@ async function sweepOrphans() {
       status.textContent = d.error || d.detail || `Error (${r.status}).`;
       return;
     }
+    // Phase E (2026-06-07): response shape changed to { per_app, legacy_pool }.
+    // Each block has its own total/kept/orphans/destroyed/errors/(apps|machines)_destroyed.
+    const pa = d.per_app || {};
+    const lp = d.legacy_pool || {};
+    const paLine = pa.skipped
+      ? `Per-app sweep: skipped (${escapeHtml(pa.reason || 'unknown')}).`
+      : pa.error
+        ? `Per-app sweep: error — ${escapeHtml(pa.error)}.`
+        : `Per-app: scanned ${pa.total||0}, kept ${pa.kept||0}, destroyed ${pa.destroyed||0}${(pa.errors||[]).length ? ` (${pa.errors.length} failed)` : ''}.`;
+    const lpLine = lp.error
+      ? `Legacy pool: error — ${escapeHtml(lp.error)}.`
+      : `Legacy pool: scanned ${lp.total||0}, kept ${lp.kept||0}, destroyed ${lp.destroyed||0}${(lp.errors||[]).length ? ` (${lp.errors.length} failed)` : ''}.`;
     status.className = 'status ok';
-    status.textContent = `Scanned ${d.total}. Kept ${d.kept}. Destroyed ${d.destroyed}${d.errors.length ? ` (${d.errors.length} failed).` : '.'}`;
-    if (d.machines_destroyed && d.machines_destroyed.length) {
+    status.textContent = `${paLine} ${lpLine}`;
+
+    const appsRows = (pa.apps_destroyed || []).map(a =>
+      `<tr><td>${escapeHtml(a.name || '')}</td><td class="mono">app</td><td>${escapeHtml(a.status || '')}</td></tr>`
+    ).join('');
+    const machineRows = (lp.machines_destroyed || []).map(m =>
+      `<tr><td>${escapeHtml(m.name || '')}</td><td class="mono">${escapeHtml(m.id || '')}</td><td>${escapeHtml(m.state || '')}</td></tr>`
+    ).join('');
+    if (appsRows || machineRows) {
       result.innerHTML = `
         <table style="margin-top:12px;">
-          <thead><tr><th>Name</th><th>ID</th><th>State at sweep</th></tr></thead>
-          <tbody>${d.machines_destroyed.map(m =>
-            `<tr><td>${escapeHtml(m.name || '')}</td><td class="mono">${escapeHtml(m.id)}</td><td>${escapeHtml(m.state || '')}</td></tr>`
-          ).join('')}</tbody>
+          <thead><tr><th>Name</th><th>ID / type</th><th>State at sweep</th></tr></thead>
+          <tbody>${appsRows}${machineRows}</tbody>
         </table>`;
     }
-    if (d.errors && d.errors.length) {
+    const allErrors = [
+      ...(pa.errors || []).map(e => ({ key: e.app_name || 'app', msg: e.error || e.body || `HTTP ${e.status}` })),
+      ...(lp.errors || []).map(e => ({ key: e.machine_id || 'machine', msg: e.error || e.body || `HTTP ${e.status}` })),
+    ];
+    if (allErrors.length) {
       result.innerHTML += `
         <div style="margin-top:10px; padding:8px 10px; border-radius:6px; background:#fbe9e7; border:1px solid #e8b8af; color:#6e2618; font-size:0.84rem;">
           <strong>Errors:</strong>
-          <ul style="margin:4px 0 0 18px; padding:0;">${d.errors.map(e =>
-            `<li>${escapeHtml(e.machine_id)} — ${escapeHtml(e.error || e.body || `HTTP ${e.status}`)}</li>`
+          <ul style="margin:4px 0 0 18px; padding:0;">${allErrors.map(e =>
+            `<li>${escapeHtml(e.key)} — ${escapeHtml(e.msg)}</li>`
           ).join('')}</ul>
         </div>`;
     }

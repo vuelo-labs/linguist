@@ -43,9 +43,9 @@
 //     with exactly one machine inside it. URL becomes
 //     `https://cyborg-c-<suffix>.fly.dev/?token=...` — uniquely addressable;
 //     no shared-pool routing ambiguity.
-//   • Pool-claim path is REMOVED. The pool table + claim_pooled_machine RPC
-//     stay in Postgres (dormant) so warmer code can be retired in a follow-up
-//     without a coupled DB migration.
+//   • Pool-claim path is REMOVED. The pool table, claim_pooled_machine RPC,
+//     and presets.target_pool_size/max_pool_size columns were dropped in the
+//     same session (2026-06-07) once the per-app path was verified.
 //   • Legacy rows with NULL `fly_app_name` continue to use `env.FLY_APP_NAME`
 //     for state/start/destroy calls so in-flight pre-Phase-E sessions keep
 //     working until they finish or revoke.
