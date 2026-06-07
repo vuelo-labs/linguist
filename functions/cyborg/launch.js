@@ -3,13 +3,17 @@
 // Flow:
 //   1. Validate the token (same checks as validate.js).
 //   2. If the token already has a running machine, return its URL (idempotent).
-//   3. Else call Fly Machines API to spawn a new machine with the token + deadline
-//      baked into env. Persist the machine_id + url back to cyborg_tokens.
+//   3. Else call Fly Machines API to create a per-candidate app + spawn one
+//      machine inside it with the token + deadline baked into env. Persist
+//      the app name, machine_id and url back to cyborg_tokens.
 //   4. Return { ok: true, url, expires_at } for the landing page to redirect to.
 //
 // Required env (Cloudflare Pages secrets):
-//   FLY_API_TOKEN      — deploy-scoped token for the candidate-pool app
-//   FLY_APP_NAME       — e.g. cyborg-candidate-pool
+//   FLY_API_TOKEN      — org-scoped token allowed to create apps + machines
+//   FLY_ORG_SLUG       — Fly organisation slug under which per-candidate apps are created
+//   FLY_APP_NAME       — pre-Phase-E pool app (e.g. cyborg-candidate-pool); used
+//                         for legacy rows whose fly_app_name is NULL and as the
+//                         registry namespace for image refs.
 //   FLY_IMAGE_REF      — e.g. registry.fly.io/cyborg-candidate-pool:v5-recruiter_full
 //   FLY_REGION         — default 'lhr'
 //   SUBMISSION_ENDPOINT — e.g. https://linguist.vuelolabs.com/cyborg/submit
@@ -31,13 +35,20 @@
 //     machine_id immediately. The orientation page (`/cyborg/launch/`)
 //     handles the wait via /cyborg/launch-status polling. Cold-start
 //     latency moves from a 30-60s blank page into a designed wait.
-//   • Pool-claim path: before falling through to a cold spawn, attempt
-//     `claim_pooled_machine` RPC (atomic SKIP LOCKED). On hit, PATCH the
-//     pooled machine's env via Fly API and return `claimed_from_pool: true`.
-//     Pool is opt-in per-preset (presets.target_pool_size > 0). With pool
-//     empty we land on the cold-spawn branch.
 //   • Resume-after-pause branch unchanged — still awaits started state
 //     since the start API is much faster than a fresh create (5-10s).
+//
+// V1.2 Phase E (2026-06-07) — per-candidate Fly app:
+//   • Each new candidate gets their own Fly app (`cyborg-c-<token-suffix>`)
+//     with exactly one machine inside it. URL becomes
+//     `https://cyborg-c-<suffix>.fly.dev/?token=...` — uniquely addressable;
+//     no shared-pool routing ambiguity.
+//   • Pool-claim path is REMOVED. The pool table + claim_pooled_machine RPC
+//     stay in Postgres (dormant) so warmer code can be retired in a follow-up
+//     without a coupled DB migration.
+//   • Legacy rows with NULL `fly_app_name` continue to use `env.FLY_APP_NAME`
+//     for state/start/destroy calls so in-flight pre-Phase-E sessions keep
+//     working until they finish or revoke.
 
 import { createClient } from '@supabase/supabase-js';
 import { requestMeta, writeAuditLog, checkEndpointRateLimit } from './_lib.js';
@@ -52,9 +63,30 @@ const POLL_INTERVAL_MS = 1500;
 const RATE_LIMIT_WINDOW_SEC  = 60;
 const RATE_LIMIT_MAX_PER_TOKEN = 3;
 
+// Phase E helper: which Fly app hosts this token's machine?
+//   • token row has fly_app_name set → per-candidate app (post-Phase-E).
+//   • NULL → legacy row from the shared-pool era; fall back to env.FLY_APP_NAME
+//     so existing /state, /start, /destroy calls still resolve.
+// Kept inline (and mirrored in launch-status.js / cleanup-orphans.js) rather
+// than added to _lib.js — three sites, ~3 lines each, low drift risk.
+function appNameFor(tokenRow, env) {
+  return tokenRow.fly_app_name || env.FLY_APP_NAME;
+}
+
+// Phase E: deterministic per-candidate app name. Last 12 chars of the token
+// give a 48-bit address space — collision-free at any plausible cohort size.
+// Lower-cased + dash-only because Fly app names must match [a-z0-9-]+.
+function deriveAppName(token) {
+  return `cyborg-c-${token.slice(-12)}`;
+}
+
 export async function onRequestPost({ request, env }) {
   // ── Env preflight ──────────────────────────────────────────────────────
-  const missing = ['FLY_API_TOKEN', 'FLY_APP_NAME', 'FLY_IMAGE_REF', 'SUBMISSION_ENDPOINT', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY']
+  // FLY_ORG_SLUG required (Phase E) — used to create per-candidate apps via
+  // POST /v1/apps. FLY_APP_NAME still required because (a) legacy in-flight
+  // rows reference it and (b) the candidate image lives at
+  // registry.fly.io/${FLY_APP_NAME}:<tag>.
+  const missing = ['FLY_API_TOKEN', 'FLY_ORG_SLUG', 'FLY_APP_NAME', 'FLY_IMAGE_REF', 'SUBMISSION_ENDPOINT', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY']
     .filter(k => !env[k]);
   if (missing.length) {
     console.error('launch not_configured: missing env', missing);
@@ -99,7 +131,7 @@ export async function onRequestPost({ request, env }) {
   }
   const { data: tokenRow, error: lookupErr } = await supabase
     .from('cyborg_tokens')
-    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, campaign_id, fly_machine_id, machine_url, launched_at, active_time_used_seconds, active_time_cap_seconds, last_resumed_at')
+    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, campaign_id, fly_machine_id, fly_app_name, machine_url, launched_at, active_time_used_seconds, active_time_cap_seconds, last_resumed_at')
     .eq('token', token)
     .maybeSingle();
 
@@ -130,8 +162,13 @@ export async function onRequestPost({ request, env }) {
   //   2. Machine is stopped (paused) → start it, wait for ready, return URL
   //      (this preserves all in-container state across pause/resume)
   //   3. Machine is destroyed/failed/unknown → fall through to spawn fresh
+  //
+  // Phase E: machine address depends on whether the token row has fly_app_name
+  // set (post-Phase-E per-candidate app) or NULL (pre-Phase-E shared pool).
+  // `appNameFor` resolves either case.
   if (tokenRow.fly_machine_id && tokenRow.machine_url) {
-    const state = await getMachineState(env, tokenRow.fly_machine_id);
+    const appNameExisting = appNameFor(tokenRow, env);
+    const state = await getMachineState(env, appNameExisting, tokenRow.fly_machine_id);
     if (state === 'started' || state === 'starting') {
       // Re-click while already running. last_resumed_at is unchanged — the
       // active-time clock is already ticking from when the candidate first
@@ -145,9 +182,9 @@ export async function onRequestPost({ request, env }) {
     }
     if (state === 'stopped' || state === 'suspended') {
       // Resume the paused machine — preserves notes.md, work/, candidate-state.json.
-      const startOk = await startFlyMachine(env, tokenRow.fly_machine_id);
+      const startOk = await startFlyMachine(env, appNameExisting, tokenRow.fly_machine_id);
       if (startOk) {
-        const ready = await waitForMachineStarted(env, tokenRow.fly_machine_id, SPAWN_TIMEOUT_MS);
+        const ready = await waitForMachineStarted(env, appNameExisting, tokenRow.fly_machine_id, SPAWN_TIMEOUT_MS);
         if (ready) {
           // Restart the active-time clock for the new period.
           await supabase
@@ -204,94 +241,54 @@ export async function onRequestPost({ request, env }) {
     }
   }
 
-  const candidateUrl = `https://${env.FLY_APP_NAME}.fly.dev/?token=${encodeURIComponent(token)}`;
+  // ── Per-candidate Fly app (Phase E) ──────────────────────────────────
+  // Each candidate gets their own Fly app + one machine inside. The URL
+  // (cyborg-c-<suffix>.fly.dev) is uniquely addressable — no shared-pool
+  // routing ambiguity.
+  //
+  // Idempotency: if the token row already has fly_app_name from a prior
+  // attempt that failed mid-way (app created but spawn returned an error
+  // before persistence), reuse that app name. Otherwise derive a fresh one.
+  const appName = tokenRow.fly_app_name || deriveAppName(token);
+  const candidateUrl = `https://${appName}.fly.dev/?token=${encodeURIComponent(token)}`;
 
-  // ── Pool-claim path (V1.2) ───────────────────────────────────────────
-  // Try to claim a pre-warmed machine for this preset before a cold spawn.
-  // `claim_pooled_machine` is an atomic SKIP LOCKED SELECT+UPDATE that flips
-  // a row from 'ready' to 'claimed'. Empty result = pool empty for this
-  // preset, fall through to cold-spawn block. Pool is opt-in per-preset
-  // (presets.target_pool_size > 0) and defaults to 0 — the cold-spawn path
-  // is the safe default.
-  if (campaignPresetId) {
-    try {
-      const { data: claimed, error: claimErr } = await supabase
-        .rpc('claim_pooled_machine', { p_preset_id: campaignPresetId, p_token: token });
-      if (claimErr) {
-        console.error('claim_pooled_machine RPC error', claimErr.message);
-      } else if (Array.isArray(claimed) && claimed.length > 0 && claimed[0].machine_id) {
-        const pooledMachineId = claimed[0].machine_id;
-        // PATCH the pooled machine's env so the container boots with this
-        // candidate's CANDIDATE_TOKEN / DEADLINE / policy env. Fly restarts
-        // the machine on a config update — restart wait is handled by the
-        // orientation page polling /cyborg/launch-status.
-        const patched = await patchMachineEnv(env, pooledMachineId, presetImageRef || env.FLY_IMAGE_REF, {
-          CANDIDATE_TOKEN:     token,
-          SUBMISSION_ENDPOINT: env.SUBMISSION_ENDPOINT,
-          DEADLINE:            tokenRow.expires_at,
-          PROFILE:             env.PROFILE || 'v5-recruiter_full',
-          ...policyEnv,
-        });
-        if (!patched) {
-          console.error('pool-claim PATCH failed for', pooledMachineId, '— destroying pooled machine and falling through to cold spawn');
-          // PATCH failed → the pooled machine still has CANDIDATE_TOKEN=__pool_pending__
-          // and is unusable. Destroy it + mark the row 'destroying' so neither the
-          // warmer nor cleanup-orphans treats it as live, then fall through to
-          // cold spawn. Token row is still unmodified (we never wrote fly_machine_id
-          // for this attempt), so the fall-through is clean.
-          await supabase
-            .from('preset_machine_pool')
-            .update({ state: 'destroying', failure_reason: 'pool_claim_patch_failed', updated_at: new Date().toISOString() })
-            .eq('fly_machine_id', pooledMachineId);
-          await destroyFlyMachine(env, pooledMachineId).catch((e) => {
-            console.error('pool-claim destroy after PATCH fail also failed', e?.message || e);
-          });
-        } else {
-          const isFirstSpawn = !tokenRow.fly_machine_id;
-          const updatePayload = {
-            fly_machine_id:  pooledMachineId,
-            machine_url:     candidateUrl,
-            launched_at:     new Date().toISOString(),
-            last_resumed_at: new Date().toISOString(),
-          };
-          if (isFirstSpawn) updatePayload.active_time_used_seconds = 0;
-          const { error: updateErr } = await supabase
-            .from('cyborg_tokens')
-            .update(updatePayload)
-            .eq('token', token);
-          if (updateErr) {
-            console.error('cyborg_tokens update failed after pool claim', updateErr.message);
-            await writeAuditLog(supabase, {
-              actorEmail: '(public)',
-              action:     'launch_persist_failed',
-              target:     token,
-              success:    false,
-              detail:     { machine_id: pooledMachineId, error: updateErr.message, claimed_from_pool: true },
-              ...meta,
-            });
-            // Don't stop the pooled machine — orphan-sweep covers it.
-            return json({ ok: false, reason: 'persist_failed' }, 500);
-          }
-          return json({
-            ok: true,
-            machine_id: pooledMachineId,
-            url: candidateUrl,
-            state: 'starting',
-            claimed_from_pool: true,
-            expires_at: tokenRow.expires_at,
-          });
-        }
+  // ── Create the Fly app ───────────────────────────────────────────────
+  // POST /v1/apps. 422 "app already exists" is treated as idempotent success
+  // (re-spawn against a prior half-created app). Anything else → 502.
+  try {
+    const appRes = await fetch(`${FLY_API_BASE}/apps`, {
+      method:  'POST',
+      headers: {
+        'Authorization': `Bearer ${env.FLY_API_TOKEN}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify({
+        app_name: appName,
+        org_slug: env.FLY_ORG_SLUG,
+        network:  'default',
+      }),
+    });
+    if (!appRes.ok) {
+      const errText = await appRes.text().catch(() => '');
+      // Fly returns 422 when the app name is already taken. Anything in the
+      // body referencing 'already' / 'taken' is treated as idempotent reuse.
+      const isAlreadyExists =
+        appRes.status === 422 && /already|taken|exists/i.test(errText);
+      if (!isAlreadyExists) {
+        console.error('fly app create failed', appRes.status, errText);
+        return json({ ok: false, reason: 'app_create_failed', status: appRes.status }, 502);
       }
-    } catch (e) {
-      console.error('pool-claim path exception, falling through to cold spawn', e?.message || e);
+      console.warn('fly app create returned 422 (already exists); reusing', appName);
     }
+  } catch (e) {
+    console.error('fly app create error', e?.message || e);
+    return json({ ok: false, reason: 'app_create_failed' }, 502);
   }
 
-  // ── Cold spawn ────────────────────────────────────────────────────────
+  // ── Spawn the machine inside the per-candidate app ───────────────────
   // Image precedence: preset's current_image_tag > env.FLY_IMAGE_REF (default).
-  // If a campaign references a preset that hasn't been built yet, we still
-  // spawn from the default — admin UI will warn the operator before they
-  // mint tokens to an unbuilt preset.
+  // Image still lives at registry.fly.io/${FLY_APP_NAME}:<tag> — the registry
+  // is namespaced under the pool app, not the per-candidate app.
   const imageRef = presetImageRef || env.FLY_IMAGE_REF;
   const machineConfig = {
     name: `cyborg-${token.slice(-12)}`,
@@ -323,7 +320,7 @@ export async function onRequestPost({ request, env }) {
 
   let machine;
   try {
-    const flyRes = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines`, {
+    const flyRes = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(appName)}/machines`, {
       method:  'POST',
       headers: {
         'Authorization': `Bearer ${env.FLY_API_TOKEN}`,
@@ -344,8 +341,7 @@ export async function onRequestPost({ request, env }) {
 
   // V1.2 async-launch: do NOT await waitForMachineStarted on the cold-spawn
   // path. The orientation page polls /cyborg/launch-status and surfaces the
-  // wait as a designed experience instead of a 30-60s blank page. Fly app
-  // URL routes to any healthy machine with the service config.
+  // wait as a designed experience instead of a 30-60s blank page.
   //
   // Append `?token=<token>` so the container's auth handler can exchange it
   // for a session cookie on first hit (avoids the "Session expired" screen).
@@ -358,6 +354,7 @@ export async function onRequestPost({ request, env }) {
   // re-spawn after a destroyed machine (rare, defensive).
   const isFirstSpawn = !tokenRow.fly_machine_id;
   const updatePayload = {
+    fly_app_name:    appName,
     fly_machine_id:  machine.id,
     machine_url:     candidateUrl,
     launched_at:     new Date().toISOString(),
@@ -370,66 +367,60 @@ export async function onRequestPost({ request, env }) {
     .update(updatePayload)
     .eq('token', token);
   if (updateErr) {
-    // F-LAUNCH-ORPHAN-MACHINE: the machine is running and billing but no
-    // token row references it; a re-click would spawn a second machine.
-    // Stop the orphan and return 500 so the candidate retries cleanly.
-    console.error('cyborg_tokens update failed; stopping orphan machine', updateErr.message);
+    // F-LAUNCH-ORPHAN-MACHINE: the app + machine are running and billing but
+    // no token row references them; a re-click would spawn a second machine
+    // inside the SAME app (the idempotency path covers this via fly_app_name=NULL
+    // → derive same name) but the audit trail is broken. Destroy the orphan
+    // app entirely and return 500 so the candidate retries cleanly.
+    console.error('cyborg_tokens update failed; destroying orphan app', updateErr.message);
     await writeAuditLog(supabase, {
       actorEmail: '(public)',
       action:     'launch_persist_failed',
       target:     token,
       success:    false,
-      detail:     { machine_id: machine.id, error: updateErr.message },
+      detail:     { fly_app_name: appName, machine_id: machine.id, error: updateErr.message },
       ...meta,
     });
-    await stopFlyMachine(env, machine.id).catch((stopErr) => {
-      console.error('orphan stop also failed', stopErr.message);
+    await destroyFlyApp(env, appName).catch((destroyErr) => {
+      console.error('orphan app destroy also failed', destroyErr?.message || destroyErr);
     });
     return json({ ok: false, reason: 'persist_failed' }, 500);
   }
 
   return json({
     ok: true,
-    machine_id: machine.id,
-    url: candidateUrl,
-    state: 'spawning',
-    claimed_from_pool: false,
-    expires_at: tokenRow.expires_at,
-    reused: false,
+    machine_id:   machine.id,
+    fly_app_name: appName,
+    url:          candidateUrl,
+    state:        'spawning',
+    expires_at:   tokenRow.expires_at,
+    reused:       false,
   });
 }
 
-async function stopFlyMachine(env, machineId) {
-  const url = `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}/stop`;
-  const r = await fetch(url, {
-    method:  'POST',
-    headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` },
-  });
-  if (!r.ok) {
-    const errText = await r.text().catch(() => '');
-    throw new Error(`fly stop ${r.status}: ${errText}`);
-  }
-}
+// Phase E: each helper takes the resolved Fly app name (per-candidate post-Phase-E,
+// or env.FLY_APP_NAME for legacy rows). Callers use `appNameFor(tokenRow, env)`
+// or, on the cold-spawn path, the freshly-derived appName.
 
-async function destroyFlyMachine(env, machineId) {
-  // Force-DELETE so we don't have to /stop first (mirrors the teammate-side
-  // revoke pattern from 2026-06-06 — Fly auto-restarts stopped machines on
-  // inbound traffic, so /stop is not enough). 404 is treated as success
-  // (already gone, possibly via a concurrent sweep).
-  const url = `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}?force=true`;
+async function destroyFlyApp(env, appName) {
+  // Destroy the entire per-candidate app — kills the app, machines, volumes,
+  // and the public hostname all in one call. 404 is treated as success
+  // (already gone). Used as the orphan-rollback path when post-spawn DB
+  // persistence fails.
+  const url = `${FLY_API_BASE}/apps/${encodeURIComponent(appName)}?force=true`;
   const r = await fetch(url, {
     method:  'DELETE',
     headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` },
   });
   if (!r.ok && r.status !== 404) {
     const errText = await r.text().catch(() => '');
-    throw new Error(`fly destroy ${r.status}: ${errText}`);
+    throw new Error(`fly app destroy ${r.status}: ${errText}`);
   }
 }
 
-async function getMachineState(env, machineId) {
+async function getMachineState(env, appName, machineId) {
   try {
-    const r = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}`, {
+    const r = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(appName)}/machines/${encodeURIComponent(machineId)}`, {
       headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` },
     });
     if (!r.ok) return null;
@@ -440,10 +431,10 @@ async function getMachineState(env, machineId) {
   }
 }
 
-async function startFlyMachine(env, machineId) {
+async function startFlyMachine(env, appName, machineId) {
   try {
     const r = await fetch(
-      `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}/start`,
+      `${FLY_API_BASE}/apps/${encodeURIComponent(appName)}/machines/${encodeURIComponent(machineId)}/start`,
       { method: 'POST', headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` } }
     );
     return r.ok;
@@ -452,60 +443,11 @@ async function startFlyMachine(env, machineId) {
   }
 }
 
-// V1.2 pool-claim path: PATCH a pooled machine's env so it boots for this
-// specific candidate. Fly auto-restarts the machine on a config update, so
-// the candidate sees the same "starting → started → ready" arc as a cold
-// spawn (just minus the image-pull seconds because the image is cached
-// locally on the host). Image is required by Fly's update API even when
-// unchanged — re-passing the same ref is a no-op.
-async function patchMachineEnv(env, machineId, imageRef, envVars) {
-  try {
-    const r = await fetch(
-      `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}`,
-      {
-        method:  'POST',
-        headers: {
-          'Authorization': `Bearer ${env.FLY_API_TOKEN}`,
-          'Content-Type':  'application/json',
-        },
-        body: JSON.stringify({
-          config: {
-            image: imageRef,
-            env:   envVars,
-            services: [{
-              ports: [
-                { port: 443, handlers: ['tls', 'http'] },
-                { port: 80,  handlers: ['http'],         force_https: true },
-              ],
-              protocol: 'tcp',
-              internal_port: 3000,
-              auto_stop_machines: 'off',
-              auto_start_machines: false,
-              min_machines_running: 1,
-            }],
-            guest: { cpu_kind: 'shared', cpus: MACHINE_CPUS, memory_mb: MACHINE_MEMORY_MB },
-            auto_destroy: false,
-          },
-        }),
-      },
-    );
-    if (!r.ok) {
-      const errText = await r.text().catch(() => '');
-      console.error('fly machine env PATCH failed', r.status, errText);
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error('fly machine env PATCH error', e?.message || e);
-    return false;
-  }
-}
-
-async function waitForMachineStarted(env, machineId, timeoutMs) {
+async function waitForMachineStarted(env, appName, machineId, timeoutMs) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      const r = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}`, {
+      const r = await fetch(`${FLY_API_BASE}/apps/${encodeURIComponent(appName)}/machines/${encodeURIComponent(machineId)}`, {
         headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` },
       });
       if (r.ok) {

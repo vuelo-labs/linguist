@@ -8,6 +8,11 @@
 // rather than per IP because CGNAT'd candidates can legitimately share an IP
 // (same reasoning as launch.js).
 //
+// Phase E (2026-06-07): Fly API URLs now resolve via fly_app_name on the
+// token row (per-candidate app) with env.FLY_APP_NAME as the legacy-row
+// fallback. `appNameFor` is duplicated from launch.js — three sites, ~3
+// lines each, kept inline (see launch.js comment).
+//
 // State semantics:
 //   spawning  — token row exists, fly_machine_id null (haven't even called create)
 //   starting  — Fly machine state in {created, starting}
@@ -28,6 +33,13 @@ const FLY_API_BASE = 'https://api.machines.dev/v1';
 const RATE_LIMIT_WINDOW_SEC = 60;
 const RATE_LIMIT_MAX_PER_TOKEN = 60;  // orientation page polls every 2s during the warm-up window — 30/min sustained + headroom
 const HEALTHZ_TIMEOUT_MS = 1000;       // short — don't block the poll on a slow machine
+
+// Phase E helper — keep in sync with launch.js + admin/fly/cleanup-orphans.js.
+// Per-candidate apps are named `cyborg-c-<token-suffix>` (see launch.js
+// `deriveAppName`); legacy rows fall back to the shared-pool app.
+function appNameFor(tokenRow, env) {
+  return tokenRow.fly_app_name || env.FLY_APP_NAME;
+}
 
 export async function onRequestGet({ request, env }) {
   // ── Env preflight ──────────────────────────────────────────────────────
@@ -71,10 +83,11 @@ export async function onRequestGet({ request, env }) {
   // ── Token lookup ──────────────────────────────────────────────────────
   // Same column set as launch.js so we can report active-time budget back
   // to the orientation page (useful if a candidate is re-launching after a
-  // pause and we want to surface how much time is left).
+  // pause and we want to surface how much time is left). `fly_app_name`
+  // added Phase E for per-candidate app routing.
   const { data: row, error } = await supabase
     .from('cyborg_tokens')
-    .select('token, expires_at, used_at, revoked_at, approved_at, fly_machine_id, machine_url, active_time_used_seconds, active_time_cap_seconds, last_resumed_at')
+    .select('token, expires_at, used_at, revoked_at, approved_at, fly_machine_id, fly_app_name, machine_url, active_time_used_seconds, active_time_cap_seconds, last_resumed_at')
     .eq('token', token)
     .maybeSingle();
 
@@ -110,7 +123,8 @@ export async function onRequestGet({ request, env }) {
     });
   }
 
-  const flyState = await getFlyMachineState(env, row.fly_machine_id);
+  const appName = appNameFor(row, env);
+  const flyState = await getFlyMachineState(env, appName, row.fly_machine_id);
   // Default to 'unknown' on transient errors so the page keeps polling.
   let state = mapFlyState(flyState);
   let healthzOk = null;
@@ -135,10 +149,10 @@ export async function onRequestGet({ request, env }) {
   });
 }
 
-async function getFlyMachineState(env, machineId) {
+async function getFlyMachineState(env, appName, machineId) {
   try {
     const r = await fetch(
-      `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(machineId)}`,
+      `${FLY_API_BASE}/apps/${encodeURIComponent(appName)}/machines/${encodeURIComponent(machineId)}`,
       { headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` } },
     );
     if (!r.ok) return null;

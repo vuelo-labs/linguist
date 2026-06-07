@@ -8,6 +8,14 @@
 //     running candidate workspace is stopped within seconds. A revoked
 //     candidate cannot continue working — the runtime dies on the next
 //     /api/config poll (which sees the lock + reason).
+//
+// Phase E (2026-06-07): admin revoke mirrors the teammate-side DELETE pattern.
+//   • Per-candidate app (fly_app_name set): DELETE the whole app.
+//   • Legacy row (fly_app_name NULL): DELETE the single machine. Fly
+//     auto-restarts stopped machines on inbound traffic, so /stop is not
+//     enough; this also closes the ghost-machine class observed 2026-06-06.
+//   • Audit detail carries both legacy machine_stop_*/machine_destroy_* and
+//     new app_destroy_* fields.
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyAccessJwt } from './_access.js';
@@ -35,13 +43,13 @@ export async function onRequestPost({ request, env }) {
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
   // Atomic claim — only one revoke "wins" if called concurrently. Pull the
-  // machine_id so we can stop the candidate's workspace too.
+  // app + machine ids so we can destroy the candidate's workspace too.
   const { data, error } = await supabase
     .from('cyborg_tokens')
     .update({ revoked_at: new Date().toISOString() })
     .eq('token', token)
     .is('revoked_at', null)
-    .select('token, fly_machine_id, candidate_label')
+    .select('token, fly_machine_id, fly_app_name, candidate_label')
     .maybeSingle();
 
   if (error) {
@@ -62,27 +70,47 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, reason: 'not_found_or_already_revoked' }, 404);
   }
 
-  // ── Stop the candidate's Fly Machine if one is running. Fire-and-forget;
-  // revocation has already succeeded in the DB, the machine stop is a
-  // best-effort cleanup. The runtime's next /api/config poll picks up the
-  // revoked_at state via active-time → 'locked' and the workspace becomes
-  // read-only regardless.
-  let machineStopAttempted = false;
-  let machineStopSuccess   = null;
-  if (data.fly_machine_id && env.FLY_API_TOKEN && env.FLY_APP_NAME) {
-    machineStopAttempted = true;
-    try {
-      const r = await fetch(
-        `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(data.fly_machine_id)}/stop`,
-        { method: 'POST', headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` } }
-      );
-      machineStopSuccess = r.ok;
-      if (!r.ok) {
-        console.error('revoke: fly stop failed', r.status, await r.text().catch(() => ''));
+  // ── Destroy the candidate's Fly resources. Per-app DELETE for Phase E
+  // rows; per-machine DELETE for legacy NULL-app rows. ?force=true allows
+  // destroying without an explicit stop step; 404 is treated as success
+  // (already gone). The runtime's next /api/config poll picks up the
+  // revoked_at state via active-time → 'locked' even if the destroy fails,
+  // so revocation enforcement isn't dependent on the Fly call succeeding.
+  let appDestroyAttempted     = false;
+  let appDestroySuccess       = null;
+  let machineDestroyAttempted = false;
+  let machineDestroySuccess   = null;
+  if (env.FLY_API_TOKEN) {
+    if (data.fly_app_name) {
+      appDestroyAttempted = true;
+      try {
+        const r = await fetch(
+          `${FLY_API_BASE}/apps/${encodeURIComponent(data.fly_app_name)}?force=true`,
+          { method: 'DELETE', headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` } }
+        );
+        appDestroySuccess = r.ok || r.status === 404;
+        if (!appDestroySuccess) {
+          console.error('revoke: fly app destroy failed', r.status, await r.text().catch(() => ''));
+        }
+      } catch (e) {
+        appDestroySuccess = false;
+        console.error('revoke: fly app destroy error', e?.message || e);
       }
-    } catch (e) {
-      machineStopSuccess = false;
-      console.error('revoke: fly stop error', e?.message || e);
+    } else if (data.fly_machine_id && env.FLY_APP_NAME) {
+      machineDestroyAttempted = true;
+      try {
+        const r = await fetch(
+          `${FLY_API_BASE}/apps/${encodeURIComponent(env.FLY_APP_NAME)}/machines/${encodeURIComponent(data.fly_machine_id)}?force=true`,
+          { method: 'DELETE', headers: { 'Authorization': `Bearer ${env.FLY_API_TOKEN}` } }
+        );
+        machineDestroySuccess = r.ok || r.status === 404;
+        if (!machineDestroySuccess) {
+          console.error('revoke: fly machine destroy failed', r.status, await r.text().catch(() => ''));
+        }
+      } catch (e) {
+        machineDestroySuccess = false;
+        console.error('revoke: fly machine destroy error', e?.message || e);
+      }
     }
   }
 
@@ -90,19 +118,24 @@ export async function onRequestPost({ request, env }) {
     actorEmail: access.email, action: 'revoke',
     target: token, success: true,
     detail: {
-      candidate_label:        data.candidate_label,
-      fly_machine_id:         data.fly_machine_id,
-      machine_stop_attempted: machineStopAttempted,
-      machine_stop_success:   machineStopSuccess,
+      candidate_label:           data.candidate_label,
+      fly_app_name:              data.fly_app_name,
+      fly_machine_id:            data.fly_machine_id,
+      app_destroy_attempted:     appDestroyAttempted,
+      app_destroy_success:       appDestroySuccess,
+      machine_destroy_attempted: machineDestroyAttempted,
+      machine_destroy_success:   machineDestroySuccess,
     },
     ...meta,
   });
 
   return json({
-    ok: true,
+    ok:                true,
     token,
-    machine_stopped: machineStopSuccess,
-    machine_id:      data.fly_machine_id,
+    app_destroyed:     appDestroySuccess,
+    machine_destroyed: machineDestroySuccess,
+    machine_id:        data.fly_machine_id,
+    fly_app_name:      data.fly_app_name,
   });
 }
 
