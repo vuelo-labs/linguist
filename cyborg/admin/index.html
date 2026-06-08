@@ -178,10 +178,13 @@
   <div class="card" id="orphans-card">
     <div class="toolbar">
       <h2 style="margin:0;">Fly orphan sweep</h2>
-      <button class="btn small" onclick="sweepOrphans()" id="sweep-btn">Sweep orphans</button>
+      <div>
+        <button class="btn ghost small" onclick="loadSweepPreview()" id="sweep-refresh-btn">Refresh</button>
+        <button class="btn small" onclick="sweepOrphans()" id="sweep-btn" disabled>Sweep 0 orphans</button>
+      </div>
     </div>
     <p style="font-size:0.84rem; color:var(--w-muted); margin:0 0 10px;">
-      Lists every machine in <code>cyborg-candidate-pool</code> and destroys ones not referenced by a currently-active token. Use after long sessions or out-of-band Fly CLI experiments to keep idle cost down.
+      Every per-candidate Fly app whose token has been revoked or expired, plus any legacy <code>cyborg-candidate-pool</code> machines not tied to an active token. Preview below; sweep button activates when there's something to destroy.
     </p>
     <div class="status" id="sweep-status"></div>
     <div id="sweep-result"></div>
@@ -400,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadPresets().then(() => loadCampaignList()).then(() => populateMintCampaignSelect());
   loadOrgListForCampaignForm();
   loadOrgListForPresetAssign();
+  loadSweepPreview();
 });
 
 // Mint card campaign picker — sourced from the same cached campaign list as the
@@ -432,11 +436,82 @@ async function populateMintCampaignSelect() {
   } catch (_) { /* non-fatal: dropdown still works without campaigns */ }
 }
 
+// Preview-on-load: GET /cyborg/admin/fly/cleanup-orphans → list orphan apps +
+// legacy machines without destroying. Shows the count in the sweep button
+// label and renders the full target list inline. Sweep button is disabled
+// when there's nothing to do, so Liam knows at a glance.
+async function loadSweepPreview() {
+  const btn    = document.getElementById('sweep-btn');
+  const refBtn = document.getElementById('sweep-refresh-btn');
+  const status = document.getElementById('sweep-status');
+  const result = document.getElementById('sweep-result');
+  refBtn.disabled = true; refBtn.textContent = 'Loading…';
+  status.className = 'status'; status.textContent = '';
+  try {
+    const r = await api('/cyborg/admin/fly/cleanup-orphans', { method: 'GET' });
+    if (r.status === 401) { location.reload(); return; }
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.ok) {
+      status.className = 'status err';
+      status.textContent = d.error || d.detail || `Error (${r.status}).`;
+      btn.disabled = true; btn.textContent = 'Sweep — error';
+      return;
+    }
+    renderSweepTargets(d);
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = `Network error: ${e.message || e}`;
+  } finally {
+    refBtn.disabled = false; refBtn.textContent = 'Refresh';
+  }
+}
+
+function renderSweepTargets(d) {
+  const btn    = document.getElementById('sweep-btn');
+  const status = document.getElementById('sweep-status');
+  const result = document.getElementById('sweep-result');
+  const pa = d.per_app || {};
+  const lp = d.legacy_pool || {};
+  const paOrphans = pa.orphan_apps || [];
+  const lpOrphans = lp.orphan_machines || [];
+  const totalOrphans = paOrphans.length + lpOrphans.length;
+  const paLine = pa.skipped
+    ? `Per-app: skipped (${escapeHtml(pa.reason || 'unknown')}).`
+    : pa.error
+      ? `Per-app: error — ${escapeHtml(pa.error)}.`
+      : `Per-app: ${pa.total||0} total, ${paOrphans.length} orphan.`;
+  const lpLine = lp.error
+    ? `Legacy pool: error — ${escapeHtml(lp.error)}.`
+    : `Legacy pool: ${lp.total||0} total, ${lpOrphans.length} orphan.`;
+  status.className = totalOrphans ? 'status ok' : 'status';
+  status.textContent = `${paLine} ${lpLine}`;
+  status.style.display = 'block';
+
+  btn.disabled = totalOrphans === 0;
+  btn.textContent = totalOrphans === 0 ? 'Nothing to sweep' : `Sweep ${totalOrphans} orphan${totalOrphans === 1 ? '' : 's'}`;
+
+  const rows = [
+    ...paOrphans.map(a => `<tr><td><span class="pill revoked">app</span></td><td>${escapeHtml(a.name || '')}</td><td class="mono" style="font-size:0.78rem;">—</td><td>${escapeHtml(a.status || '')}</td></tr>`),
+    ...lpOrphans.map(m => `<tr><td><span class="pill expired">machine</span></td><td>${escapeHtml(m.name || '')}</td><td class="mono" style="font-size:0.78rem;">${escapeHtml(m.id || '')}</td><td>${escapeHtml(m.state || '')}</td></tr>`),
+  ].join('');
+  if (rows) {
+    result.innerHTML = `
+      <p style="font-size:0.84rem; color:var(--w-muted); margin:10px 0 6px;">These will be destroyed when you click Sweep:</p>
+      <table>
+        <thead><tr><th>Kind</th><th>Name</th><th>ID</th><th>State</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } else {
+    result.innerHTML = '<p style="font-size:0.84rem; color:var(--w-muted); margin:10px 0 0;">No orphans. You\'re clean.</p>';
+  }
+}
+
 async function sweepOrphans() {
   const btn    = document.getElementById('sweep-btn');
   const status = document.getElementById('sweep-status');
   const result = document.getElementById('sweep-result');
-  if (!confirm('Sweep orphans? This will destroy every Fly machine in the candidate pool that is not tied to an active token. Cannot be undone.')) return;
+  const targetCount = (btn.textContent.match(/(\d+)\s+orphan/) || [])[1] || '?';
+  if (!confirm(`Destroy ${targetCount} orphan(s)? Cannot be undone.`)) return;
   btn.disabled = true; btn.textContent = 'Sweeping…';
   status.className = 'status'; status.textContent = '';
   result.innerHTML = '';
@@ -448,40 +523,19 @@ async function sweepOrphans() {
       status.textContent = d.error || d.detail || `Error (${r.status}).`;
       return;
     }
-    // Phase E (2026-06-07): response shape changed to { per_app, legacy_pool }.
-    // Each block has its own total/kept/orphans/destroyed/errors/(apps|machines)_destroyed.
     const pa = d.per_app || {};
     const lp = d.legacy_pool || {};
-    const paLine = pa.skipped
-      ? `Per-app sweep: skipped (${escapeHtml(pa.reason || 'unknown')}).`
-      : pa.error
-        ? `Per-app sweep: error — ${escapeHtml(pa.error)}.`
-        : `Per-app: scanned ${pa.total||0}, kept ${pa.kept||0}, destroyed ${pa.destroyed||0}${(pa.errors||[]).length ? ` (${pa.errors.length} failed)` : ''}.`;
-    const lpLine = lp.error
-      ? `Legacy pool: error — ${escapeHtml(lp.error)}.`
-      : `Legacy pool: scanned ${lp.total||0}, kept ${lp.kept||0}, destroyed ${lp.destroyed||0}${(lp.errors||[]).length ? ` (${lp.errors.length} failed)` : ''}.`;
+    const paErrCount = (pa.errors || []).length;
+    const lpErrCount = (lp.errors || []).length;
     status.className = 'status ok';
-    status.textContent = `${paLine} ${lpLine}`;
-
-    const appsRows = (pa.apps_destroyed || []).map(a =>
-      `<tr><td>${escapeHtml(a.name || '')}</td><td class="mono">app</td><td>${escapeHtml(a.status || '')}</td></tr>`
-    ).join('');
-    const machineRows = (lp.machines_destroyed || []).map(m =>
-      `<tr><td>${escapeHtml(m.name || '')}</td><td class="mono">${escapeHtml(m.id || '')}</td><td>${escapeHtml(m.state || '')}</td></tr>`
-    ).join('');
-    if (appsRows || machineRows) {
-      result.innerHTML = `
-        <table style="margin-top:12px;">
-          <thead><tr><th>Name</th><th>ID / type</th><th>State at sweep</th></tr></thead>
-          <tbody>${appsRows}${machineRows}</tbody>
-        </table>`;
-    }
+    status.textContent = `Destroyed ${pa.destroyed||0} app(s) + ${lp.destroyed||0} machine(s).` +
+      (paErrCount || lpErrCount ? ` ${paErrCount + lpErrCount} failed.` : '');
     const allErrors = [
       ...(pa.errors || []).map(e => ({ key: e.app_name || 'app', msg: e.error || e.body || `HTTP ${e.status}` })),
       ...(lp.errors || []).map(e => ({ key: e.machine_id || 'machine', msg: e.error || e.body || `HTTP ${e.status}` })),
     ];
     if (allErrors.length) {
-      result.innerHTML += `
+      result.innerHTML = `
         <div style="margin-top:10px; padding:8px 10px; border-radius:6px; background:#fbe9e7; border:1px solid #e8b8af; color:#6e2618; font-size:0.84rem;">
           <strong>Errors:</strong>
           <ul style="margin:4px 0 0 18px; padding:0;">${allErrors.map(e =>
@@ -489,11 +543,12 @@ async function sweepOrphans() {
           ).join('')}</ul>
         </div>`;
     }
+    // Re-fetch preview so the card refreshes itself.
+    setTimeout(loadSweepPreview, 1500);
   } catch (e) {
     status.className = 'status err';
     status.textContent = `Network error: ${e.message || e}`;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Sweep orphans';
+    btn.disabled = false; btn.textContent = 'Retry sweep';
   }
 }
 

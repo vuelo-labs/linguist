@@ -128,14 +128,37 @@ export async function onRequestGet({ request, env }) {
   // Default to 'unknown' on transient errors so the page keeps polling.
   let state = mapFlyState(flyState);
   let healthzOk = null;
+  let healthzStatus = null;  // HTTP code or 0 for network error; null if not yet probed
 
   if (state === 'started' && row.machine_url) {
     // Probe /healthz to distinguish "Fly says started but container's web
     // server hasn't bound yet" from "actually serving traffic". 1s timeout
     // — we don't want to block the poll on a slow boot.
-    healthzOk = await probeHealthz(row.machine_url);
+    healthzStatus = await probeHealthzStatus(row.machine_url);
+    healthzOk = healthzStatus >= 200 && healthzStatus < 300;
     if (healthzOk) state = 'ready';
   }
+
+  // Diagnostic hint surfaces the most likely cause to a human operator.
+  // Keeps the orientation page's "Operator details" panel useful without the
+  // candidate needing to read Fly logs. Strict order:
+  //   - failed/destroyed → terminal
+  //   - no machine_id → launch hasn't persisted yet
+  //   - fly state pre-'started' → still booting
+  //   - 'started' but healthz < 200/3xx → container up, /healthz missing
+  //     (means image was built before the /healthz route landed — re-publish)
+  //   - 'started' + healthz 5xx → Flask crashed / not bound to port 3000 yet
+  //   - 'started' + healthz network error (status=0) → IPs not allocated
+  //     (Phase E launch.js handles this now; legacy apps may need backfill)
+  let diagnostic = null;
+  if (state === 'failed')         diagnostic = 'Fly machine entered failed state. Check fly logs.';
+  else if (state === 'destroyed') diagnostic = 'Fly machine was destroyed. Token may have been revoked.';
+  else if (!row.fly_machine_id)   diagnostic = 'No machine spawned yet — /cyborg/launch hasn\'t persisted.';
+  else if (flyState && flyState !== 'started') diagnostic = `Booting (Fly state: ${flyState}).`;
+  else if (healthzStatus === 0)   diagnostic = 'Machine started but /healthz unreachable (IP allocation? Pre-Phase-E image?).';
+  else if (healthzStatus === 404) diagnostic = 'Machine started but /healthz returned 404 — image predates the /healthz route. Rebuild the preset image.';
+  else if (healthzStatus && healthzStatus >= 500) diagnostic = `Machine started but /healthz returned ${healthzStatus} — Flask crashed or port 3000 not yet bound.`;
+  else if (healthzStatus && healthzStatus >= 300 && healthzStatus < 400) diagnostic = `Machine started but /healthz returned ${healthzStatus} (redirect). Probe sees a CF Access page or similar.`;
 
   return json({
     ok: true,
@@ -143,6 +166,10 @@ export async function onRequestGet({ request, env }) {
     machine_id: row.fly_machine_id,
     url: row.machine_url || null,
     healthz_ok: healthzOk,
+    healthz_status: healthzStatus,
+    fly_state: flyState,
+    fly_app_name: appName,
+    diagnostic,
     active_time_used_seconds: usedTotal,
     active_time_cap_seconds: cap,
     reused: false,
@@ -187,16 +214,19 @@ function mapFlyState(raw) {
   }
 }
 
-async function probeHealthz(machineUrl) {
+async function probeHealthzStatus(machineUrl) {
   // machineUrl looks like https://<app>.fly.dev/?token=<t>. Strip query +
   // any path → root → /healthz. The container exposes /healthz on the same
   // port as the desktop UI (Flask server).
+  //
+  // Returns the HTTP status code, or 0 for a network/timeout/DNS error
+  // (which is the most useful "operator should look at IPs / DNS" signal).
   let healthzUrl;
   try {
     const u = new URL(machineUrl);
     healthzUrl = `${u.protocol}//${u.host}/healthz`;
   } catch {
-    return false;
+    return 0;
   }
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), HEALTHZ_TIMEOUT_MS);
@@ -209,9 +239,9 @@ async function probeHealthz(machineUrl) {
       redirect: 'manual',
       cf: { cacheTtl: 0 },
     });
-    return r.status >= 200 && r.status < 300;
+    return r.status;
   } catch {
-    return false;
+    return 0;
   } finally {
     clearTimeout(timer);
   }

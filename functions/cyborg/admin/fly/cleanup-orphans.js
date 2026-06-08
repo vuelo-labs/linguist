@@ -1,26 +1,33 @@
-// POST /cyborg/admin/fly/cleanup-orphans
+// POST /cyborg/admin/fly/cleanup-orphans  → actually destroys orphans
+// GET  /cyborg/admin/fly/cleanup-orphans  → dry-run preview (no destruction)
 //
 // Two sweeps in one call:
 //
 //   A. Per-candidate apps (Phase E, 2026-06-07): lists every Fly app in the
-//      configured org with a name matching `cyborg-c-*`. Destroys any whose
+//      configured org with a name matching `cyborg-c-*`. Targets any whose
 //      name is NOT referenced by a currently-non-revoked cyborg_tokens row.
-//      A revoked candidate whose app destroy failed mid-revoke, or a launch
-//      that crashed between app-create and DB-persist, both show up here.
 //
 //   B. Legacy shared-pool machines (pre-Phase-E): lists every machine in
-//      env.FLY_APP_NAME and destroys any whose id is NOT referenced by a
+//      env.FLY_APP_NAME and targets any whose id is NOT referenced by a
 //      non-revoked token row. Kept for back-compat with in-flight pre-Phase-E
 //      sessions and any test machines spawned directly via Fly CLI.
 //
-// Origin (2026-06-06): r16 verification machine survived the session that
-// spawned it because the admin-side revoke calls .../stop (Fly auto-restarts
-// stopped machines on inbound traffic). The admin-side revoke is now per-app
-// DELETE (2026-06-07) but the sweep stays as the cleanup hatch.
+// Response shape (both modes):
+//   { ok, dry_run, per_app: {
+//       total, kept, orphans, destroyed,
+//       orphan_apps:    [{ name, status }],   // always — the targets
+//       apps_destroyed: [{ name, status }],   // POST only — subset that succeeded
+//       errors: [...]
+//     },
+//     legacy_pool: {
+//       total, kept, orphans, destroyed,
+//       orphan_machines:    [{ id, name, state }],
+//       machines_destroyed: [{ id, name, state }],
+//       errors: [...]
+//     }
+//   }
 //
 // Auth: Cloudflare Access (same as other /cyborg/admin/* routes).
-// Body: {} (no params; future: per-preset filter).
-// Returns: { ok, per_app: {...}, legacy_pool: {...} }
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyAccessJwt } from '../../_access.js';
@@ -29,19 +36,24 @@ import { writeAuditLog, requestMeta } from '../../_lib.js';
 const FLY_API_BASE         = 'https://api.machines.dev/v1';
 const FLY_LIST_APPS_URL    = (orgSlug) =>
   `https://api.machines.dev/v1/apps?org_slug=${encodeURIComponent(orgSlug)}`;
-// NOTE: Fly's "list apps" endpoint sits on api.machines.dev/v1/apps in current
-// Machines API docs. If a 404 is returned by Fly, the alternative endpoint is
-// https://api.fly.io/v1/apps?org_slug=<slug> (different host, same shape).
-// Sweep falls through with `list_apps_failed` so the operator can debug.
 const PER_APP_PREFIX = 'cyborg-c-';
 
+export async function onRequestGet({ request, env }) {
+  return handle(request, env, { dryRun: true });
+}
+
 export async function onRequestPost({ request, env }) {
+  return handle(request, env, { dryRun: false });
+}
+
+async function handle(request, env, { dryRun }) {
   const meta = requestMeta(request);
   const access = await verifyAccessJwt(request, env);
   if (!access.ok) {
     const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
     await writeAuditLog(supabase, {
-      actorEmail: '(unauthenticated)', action: 'fly_cleanup_orphans',
+      actorEmail: '(unauthenticated)',
+      action: dryRun ? 'fly_cleanup_orphans_preview' : 'fly_cleanup_orphans',
       success: false, detail: { reason: access.reason }, ...meta,
     });
     return json({ error: 'Unauthorized', reason: access.reason }, 401);
@@ -68,24 +80,26 @@ export async function onRequestPost({ request, env }) {
   );
   const liveMachineIds = new Set((liveTokens || []).map(t => t.fly_machine_id));
 
-  const perApp      = await sweepPerCandidateApps(env, liveAppNames);
-  const legacyPool  = await sweepLegacyPoolMachines(env, liveMachineIds);
+  const perApp     = await sweepPerCandidateApps(env, liveAppNames, dryRun);
+  const legacyPool = await sweepLegacyPoolMachines(env, liveMachineIds, dryRun);
 
-  const sweepOk = !perApp.error && !legacyPool.error
-    && (perApp.errors || []).length === 0
-    && (legacyPool.errors || []).length === 0;
+  // Don't audit preview calls — they're idempotent / no side effects.
+  if (!dryRun) {
+    const sweepOk = !perApp.error && !legacyPool.error
+      && (perApp.errors || []).length === 0
+      && (legacyPool.errors || []).length === 0;
+    await writeAuditLog(supabase, {
+      actorEmail: access.email, action: 'fly_cleanup_orphans',
+      target: env.FLY_APP_NAME, success: sweepOk,
+      detail: { per_app: perApp, legacy_pool: legacyPool }, ...meta,
+    });
+  }
 
-  await writeAuditLog(supabase, {
-    actorEmail: access.email, action: 'fly_cleanup_orphans',
-    target: env.FLY_APP_NAME, success: sweepOk,
-    detail: { per_app: perApp, legacy_pool: legacyPool }, ...meta,
-  });
-
-  return json({ ok: true, per_app: perApp, legacy_pool: legacyPool });
+  return json({ ok: true, dry_run: dryRun, per_app: perApp, legacy_pool: legacyPool });
 }
 
 // ── Sweep A: per-candidate apps ───────────────────────────────────────────
-async function sweepPerCandidateApps(env, liveAppNames) {
+async function sweepPerCandidateApps(env, liveAppNames, dryRun) {
   if (!env.FLY_ORG_SLUG) {
     return { skipped: true, reason: 'FLY_ORG_SLUG_not_set' };
   }
@@ -101,7 +115,6 @@ async function sweepPerCandidateApps(env, liveAppNames) {
       return { error: 'list_apps_failed', status: r.status, body };
     }
     const payload = await r.json();
-    // Fly API returns either an array or { apps: [...] } depending on version.
     apps = Array.isArray(payload) ? payload : (payload?.apps || []);
   } catch (e) {
     console.error('cleanup-orphans: fly list apps error', e?.message || e);
@@ -110,6 +123,19 @@ async function sweepPerCandidateApps(env, liveAppNames) {
 
   const candidateApps = apps.filter(a => (a.name || '').startsWith(PER_APP_PREFIX));
   const orphans = candidateApps.filter(a => !liveAppNames.has(a.name));
+  const orphanList = orphans.map(a => ({ name: a.name, status: a.status }));
+
+  if (dryRun) {
+    return {
+      total:   candidateApps.length,
+      kept:    candidateApps.length - orphans.length,
+      orphans: orphans.length,
+      destroyed: 0,
+      orphan_apps: orphanList,
+      apps_destroyed: [],
+      errors: [],
+    };
+  }
 
   const errors = [];
   let destroyed = 0;
@@ -131,19 +157,20 @@ async function sweepPerCandidateApps(env, liveAppNames) {
   }
 
   return {
-    total:    candidateApps.length,
-    kept:     candidateApps.length - orphans.length,
-    orphans:  orphans.length,
+    total:   candidateApps.length,
+    kept:    candidateApps.length - orphans.length,
+    orphans: orphans.length,
     destroyed,
-    errors,
+    orphan_apps:    orphanList,
     apps_destroyed: orphans
       .filter(a => !errors.find(e => e.app_name === a.name))
       .map(a => ({ name: a.name, status: a.status })),
+    errors,
   };
 }
 
 // ── Sweep B: legacy shared-pool machines (back-compat) ────────────────────
-async function sweepLegacyPoolMachines(env, liveMachineIds) {
+async function sweepLegacyPoolMachines(env, liveMachineIds, dryRun) {
   let machines;
   try {
     const r = await fetch(
@@ -162,6 +189,20 @@ async function sweepLegacyPoolMachines(env, liveMachineIds) {
   }
 
   const orphans = (machines || []).filter(m => !liveMachineIds.has(m.id));
+  const orphanList = orphans.map(m => ({ id: m.id, name: m.name, state: m.state }));
+
+  if (dryRun) {
+    return {
+      total:   (machines || []).length,
+      kept:    ((machines || []).length) - orphans.length,
+      orphans: orphans.length,
+      destroyed: 0,
+      orphan_machines:    orphanList,
+      machines_destroyed: [],
+      errors: [],
+    };
+  }
+
   const errors = [];
   let destroyed = 0;
   for (const m of orphans) {
@@ -182,14 +223,15 @@ async function sweepLegacyPoolMachines(env, liveMachineIds) {
   }
 
   return {
-    total:    (machines || []).length,
-    kept:     ((machines || []).length) - orphans.length,
-    orphans:  orphans.length,
+    total:   (machines || []).length,
+    kept:    ((machines || []).length) - orphans.length,
+    orphans: orphans.length,
     destroyed,
-    errors,
+    orphan_machines:    orphanList,
     machines_destroyed: orphans
       .filter(m => !errors.find(e => e.machine_id === m.id))
       .map(m => ({ id: m.id, name: m.name, state: m.state })),
+    errors,
   };
 }
 
