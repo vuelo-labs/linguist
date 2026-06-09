@@ -31,7 +31,7 @@
 // candidate is interviewed about their own work; a stand-in cannot answer.
 
 import { createClient } from '@supabase/supabase-js';
-import { generateToken, writeAuditLog, requestMeta, sendEmailViaResend,
+import { generateToken, generateJitToken, writeAuditLog, requestMeta, sendEmailViaResend,
          cleanInput, EMAIL_RE, isDisposableEmail } from '../../../_lib.js';
 
 const DEFAULT_DAYS = 8;
@@ -123,7 +123,7 @@ export async function onRequestPost({ request, env }) {
     // a fresh assessment, not a re-email of the spent one.
     const { data: existing, error: lookupErr } = await admin
       .from('cyborg_tokens')
-      .select('token, candidate_label, expires_at, issued_at, fly_machine_id, launched_at')
+      .select('token, jit_token, candidate_label, expires_at, issued_at, fly_machine_id, launched_at')
       .eq('organisation_id', orgId)
       .ilike('candidate_email', candidateEmail)
       .is('rotated_to_token', null)
@@ -145,9 +145,26 @@ export async function onRequestPost({ request, env }) {
   const issuedAt  = isResend ? existingRow.issued_at : new Date().toISOString();
   const expiresAt = isResend ? existingRow.expires_at : new Date(Date.now() + days * 86400000).toISOString();
 
+  // JIT launch ticket (2026-06-09). RESEND reuses the row's existing jit so
+  // a re-sent email carries the same /c/ link; pre-JIT rows (NULL) get one
+  // backfilled here so the re-send moves them onto the opaque path.
+  let jitToken = isResend ? existingRow.jit_token : generateJitToken();
+  if (isResend && !jitToken) {
+    jitToken = generateJitToken();
+    const { error: jitErr } = await admin
+      .from('cyborg_tokens')
+      .update({ jit_token: jitToken })
+      .eq('token', token);
+    if (jitErr) {
+      console.error('issue: jit backfill failed', jitErr.message);
+      return json({ ok: false, reason: 'jit_backfill_failed' }, 500);
+    }
+  }
+
   if (!isResend) {
     const { error: insertErr } = await admin.from('cyborg_tokens').insert({
       token,
+      jit_token:         jitToken,
       candidate_label:   label,
       candidate_email:   emailValid ? candidateEmail : null,
       issued_at:         issuedAt,
@@ -175,7 +192,8 @@ export async function onRequestPost({ request, env }) {
   // fire-and-await the Resend send. Failure is recorded in the response
   // but does NOT roll back the token (operator can re-share manually).
   const origin    = `${new URL(request.url).protocol}//${new URL(request.url).host}`;
-  const launchUrl = `${origin}/cyborg/?t=${encodeURIComponent(token)}`;
+  // Opaque jit link — the real cyb_ token never appears in candidate email.
+  const launchUrl = `${origin}/c/${encodeURIComponent(jitToken)}`;
   let emailSent       = false;
   let emailSendError  = null;
   if (emailValid) {

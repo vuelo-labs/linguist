@@ -7,7 +7,7 @@
 // to the candidate-facing email.
 
 import { createClient } from '@supabase/supabase-js';
-import { hmacHex, timingSafeEqual, generateToken, htmlPage, fetchDadJokes, originFromRequest,
+import { hmacHex, timingSafeEqual, generateToken, generateJitToken, htmlPage, fetchDadJokes, originFromRequest,
          writeAuditLog, requestMeta, sendEmailViaResend } from './_lib.js';
 
 const TOKEN_DAYS = 8;       // 7-day window + 1-day grace
@@ -69,10 +69,12 @@ export async function onRequestGet({ request, env }) {
   if (decision === 'approve') {
     // Mint a fresh, approved-on-creation token.
     const token = generateToken();
+    const jitToken = generateJitToken();   // opaque /c/<jit> launch ticket (2026-06-09)
     const expiresAt = new Date(Date.now() + TOKEN_DAYS * 86400000).toISOString();
 
     const { error: tokenErr } = await supabase.from('cyborg_tokens').insert({
       token,
+      jit_token:       jitToken,
       candidate_label: `${claimed.name} (${claimed.email}) — request ${claimed.request_id.slice(0, 8)}`,
       expires_at:      expiresAt,
       approved_at:     nowIso,
@@ -103,7 +105,9 @@ export async function onRequestGet({ request, env }) {
     });
 
     const origin = originFromRequest(request);
-    const installUrl = `${origin}/cyborg/?t=${encodeURIComponent(token)}`;
+    // Opaque jit link — the real cyb_ token never appears in candidate email.
+    // installCmd (local-CLI channel) still carries the real token: unchanged.
+    const installUrl = `${origin}/c/${encodeURIComponent(jitToken)}`;
     const installCmd = `curl -fsSL https://raw.githubusercontent.com/vuelo-labs/cyborg_versions/main/install.sh | bash -s ${token}`;
 
     // Candidate approval email — Resend (was Tines until 2026-06-05).

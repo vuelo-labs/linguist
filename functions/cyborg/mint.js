@@ -3,7 +3,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyAccessJwt } from './_access.js';
-import { writeAuditLog, requestMeta } from './_lib.js';
+import { writeAuditLog, requestMeta, generateJitToken } from './_lib.js';
 
 const DEFAULT_DAYS = 8;  // assessment is 7 days; +1 day grace
 
@@ -29,6 +29,7 @@ export async function onRequestPost({ request, env }) {
   const campaignId = body.campaign_id ? String(body.campaign_id).trim() : null;
 
   const token = generateToken();
+  const jitToken = generateJitToken();   // opaque /c/<jit> launch ticket (2026-06-09)
   const expiresAt = new Date(Date.now() + days * 86400000).toISOString();
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
@@ -53,6 +54,7 @@ export async function onRequestPost({ request, env }) {
 
   const { error } = await supabase.from('cyborg_tokens').insert({
     token,
+    jit_token:       jitToken,
     candidate_label: label,
     expires_at:      expiresAt,
     approved_at:     new Date().toISOString(),   // admin-minted = pre-approved
@@ -76,10 +78,14 @@ export async function onRequestPost({ request, env }) {
     detail: { label, days, expires_at: expiresAt, campaign_id: campaignId }, ...meta,
   });
 
+  // launch_url is the candidate-facing link (opaque jit — real token stays
+  // server-side). install_cmd is the separate local-CLI channel: unchanged.
+  const origin = new URL(request.url).origin;
   return json({
     ok:          true,
     token,
     expires_at:  expiresAt,
+    launch_url:  `${origin}/c/${jitToken}`,
     install_cmd: `curl -fsSL https://raw.githubusercontent.com/vuelo-labs/cyborg_versions/main/install.sh | bash -s ${token}`,
   });
 }

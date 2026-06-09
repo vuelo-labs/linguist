@@ -51,7 +51,7 @@ export async function onRequestPost({ request, env }) {
 
   const { data, error } = await supabase
     .from('cyborg_tokens')
-    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label')
+    .select('token, expires_at, used_at, revoked_at, approved_at, candidate_label, jit_token')
     .eq('token', token)
     .maybeSingle();
 
@@ -66,6 +66,10 @@ export async function onRequestPost({ request, env }) {
     ok:               true,
     candidate_label:  data.candidate_label,
     expires_at:       data.expires_at,
+    // JIT migration (2026-06-09): when the row has a jit_token, the landing
+    // page redirects legacy ?t= links to /c/<jit> so the real token leaves
+    // the URL. NULL for pre-JIT rows → inline launch flow as before.
+    jit_token:        data.jit_token || null,
   });
 }
 

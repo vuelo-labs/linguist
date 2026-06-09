@@ -302,3 +302,90 @@ export async function checkEndpointRateLimit(supabase, bucketKey, windowSec, max
   if (insertErr) console.error('rate-limit insert error:', insertErr.message);
   return { ok: true };
 }
+
+// ── JIT token exchange + session binding (token obfuscation, 2026-06-09) ──
+// The candidate-facing launch URL is /c/<jit> — a single-use opaque ticket.
+// The real cyb_ token never leaves the server. Claiming binds the row to an
+// HttpOnly cyborg_session cookie at "Begin assessment" click time (NOT at
+// GET time — email scanners follow GETs and must not consume the ticket).
+
+function base64url(bytes) {
+  let s = '';
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+// 12 bytes → 16-char base64url (96 bits). URL-facing single-use ticket.
+export function generateJitToken() {
+  return base64url(crypto.getRandomValues(new Uint8Array(12)));
+}
+
+// 18 bytes → 24-char base64url (144 bits). Cookie-only session identifier.
+export function generateSessionId() {
+  return base64url(crypto.getRandomValues(new Uint8Array(18)));
+}
+
+// Cookie spec mirrors runtime/server/server.py cyborg-auth: HttpOnly +
+// SameSite=Lax + 8-day Max-Age. Path=/cyborg/ — the cookie is only read by
+// /cyborg/* endpoints; /c/<jit> sets it on the 302 but never reads it back.
+export function sessionCookieHeader(sessionId) {
+  return `cyborg_session=${sessionId}; Path=/cyborg/; HttpOnly; Secure; SameSite=Lax; Max-Age=691200`;
+}
+
+export function readSessionCookie(request) {
+  const cookie = request.headers.get('cookie') || '';
+  const m = cookie.match(/(?:^|;\s*)cyborg_session=([A-Za-z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+// The pending (unconsumed) jit travels from /c/<jit> to /cyborg/launch/begin
+// in its own HttpOnly cookie — never in the URL, so it stays out of history
+// and referer headers. Cleared implicitly once consumed (begin.js ignores it
+// when the session is already bound).
+export function jitCookieHeader(jit) {
+  return `cyborg_jit=${jit}; Path=/cyborg/; HttpOnly; Secure; SameSite=Lax; Max-Age=691200`;
+}
+
+export function readJitCookie(request) {
+  const cookie = request.headers.get('cookie') || '';
+  const m = cookie.match(/(?:^|;\s*)cyborg_jit=([A-Za-z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+export async function loadTokenBySession(supabase, sessionId) {
+  if (!sessionId) return null;
+  const { data, error } = await supabase
+    .from('cyborg_tokens')
+    .select('*')
+    .eq('session_id', sessionId)
+    .maybeSingle();
+  if (error) {
+    console.error('session lookup error:', error.message);
+    return null;
+  }
+  return data;
+}
+
+// Atomic claim: bind session + consume the JIT in one conditional UPDATE.
+// Returns { claimed: row } on win, { claimed: null } on lost race (caller
+// re-reads and checks whether the winner was this same session — idempotent
+// double-click — or another browser — 403).
+export async function claimSessionAtomic(supabase, jitToken, sessionId, meta) {
+  const { data, error } = await supabase
+    .from('cyborg_tokens')
+    .update({
+      session_id:         sessionId,
+      session_claimed_ip: meta.ip || null,
+      session_user_agent: meta.userAgent ? String(meta.userAgent).slice(0, 500) : null,
+      jit_consumed_at:    new Date().toISOString(),
+    })
+    .eq('jit_token', jitToken)
+    .is('jit_consumed_at', null)
+    .select()
+    .maybeSingle();
+  if (error) {
+    console.error('jit claim error:', error.message);
+    return { claimed: null, error };
+  }
+  return { claimed: data || null };
+}

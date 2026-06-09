@@ -142,6 +142,18 @@ export async function onRequestPost({ request, env }) {
   if (tokenRow.used_at)       return json({ ok: false, reason: 'already_used' }, 403);
   if (new Date(tokenRow.expires_at) < new Date()) return json({ ok: false, reason: 'expired' }, 403);
 
+  return spawnCandidate(env, supabase, tokenRow, meta);
+}
+
+// ── Shared spawn path (JIT exchange, 2026-06-09) ─────────────────────────
+// Everything from the active-time check through machine spawn + persistence.
+// Two callers: the legacy POST handler above (token-in-body) and
+// launch/begin.js (cookie-session claim). Returns a Response; semantics are
+// byte-identical to the pre-extraction inline flow.
+export async function spawnCandidate(env, supabase, tokenRow, meta) {
+  const token = tokenRow.token;
+  const region = env.FLY_REGION || DEFAULT_REGION;
+
   // ── Active-time cap check ─────────────────────────────────────────────
   // Total active time = accumulated + (currently running period, if any).
   // If the candidate is over the 8h cap, refuse to (re)launch.

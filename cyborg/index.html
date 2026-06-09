@@ -417,6 +417,15 @@ async function checkToken(opts = {}) {
     });
     const d = await r.json();
     if (d.ok) {
+      // JIT migration (2026-06-09): rows minted post-cutover carry a jit_token.
+      // Bounce legacy ?t= arrivals onto the opaque /c/<jit> path so the real
+      // token leaves the URL (history/referer hygiene). Pre-JIT rows fall
+      // through to the inline flow. Sunset: remove this redirect ~30 days
+      // post-rollout and let old ?t= links 410.
+      if (d.jit_token) {
+        window.location.replace(`/c/${encodeURIComponent(d.jit_token)}`);
+        return;
+      }
       _validToken = tok;
       const exp = d.expires_at ? new Date(d.expires_at).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : null;
       const who = d.candidate_label ? ` for ${escapeHtml(d.candidate_label)}` : '';

@@ -27,7 +27,7 @@
 // surface). Rate-limit hits ARE audited (attack signal).
 
 import { createClient } from '@supabase/supabase-js';
-import { requestMeta, writeAuditLog, checkEndpointRateLimit } from './_lib.js';
+import { requestMeta, writeAuditLog, checkEndpointRateLimit, readSessionCookie, loadTokenBySession } from './_lib.js';
 
 const FLY_API_BASE = 'https://api.machines.dev/v1';
 const RATE_LIMIT_WINDOW_SEC = 60;
@@ -51,11 +51,21 @@ export async function onRequestGet({ request, env }) {
   }
 
   const url = new URL(request.url);
-  const token = (url.searchParams.get('token') || '').trim();
-  if (!token) return json({ ok: false, reason: 'missing_token' }, 400);
-
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
   const meta = requestMeta(request);
+
+  // ── Identity: session cookie (JIT path) OR ?token= (legacy) ───────────
+  // JIT-claimed sessions carry the HttpOnly cyborg_session cookie and no
+  // query param; pre-JIT in-flight orientation pages still pass ?token=.
+  let token = (url.searchParams.get('token') || '').trim();
+  if (!token) {
+    const sessionId = readSessionCookie(request);
+    if (sessionId) {
+      const sessionRow = await loadTokenBySession(supabase, sessionId);
+      if (sessionRow) token = sessionRow.token;
+    }
+  }
+  if (!token) return json({ ok: false, reason: 'missing_token' }, 401);
 
   // ── Rate-limit per token (CGNAT-safe) ─────────────────────────────────
   const rl = await checkEndpointRateLimit(

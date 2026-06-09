@@ -163,8 +163,8 @@
 
 <div class="wrap">
 
-  <h1>Your workspace is warming up.</h1>
-  <p class="lede">
+  <h1 id="page-title">Your workspace is warming up.</h1>
+  <p class="lede" id="page-lede">
     It takes about a minute. Read the next page or two while it boots — the framing matters
     more than the speed, and the first thirty seconds of the assessment are the most informative.
   </p>
@@ -240,11 +240,14 @@
 
 <script>
 const LAUNCH_URL = '/cyborg/launch';
+const BEGIN_URL  = '/cyborg/launch/begin';
 const STATUS_URL = '/cyborg/launch-status';
 const POLL_INTERVAL_MS = 2000;
 const TIMEOUT_MS = 90000;            // 90s — after this, show the long-wait fallback
 
-let _token = null;
+let _token = null;       // legacy ?t= path only; null in JIT/cookie mode
+let _jitMode = false;    // identity carried by HttpOnly cookies set at /c/<jit>
+let _phase = 'warming';  // 'begin' (JIT pre-spawn) | 'warming' | 'ready'
 let _machineUrl = null;
 let _pollTimer = null;
 let _pollStart = 0;
@@ -262,21 +265,83 @@ document.addEventListener('DOMContentLoaded', () => {
     const diag = document.getElementById('diag-card');
     if (diag) { diag.style.display = 'block'; diag.open = true; }
   }
-  if (!t) {
-    // No token → bounce back to the setup page where the candidate can paste it.
-    window.location.replace('/cyborg/');
-    return;
-  }
-  _token = t;
 
-  document.getElementById('enter-btn').addEventListener('click', enterWorkspace);
+  document.getElementById('enter-btn').addEventListener('click', onMainButton);
   document.getElementById('retry-btn').addEventListener('click', () => {
     hideError();
-    startLaunch();
+    if (_jitMode) beginAssessment(); else startLaunch();
   });
 
-  startLaunch();
+  if (t) {
+    // Legacy in-flight path: token in the URL, spawn starts immediately.
+    _token = t;
+    startLaunch();
+    return;
+  }
+
+  // JIT path (2026-06-09): no URL params — identity lives in the HttpOnly
+  // cyborg_session/cyborg_jit cookies set by /c/<jit>. The spawn is the
+  // candidate's explicit choice: nothing boots (and nothing is consumed)
+  // until they click "Begin assessment". Email scanners never get here.
+  _jitMode = true;
+  setJitPreSpawnState();
 });
+
+function onMainButton() {
+  if (_phase === 'begin')      beginAssessment();
+  else if (_phase === 'ready') enterWorkspace();
+}
+
+function setJitPreSpawnState() {
+  _phase = 'begin';
+  document.getElementById('page-title').textContent = 'Ready when you are.';
+  document.getElementById('page-lede').textContent =
+    'Read the next page or two before you begin — the framing matters more than the speed, ' +
+    'and the first thirty seconds of the assessment are the most informative. Your active-time ' +
+    'clock starts when the workspace boots, not before.';
+  setButtonState('begin');
+  setStatus('The workspace boots when you click. It takes about a minute.');
+}
+
+async function beginAssessment() {
+  _phase = 'warming';
+  document.getElementById('page-title').textContent = 'Your workspace is warming up.';
+  setStatus('Reserving your machine.');
+  setButtonState('warming');
+  hideError();
+
+  try {
+    const r = await fetch(BEGIN_URL, { method: 'POST' });
+    const d = await r.json();
+    if (!d.ok) {
+      if (d.reason === 'no_session') {
+        showError(
+          'We could not find your session.',
+          'Open the assessment link from your invitation email again. If that does not work, reply to the email and we will re-issue your link.'
+        );
+        _phase = 'begin';
+        setButtonState('begin');
+        return;
+      }
+      surfaceLaunchError(d.reason);
+      return;
+    }
+    _machineUrl = d.url || null;
+    if (d.state === 'ready' || d.reused) {
+      enableEnter();
+      return;
+    }
+    setStatus('Booting the desktop. This is the long part.');
+    startPolling();
+  } catch (e) {
+    showError(
+      'Could not reach the launch server.',
+      'Check your connection and try again. Your link is still valid.'
+    );
+    _phase = 'begin';
+    setButtonState('begin');
+  }
+}
 
 async function startLaunch() {
   setStatus('Reserving your machine.');
@@ -331,7 +396,9 @@ async function pollOnce() {
   }
 
   try {
-    const r = await fetch(`${STATUS_URL}?token=${encodeURIComponent(_token)}`, {
+    // JIT mode: the cyborg_session cookie is the identity — no query param.
+    const statusUrl = _token ? `${STATUS_URL}?token=${encodeURIComponent(_token)}` : STATUS_URL;
+    const r = await fetch(statusUrl, {
       method: 'GET',
       cache: 'no-store',
     });
@@ -372,6 +439,7 @@ async function pollOnce() {
 
 function enableEnter() {
   clearTimeout(_pollTimer);
+  _phase = 'ready';
   setStatus('Ready when you are.');
   setButtonState('ready');
   document.getElementById('progress').classList.add('ready');
@@ -387,6 +455,10 @@ function setButtonState(state) {
   if (state === 'ready') {
     btn.disabled = false;
     btn.textContent = 'Enter workspace →';
+  } else if (state === 'begin') {
+    // JIT pre-spawn: the click is the consume + spawn trigger.
+    btn.disabled = false;
+    btn.textContent = 'Begin assessment';
   } else {
     btn.disabled = true;
     // Use innerHTML so the animated dots span stays mounted.
