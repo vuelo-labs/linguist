@@ -269,6 +269,7 @@ const LAUNCH_URL = '/cyborg/launch';
 const BEGIN_URL  = '/cyborg/launch/begin';
 const STATUS_URL = '/cyborg/launch-status';
 const OTP_URL    = '/cyborg/c/request-otp';
+const SESSIONCHECK_URL = '/cyborg/c/session-check';
 const POLL_INTERVAL_MS = 2000;
 const TIMEOUT_MS = 90000;            // 90s — after this, show the long-wait fallback
 
@@ -321,6 +322,26 @@ async function init() {
   if (session) {
     _authToken = session.access_token;
     _sessionEmail = session.user?.email || null;
+    // Up-front wrong-account detection: if the signed-in email isn't the one this
+    // assessment was invited to, route straight to the "switch account" step
+    // rather than letting the candidate click Begin and dead-end on
+    // email_mismatch. Only triggers when a *different* account is signed in (a
+    // teammate session in the same browser, or a stale session on a shared
+    // device) — a candidate signed into their own invited inbox goes straight to
+    // Begin. begin.js still enforces the match server-side; this is pure UX.
+    let wrongAccount = false;
+    try {
+      const chk = await fetch(SESSIONCHECK_URL, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${_authToken}` },
+      });
+      const d = await chk.json();
+      if (d && d.authed && d.matches === false) wrongAccount = true;
+    } catch (_) { /* network blip → fall through to Begin; begin re-checks */ }
+    if (wrongAccount) {
+      setAuthState('switch');
+      return;
+    }
     document.getElementById('enter-card').style.display = 'block';
     setJitPreSpawnState();
   } else {
