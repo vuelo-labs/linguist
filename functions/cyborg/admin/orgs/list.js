@@ -39,7 +39,7 @@ export async function onRequestGet({ request, env }) {
     const [{ count: members }, { count: campaigns }, { count: candidates }] = await Promise.all([
       supabase.from('organisation_members').select('id', { count: 'exact', head: true }).eq('organisation_id', org.id),
       supabase.from('campaigns').select('id', { count: 'exact', head: true }).eq('organisation_id', org.id),
-      supabase.from('cyborg_tokens').select('token', { count: 'exact', head: true }).eq('organisation_id', org.id),
+      supabase.from('cyborg_tokens').select('token', { count: 'exact', head: true }).eq('organisation_id', org.id).is('revoked_at', null),
     ]);
     return {
       ...org,

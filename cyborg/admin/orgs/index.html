@@ -164,7 +164,7 @@ function renderOrgs(orgs) {
       <tr>
         <td>
           <div style="font-weight:500;">${escapeHtml(o.name)}</div>
-          <div class="mono">${escapeHtml(o.slug)}</div>
+          <div class="mono" data-slug="${escapeHtml(o.slug)}" hidden></div>
         </td>
         <td>${pill}</td>
         <td>${limitBits}</td>

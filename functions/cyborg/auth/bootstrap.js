@@ -45,6 +45,12 @@ export async function onRequestPost({ request, env }) {
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
   });
 
+  // Service-role client for writes + the auth_key_mismatch audit on the
+  // invalid-token path below. Created here (not after getUser) so the error
+  // path can use it — previously it was declared later, so the audit write
+  // threw a ReferenceError that the catch swallowed and the event never landed.
+  const admin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+
   const { data: { user }, error: userErr } = await userSupabase.auth.getUser();
   if (userErr || !user) {
     console.error('bootstrap: invalid token', userErr?.message);
@@ -77,11 +83,10 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, reason: 'invalid_token' }, 401);
   }
 
-  // Service-role client for the actual writes — RLS doesn't have all the
-  // policies we'd need (insert org_members on a newly-created org has a
-  // chicken-and-egg problem with the policy "you can insert if you're
-  // already a member"). Keep this scoped narrowly to bootstrap-time only.
-  const admin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+  // (admin service-role client created above — used for the writes below.
+  // RLS doesn't have all the policies we'd need; insert org_members on a
+  // newly-created org has a chicken-and-egg problem with the "you can insert
+  // if you're already a member" policy. Scoped to bootstrap-time only.)
 
   // ── Branch 1: invitation acceptance ────────────────────────────────────
   if (inviteToken) {
