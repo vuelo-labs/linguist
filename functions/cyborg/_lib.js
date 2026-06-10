@@ -389,3 +389,56 @@ export async function claimSessionAtomic(supabase, jitToken, sessionId, meta) {
   }
   return { claimed: data || null };
 }
+
+// ── Candidate authentication (OTP / Supabase session, 2026-06-10) ─────────
+// Candidate browser access depends on an authenticated Supabase session
+// (bound to the recruiter-invited email), NOT a bare token. Supabase JS keeps
+// the session in localStorage, so the candidate page sends it as an explicit
+// `Authorization: Bearer <jwt>` header — same pattern as app/_middleware.js.
+// Returns { userId, email } on a valid session, or null.
+export async function verifyCandidateSession(request, env) {
+  const headerAuth = request.headers.get('authorization') || '';
+  if (!headerAuth.startsWith('Bearer ')) return null;
+  const accessToken = headerAuth.slice(7);
+  if (!accessToken || !env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) return null;
+  try {
+    const r = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'apikey':        env.SUPABASE_PUBLISHABLE_KEY,
+      },
+    });
+    if (!r.ok) return null;
+    const user = await r.json();
+    if (!user?.id) return null;
+    return { userId: user.id, email: (user.email || '').toLowerCase() };
+  } catch {
+    return null;
+  }
+}
+
+// Atomic first-verify-wins claim: bind the row to the authenticated candidate
+// user + consume the JIT in one conditional UPDATE. Only succeeds while the
+// row is unclaimed AND unconsumed AND the email matches the invited address.
+// Returns { claimed: row } on win, { claimed: null } otherwise (caller
+// re-reads to distinguish idempotent same-user re-entry from a conflict).
+export async function claimJitForCandidate(supabase, jitToken, userId, email, meta) {
+  const { data, error } = await supabase
+    .from('cyborg_tokens')
+    .update({
+      candidate_user_id:  userId,
+      session_claimed_ip: meta.ip || null,
+      session_user_agent: meta.userAgent ? String(meta.userAgent).slice(0, 500) : null,
+      jit_consumed_at:    new Date().toISOString(),
+    })
+    .eq('jit_token', jitToken)
+    .is('candidate_user_id', null)
+    .ilike('candidate_email', email)
+    .select()
+    .maybeSingle();
+  if (error) {
+    console.error('candidate jit claim error:', error.message);
+    return { claimed: null, error };
+  }
+  return { claimed: data || null };
+}

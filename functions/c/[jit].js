@@ -17,8 +17,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import {
-  htmlPage, requestMeta, writeAuditLog, checkEndpointRateLimit,
-  generateSessionId, sessionCookieHeader, readSessionCookie, jitCookieHeader,
+  htmlPage, requestMeta, writeAuditLog, checkEndpointRateLimit, jitCookieHeader,
 } from '../cyborg/_lib.js';
 
 const RATE_LIMIT_WINDOW_SEC = 60;
@@ -58,7 +57,7 @@ export async function onRequestGet({ request, env, params }) {
 
   const { data: row, error } = await supabase
     .from('cyborg_tokens')
-    .select('jit_token, jit_consumed_at, session_id, expires_at, revoked_at, approved_at')
+    .select('jit_token, expires_at, revoked_at, approved_at')
     .eq('jit_token', jit)
     .maybeSingle();
 
@@ -67,37 +66,14 @@ export async function onRequestGet({ request, env, params }) {
     return htmlPage(410, 'Link unavailable', NEUTRAL_GONE);
   }
 
-  const cookieSession = readSessionCookie(request);
-
-  if (row.jit_consumed_at) {
-    if (cookieSession && cookieSession === row.session_id) {
-      // Same browser reloading the link after claiming — idempotent.
-      return redirect('/cyborg/launch/');
-    }
-    // Claimed by a different browser. Neutral copy outward; mechanism detail
-    // stays server-side in the audit trail (claim IP/UA vs this attempt).
-    await writeAuditLog(supabase, {
-      actorEmail: '(public)',
-      action:     'jit_token_claim_conflict',
-      target:     jit,
-      success:    false,
-      detail:     { stage: 'exchange_get', jit_prefix: jit.slice(0, 6) },
-      ...meta,
-    });
-    return htmlPage(403, 'Link unavailable', NEUTRAL_GONE);
-  }
-
-  // Unconsumed: hand out a session cookie (reuse an existing one — a reload
-  // before Begin keeps the same identity) plus the jit in its own HttpOnly
-  // cookie so begin.js knows what to claim. NO DB WRITE here — see header.
+  // Candidate auth (2026-06-10): this endpoint only records WHICH assessment
+  // (the cyborg_jit cookie) and forwards to the orientation page. It does NOT
+  // claim or 403 — the real gate is the OTP sign-in + the email-matched,
+  // first-verify-wins claim in /cyborg/launch/begin. A consumed jit is fine to
+  // re-follow: the orientation page will require the bound candidate's session,
+  // so a stranger who has the link still can't get in without that inbox.
+  // Stays passive (no DB write) so email scanners can't consume anything.
   const headers = new Headers({ Location: '/cyborg/launch/' });
-  if (!cookieSession) {
-    headers.append('Set-Cookie', sessionCookieHeader(generateSessionId()));
-  }
   headers.append('Set-Cookie', jitCookieHeader(jit));
   return new Response(null, { status: 302, headers });
-}
-
-function redirect(location) {
-  return new Response(null, { status: 302, headers: { Location: location } });
 }

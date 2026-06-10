@@ -211,6 +211,11 @@
       <div id="m-campaign-warn" style="display:none; margin-top:6px; padding:8px 10px; border-radius:6px; background:#fbe9e7; border:1px solid #e8b8af; color:#6e2618; font-size:0.82rem;"></div>
     </div>
     <div class="field">
+      <label for="m-email">Candidate email <span style="color:var(--w-muted);font-weight:400;">(required for the hosted launch link)</span></label>
+      <input type="email" id="m-email" placeholder="alex@example.com" />
+      <div style="margin-top:4px; font-size:0.78rem; color:var(--w-muted);">Hosted launch uses a one-time email sign-in. Leave blank only for a local-CLI (install command) token.</div>
+    </div>
+    <div class="field">
       <label for="m-notes">Notes (optional)</label>
       <input type="text" id="m-notes" placeholder="e.g. internal pilot, friendly dry-run" />
     </div>
@@ -579,6 +584,7 @@ async function mintToken() {
   const label = document.getElementById('m-label').value.trim();
   const days  = parseInt(document.getElementById('m-days').value, 10) || 8;
   const notes = document.getElementById('m-notes').value.trim();
+  const email = document.getElementById('m-email').value.trim();
   const campaignId = document.getElementById('m-campaign').value || null;
   const status = document.getElementById('mint-status');
   const result = document.getElementById('mint-result');
@@ -587,7 +593,7 @@ async function mintToken() {
 
   const r = await api('/cyborg/mint', {
     method: 'POST',
-    body: JSON.stringify({ label: label || null, days, notes: notes || null, campaign_id: campaignId }),
+    body: JSON.stringify({ label: label || null, email: email || null, days, notes: notes || null, campaign_id: campaignId }),
   });
   const d = await r.json();
   if (!r.ok || !d.ok) {
@@ -603,10 +609,16 @@ async function mintToken() {
   // necessarily embeds the token. The bare token is intentionally NOT shown
   // — it's available in the Tokens list / Trace tab if ever needed.
   const launchUrl = escapeHtml(d.launch_url || '');
-  result.innerHTML = `
+  const hostedBlock = d.has_email ? `
     <p style="font-size:0.84rem;color:var(--w-muted);margin:0 0 4px;">Hosted launch link — share this with the candidate:</p>
     <div class="install-cmd">${launchUrl}</div>
-    <button type="button" class="btn small" onclick="navigator.clipboard.writeText('${launchUrl}').then(()=>{this.textContent='Copied';setTimeout(()=>{this.textContent='Copy link';},1500);})">Copy link</button>
+    <button type="button" class="btn small" onclick="navigator.clipboard.writeText('${launchUrl}').then(()=>{this.textContent='Copied';setTimeout(()=>{this.textContent='Copy link';},1500);})">Copy link</button>`
+  : `
+    <div style="padding:8px 10px;border-radius:6px;background:#fbe9e7;border:1px solid #e8b8af;color:#6e2618;font-size:0.82rem;">
+      No candidate email — the hosted launch link won't work (it needs a one-time email sign-in). This token is local-CLI only. Re-mint with an email to enable the hosted link.
+    </div>`;
+  result.innerHTML = `
+    ${hostedBlock}
     <details style="margin-top:12px;">
       <summary style="cursor:pointer;font-size:0.84rem;color:var(--w-muted);">Local install (CLI) — for the self-hosted Docker tier</summary>
       <div class="install-cmd" style="margin-top:6px;">${escapeHtml(d.install_cmd)}</div>
@@ -614,6 +626,7 @@ async function mintToken() {
     <p style="font-size:0.8rem;color:var(--w-muted);margin-top:10px;">Expires ${new Date(d.expires_at).toLocaleString('en-GB')}.</p>
   `;
   document.getElementById('m-label').value = '';
+  document.getElementById('m-email').value = '';
   document.getElementById('m-notes').value = '';
   loadTokens();
 }

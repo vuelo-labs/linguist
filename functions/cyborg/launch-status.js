@@ -27,7 +27,7 @@
 // surface). Rate-limit hits ARE audited (attack signal).
 
 import { createClient } from '@supabase/supabase-js';
-import { requestMeta, writeAuditLog, checkEndpointRateLimit, readSessionCookie, loadTokenBySession } from './_lib.js';
+import { requestMeta, writeAuditLog, checkEndpointRateLimit, verifyCandidateSession } from './_lib.js';
 
 const FLY_API_BASE = 'https://api.machines.dev/v1';
 const RATE_LIMIT_WINDOW_SEC = 60;
@@ -54,15 +54,22 @@ export async function onRequestGet({ request, env }) {
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
   const meta = requestMeta(request);
 
-  // ── Identity: session cookie (JIT path) OR ?token= (legacy) ───────────
-  // JIT-claimed sessions carry the HttpOnly cyborg_session cookie and no
-  // query param; pre-JIT in-flight orientation pages still pass ?token=.
+  // ── Identity: candidate session (JIT path) OR ?token= (legacy) ────────
+  // Authenticated candidates send a Supabase Bearer JWT (no query param); the
+  // row is resolved by the bound candidate_user_id. Pre-JIT in-flight
+  // orientation pages still pass ?token=.
   let token = (url.searchParams.get('token') || '').trim();
   if (!token) {
-    const sessionId = readSessionCookie(request);
-    if (sessionId) {
-      const sessionRow = await loadTokenBySession(supabase, sessionId);
-      if (sessionRow) token = sessionRow.token;
+    const candidate = await verifyCandidateSession(request, env);
+    if (candidate) {
+      const { data: row } = await supabase
+        .from('cyborg_tokens')
+        .select('token')
+        .eq('candidate_user_id', candidate.userId)
+        .order('issued_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (row) token = row.token;
     }
   }
   if (!token) return json({ ok: false, reason: 'missing_token' }, 401);

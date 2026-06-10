@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirming you — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { background: var(--w-bg); color: var(--w-text); font-family: var(--sans, 'Inter', sans-serif); margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .wrap { max-width: 420px; padding: 40px 24px; text-align: center; }
+    h1 { font-family: var(--serif, 'Newsreader', serif); font-size: 1.6rem; margin: 0 0 12px; font-weight: 500; letter-spacing: -0.01em; }
+    .lede { color: var(--w-muted); font-size: 0.95rem; line-height: 1.55; }
+    .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid var(--w-border); border-top-color: var(--w-accent); border-radius: 50%; animation: spin 0.9s linear infinite; margin: 8px 0 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status.err { background: #fbe9e7; border: 1px solid #e8b8af; color: #6e2618; padding: 12px 16px; border-radius: 8px; margin-top: 16px; }
+    .btn { display: inline-block; margin-top: 16px; background: var(--w-accent); color: var(--w-bg); border: none; border-radius: 9px; padding: 11px 22px; font-size: 0.95rem; font-weight: 500; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="spinner" id="spinner"></div>
+  <h1 id="title">Confirming it's you…</h1>
+  <p class="lede" id="lede">Just a moment.</p>
+  <div id="error" class="status err" style="display:none;"></div>
+  <a id="retry" href="/cyborg/launch/" class="btn" style="display:none;">Back to the assessment</a>
+</div>
+
+<script type="module">
+  // Candidate magic-link callback. Establishes the Supabase candidate session
+  // from the link hash, then returns to the orientation page. Unlike the
+  // teammate callback (/cyborg/auth/callback/) there is NO org bootstrap —
+  // a candidate is not a team member.
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  function showError(msg) {
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('title').textContent = 'Confirmation failed';
+    document.getElementById('lede').textContent = '';
+    const err = document.getElementById('error');
+    err.textContent = msg;
+    err.style.display = 'block';
+    document.getElementById('retry').style.display = 'inline-block';
+  }
+
+  async function init() {
+    let { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      session = await new Promise((resolve) => {
+        const timeout = setTimeout(() => resolve(null), 5000);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
+          if (sess) { clearTimeout(timeout); subscription.unsubscribe(); resolve(sess); }
+        });
+      });
+    }
+    if (!session) {
+      showError("Your sign-in link expired or was already used. Go back and request a new one.");
+      return;
+    }
+    // Session established (in localStorage). Return to the orientation page,
+    // which will now detect the session and show "Begin assessment".
+    location.replace('/cyborg/launch/');
+  }
+
+  init();
+</script>
+
+</body>
+</html>

@@ -207,7 +207,22 @@
     </p>
   </div>
 
-  <div class="card">
+  <!-- Auth gate (JIT path): candidate confirms control of the invited inbox
+       once, before launching. Hidden for the legacy ?t= path and once a
+       session exists. -->
+  <div class="card" id="auth-card" style="display:none;">
+    <h2>Confirm it's you</h2>
+    <p>
+      Before you start, we'll email a one-time sign-in link to the address your assessment was sent to.
+      This confirms it's really you — you only do this once.
+    </p>
+    <div class="enter-row">
+      <button class="btn" id="otp-btn">Email me a sign-in link</button>
+      <p class="status-line" id="otp-status"></p>
+    </div>
+  </div>
+
+  <div class="card" id="enter-card" style="display:none;">
     <div class="enter-row">
       <button class="btn" id="enter-btn" disabled>Workspace warming<span class="dots"></span></button>
       <p class="status-line" id="status-line">Reserving your machine.</p>
@@ -238,16 +253,25 @@
 
 </div>
 
-<script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  'https://odnzrykfmfgdfybnmcfd.supabase.co',
+  'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+);
+
 const LAUNCH_URL = '/cyborg/launch';
 const BEGIN_URL  = '/cyborg/launch/begin';
 const STATUS_URL = '/cyborg/launch-status';
+const OTP_URL    = '/cyborg/c/request-otp';
 const POLL_INTERVAL_MS = 2000;
 const TIMEOUT_MS = 90000;            // 90s — after this, show the long-wait fallback
 
 let _token = null;       // legacy ?t= path only; null in JIT/cookie mode
 let _jitMode = false;    // identity carried by HttpOnly cookies set at /c/<jit>
-let _phase = 'warming';  // 'begin' (JIT pre-spawn) | 'warming' | 'ready'
+let _phase = 'warming';  // 'auth' | 'begin' (JIT pre-spawn) | 'warming' | 'ready'
+let _authToken = null;   // Supabase candidate session access token (JIT path)
 let _machineUrl = null;
 let _pollTimer = null;
 let _pollStart = 0;
@@ -255,7 +279,9 @@ let _longWaitShown = false;
 let _lastStatus = null;
 let _debugMode = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+init();
+
+async function init() {
   const params = new URLSearchParams(location.search);
   const t = (params.get('t') || params.get('token') || '').trim();
   _debugMode = params.get('debug') === '1';
@@ -267,6 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('enter-btn').addEventListener('click', onMainButton);
+  document.getElementById('otp-btn').addEventListener('click', requestOtp);
   document.getElementById('retry-btn').addEventListener('click', () => {
     hideError();
     if (_jitMode) beginAssessment(); else startLaunch();
@@ -275,17 +302,64 @@ document.addEventListener('DOMContentLoaded', () => {
   if (t) {
     // Legacy in-flight path: token in the URL, spawn starts immediately.
     _token = t;
+    document.getElementById('enter-card').style.display = 'block';
     startLaunch();
     return;
   }
 
-  // JIT path (2026-06-09): no URL params — identity lives in the HttpOnly
-  // cyborg_session/cyborg_jit cookies set by /c/<jit>. The spawn is the
-  // candidate's explicit choice: nothing boots (and nothing is consumed)
-  // until they click "Begin assessment". Email scanners never get here.
+  // JIT path: candidate access requires an authenticated Supabase session
+  // (bound to the invited email). If there's no session yet, gate on the
+  // one-time email confirmation (OTP). Nothing boots until they're signed
+  // in AND click "Begin assessment".
   _jitMode = true;
-  setJitPreSpawnState();
-});
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    _authToken = session.access_token;
+    document.getElementById('enter-card').style.display = 'block';
+    setJitPreSpawnState();
+  } else {
+    setAuthState();
+  }
+}
+
+function setAuthState() {
+  _phase = 'auth';
+  document.getElementById('auth-card').style.display = 'block';
+  document.getElementById('enter-card').style.display = 'none';
+  document.getElementById('page-title').textContent = 'Confirm your email to begin.';
+  document.getElementById('page-lede').textContent =
+    'Your assessment is tied to the email it was sent to. Confirm it’s you with a one-time ' +
+    'sign-in link, then you’ll start the assessment. This takes a few seconds and you only do it once.';
+}
+
+async function requestOtp() {
+  const btn = document.getElementById('otp-btn');
+  const stat = document.getElementById('otp-status');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  stat.textContent = '';
+  try {
+    const r = await fetch(OTP_URL, { method: 'POST' });
+    const d = await r.json();
+    if (!d.ok) {
+      btn.disabled = false; btn.textContent = 'Email me a sign-in link';
+      stat.textContent = ({
+        no_jit:            'This link is missing its context. Re-open the link from your invitation email.',
+        unknown:           'This assessment link is no longer available. Contact your recruiter.',
+        unavailable:       'This assessment link is no longer available. Contact your recruiter.',
+        no_email_on_record:'This link can’t use email sign-in. Reply to your invitation email and we’ll sort it.',
+        rate_limited:      'Too many requests. Wait a minute and try again.',
+        otp_send_failed:   'We couldn’t send the email just now. Try again in a moment.',
+      })[d.reason] || 'Something went wrong. Try again in a moment.';
+      return;
+    }
+    btn.textContent = 'Link sent';
+    stat.innerHTML = `Check your inbox — we sent a sign-in link to <strong>${d.email_hint || 'your email'}</strong>. ` +
+      'Click it to continue. You can close this tab; the link opens the next step.';
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Email me a sign-in link';
+    stat.textContent = 'Could not reach the server. Check your connection and try again.';
+  }
+}
 
 function onMainButton() {
   if (_phase === 'begin')      beginAssessment();
@@ -311,16 +385,22 @@ async function beginAssessment() {
   hideError();
 
   try {
-    const r = await fetch(BEGIN_URL, { method: 'POST' });
+    const r = await fetch(BEGIN_URL, {
+      method: 'POST',
+      headers: _authToken ? { 'Authorization': `Bearer ${_authToken}` } : {},
+    });
     const d = await r.json();
     if (!d.ok) {
-      if (d.reason === 'no_session') {
+      if (d.reason === 'no_session' || d.reason === 'auth_required') {
+        // Session expired or missing — send them back to the email confirm step.
+        setAuthState();
+        return;
+      }
+      if (d.reason === 'email_mismatch') {
         showError(
-          'We could not find your session.',
-          'Open the assessment link from your invitation email again. If that does not work, reply to the email and we will re-issue your link.'
+          'This assessment belongs to a different email.',
+          'You’re signed in with an address that doesn’t match this invitation. Reply to your invitation email and we’ll sort it.'
         );
-        _phase = 'begin';
-        setButtonState('begin');
         return;
       }
       surfaceLaunchError(d.reason);
@@ -396,11 +476,13 @@ async function pollOnce() {
   }
 
   try {
-    // JIT mode: the cyborg_session cookie is the identity — no query param.
+    // JIT mode: identity is the Supabase candidate session (Bearer) — no
+    // query param. Legacy path still uses ?token=.
     const statusUrl = _token ? `${STATUS_URL}?token=${encodeURIComponent(_token)}` : STATUS_URL;
     const r = await fetch(statusUrl, {
       method: 'GET',
       cache: 'no-store',
+      headers: _authToken ? { 'Authorization': `Bearer ${_authToken}` } : {},
     });
     const d = await r.json();
     if (!d.ok) {

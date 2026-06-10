@@ -27,6 +27,10 @@ export async function onRequestPost({ request, env }) {
   const days  = Number.isFinite(body.days) ? Math.min(Math.max(body.days, 1), 30) : DEFAULT_DAYS;
   const notes = body.notes ? String(body.notes).slice(0, 500) : null;
   const campaignId = body.campaign_id ? String(body.campaign_id).trim() : null;
+  // Optional candidate email. Required for the hosted /c/<jit> launch (OTP
+  // sign-in, candidate auth 2026-06-10); if omitted, the token is usable only
+  // via the local-CLI install_cmd, not the hosted launch link.
+  const candidateEmail = (body.email || '').toString().trim().toLowerCase() || null;
 
   const token = generateToken();
   const jitToken = generateJitToken();   // opaque /c/<jit> launch ticket (2026-06-09)
@@ -56,6 +60,7 @@ export async function onRequestPost({ request, env }) {
     token,
     jit_token:       jitToken,
     candidate_label: label,
+    candidate_email: candidateEmail,
     expires_at:      expiresAt,
     approved_at:     new Date().toISOString(),   // admin-minted = pre-approved
     notes,
@@ -85,6 +90,7 @@ export async function onRequestPost({ request, env }) {
     ok:          true,
     token,
     expires_at:  expiresAt,
+    has_email:   !!candidateEmail,   // hosted launch (OTP) only works with an email
     launch_url:  `${origin}/c/${jitToken}`,
     install_cmd: `curl -fsSL https://raw.githubusercontent.com/vuelo-labs/cyborg_versions/main/install.sh | bash -s ${token}`,
   });

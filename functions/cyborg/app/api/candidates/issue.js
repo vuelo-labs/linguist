@@ -65,6 +65,11 @@ export async function onRequestPost({ request, env }) {
 
   if (!orgId || !label) return json({ ok: false, reason: 'missing_fields' }, 400);
 
+  // Candidate auth (2026-06-10): the hosted launch now requires a verified
+  // email (OTP sign-in), so a valid candidate_email is mandatory here. The
+  // local-CLI/install tier is a separate channel and is not issued from here.
+  if (!emailValid) return json({ ok: false, reason: 'email_required' }, 400);
+
   const admin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
   // Org membership check — the caller MUST belong to this org.

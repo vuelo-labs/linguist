@@ -76,6 +76,9 @@ export async function onRequestGet({ request, env }) {
       token,
       jit_token:       jitToken,
       candidate_label: `${claimed.name} (${claimed.email}) — request ${claimed.request_id.slice(0, 8)}`,
+      // candidate_email drives the OTP sign-in (candidate auth, 2026-06-10);
+      // the request flow always has a verified-on-submit email.
+      candidate_email: (claimed.email || '').toLowerCase(),
       expires_at:      expiresAt,
       approved_at:     nowIso,
     });
