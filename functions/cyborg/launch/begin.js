@@ -54,22 +54,21 @@ export async function onRequestPost({ request, env }) {
       { 'Retry-After': String(rl.retryAfter) });
   }
 
-  // ── Already bound to this user? (re-click / reload / new device, same login) ──
-  // The candidate session is the source of truth, so a row already bound to
-  // this user is re-entered idempotently regardless of cookies — this is what
-  // makes clean multi-device resume work.
-  const existing = await loadTokenByCandidateUser(supabase, candidate.userId);
-  if (existing) {
-    if (!validateRow(existing)) return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
-    return spawnCandidate(env, supabase, existing, meta);
-  }
-
-  // ── Fresh claim ────────────────────────────────────────────────────────
+  // ── Resolve which assessment ──────────────────────────────────────────
+  // The jit cookie is authoritative: it names the exact assessment the
+  // candidate clicked (a candidate may hold more than one). Only when there's
+  // no jit context do we fall back to "resume the assessment already bound to
+  // this user" — the clean multi-device / cleared-cookies resume path.
   if (!jit || !/^[A-Za-z0-9_-]{16}$/.test(jit)) {
+    const existing = await loadTokenByCandidateUser(supabase, candidate.userId);
+    if (existing) {
+      if (!validateRow(existing)) return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
+      return spawnCandidate(env, supabase, existing, meta);
+    }
     return json({ ok: false, reason: 'no_jit' }, 400);
   }
 
-  // Load the row, then verify the invited email matches the authenticated
+  // Load the jit's row, then verify the invited email matches the authenticated
   // session BEFORE the atomic claim (the email is immutable, so this is
   // race-safe — and it avoids PostgREST's '+'-in-filter pitfall).
   const { data: row } = await supabase
