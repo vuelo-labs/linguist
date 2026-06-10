@@ -339,7 +339,11 @@
     }
 
     issueForm.style.display = 'none'; issueResult.style.display = 'block';
-    document.getElementById('launch-url').textContent = `${location.origin}/cyborg/?t=${d.token}`;
+    // Use the server-composed opaque /c/<jit> link. Never rebuild ?t=<token>
+    // here — that would put the real token back in the shareable URL. Fall
+    // back to the absolute API value, or a relative path, but never the token.
+    document.getElementById('launch-url').textContent =
+      d.launch_url || `${location.origin}/cyborg/`;
     // Reflect actual outcome — issue vs resend, send success vs failure —
     // so the operator knows whether to copy + share the link manually and
     // whether this was a brand-new key or a re-send of the existing one.

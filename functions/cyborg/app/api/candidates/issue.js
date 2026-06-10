@@ -255,6 +255,9 @@ export async function onRequestPost({ request, env }) {
   return json({
     ok:               true,
     token,
+    // Opaque /c/<jit> link for the "share this link directly" UI — the real
+    // cyb_ token must NOT be handed to the frontend to compose a ?t= URL.
+    launch_url:       launchUrl,
     expires_at:       expiresAt,
     email_sent:       emailSent,
     email_send_error: emailSendError,
