@@ -69,13 +69,43 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, reason: 'no_jit' }, 400);
   }
 
-  // Atomic first-verify-wins: binds candidate_user_id only while unclaimed AND
-  // the invited email matches the authenticated email.
-  const { claimed } = await claimJitForCandidate(supabase, jit, candidate.userId, candidate.email, meta);
-  if (claimed) {
-    if (!validateRow(claimed)) {
-      return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
+  // Load the row, then verify the invited email matches the authenticated
+  // session BEFORE the atomic claim (the email is immutable, so this is
+  // race-safe — and it avoids PostgREST's '+'-in-filter pitfall).
+  const { data: row } = await supabase
+    .from('cyborg_tokens')
+    .select('*')
+    .eq('jit_token', jit)
+    .maybeSingle();
+
+  if (!row) return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
+
+  // Already claimed?
+  if (row.candidate_user_id) {
+    // Same user re-clicking / new device same login → idempotent spawn.
+    if (row.candidate_user_id === candidate.userId) {
+      if (!validateRow(row)) return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
+      return spawnCandidate(env, supabase, row, meta);
     }
+    // Claimed by another identity → conflict.
+    await writeAuditLog(supabase, {
+      actorEmail: candidate.email, action: 'jit_token_claim_conflict',
+      target: jit, success: false,
+      detail: { stage: 'begin_post', jit_prefix: jit.slice(0, 6) }, ...meta,
+    });
+    return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
+  }
+
+  // Authenticated as a different address than the invitation → explicit signal.
+  if (row.candidate_email && row.candidate_email.toLowerCase() !== candidate.email) {
+    return json({ ok: false, reason: 'email_mismatch' }, 403);
+  }
+
+  if (!validateRow(row)) return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
+
+  // Atomic first-claimer-wins on (jit, candidate_user_id IS NULL).
+  const { claimed } = await claimJitForCandidate(supabase, jit, candidate.userId, meta);
+  if (claimed) {
     await writeAuditLog(supabase, {
       actorEmail: candidate.email, action: 'jit_token_consumed',
       target: jit, success: true, detail: { jit_prefix: jit.slice(0, 6) }, ...meta,
@@ -83,32 +113,16 @@ export async function onRequestPost({ request, env }) {
     return spawnCandidate(env, supabase, claimed, meta);
   }
 
-  // ── Claim failed — diagnose why ─────────────────────────────────────────
-  const { data: row } = await supabase
-    .from('cyborg_tokens')
-    .select('*')
-    .eq('jit_token', jit)
-    .maybeSingle();
-
-  // Double-click / reload after this same user already claimed → idempotent.
-  if (row && row.candidate_user_id === candidate.userId) {
-    if (!validateRow(row)) return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
-    return spawnCandidate(env, supabase, row, meta);
+  // Lost the race — re-read; if this same user won, idempotent spawn, else conflict.
+  const { data: row2 } = await supabase
+    .from('cyborg_tokens').select('*').eq('jit_token', jit).maybeSingle();
+  if (row2 && row2.candidate_user_id === candidate.userId) {
+    return spawnCandidate(env, supabase, row2, meta);
   }
-
-  // Authenticated as a different address than the invitation → explicit signal
-  // so the page can tell the candidate to use the right inbox.
-  if (row && row.candidate_email &&
-      row.candidate_email.toLowerCase() !== candidate.email &&
-      !row.candidate_user_id) {
-    return json({ ok: false, reason: 'email_mismatch' }, 403);
-  }
-
-  // Claimed by someone else (or dead jit). Neutral copy; detail to audit.
   await writeAuditLog(supabase, {
     actorEmail: candidate.email, action: 'jit_token_claim_conflict',
     target: jit, success: false,
-    detail: { stage: 'begin_post', jit_prefix: jit.slice(0, 6) }, ...meta,
+    detail: { stage: 'begin_post_race', jit_prefix: jit.slice(0, 6) }, ...meta,
   });
   return json({ ok: false, reason: 'unavailable', message: NEUTRAL_DENIED }, 403);
 }

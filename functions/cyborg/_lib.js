@@ -418,11 +418,15 @@ export async function verifyCandidateSession(request, env) {
 }
 
 // Atomic first-verify-wins claim: bind the row to the authenticated candidate
-// user + consume the JIT in one conditional UPDATE. Only succeeds while the
-// row is unclaimed AND unconsumed AND the email matches the invited address.
+// user + consume the JIT in one conditional UPDATE. Guarded only on
+// (jit_token, candidate_user_id IS NULL) — the email match is verified in JS
+// by the caller BEFORE this call. (We deliberately do NOT filter on
+// candidate_email here: emails contain '+', which PostgREST decodes to a space
+// in a filter value, silently matching 0 rows. The email is immutable on the
+// row, so a prior JS check is race-safe.)
 // Returns { claimed: row } on win, { claimed: null } otherwise (caller
 // re-reads to distinguish idempotent same-user re-entry from a conflict).
-export async function claimJitForCandidate(supabase, jitToken, userId, email, meta) {
+export async function claimJitForCandidate(supabase, jitToken, userId, meta) {
   const { data, error } = await supabase
     .from('cyborg_tokens')
     .update({
@@ -433,7 +437,6 @@ export async function claimJitForCandidate(supabase, jitToken, userId, email, me
     })
     .eq('jit_token', jitToken)
     .is('candidate_user_id', null)
-    .ilike('candidate_email', email)
     .select()
     .maybeSingle();
   if (error) {
