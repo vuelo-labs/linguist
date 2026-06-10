@@ -354,6 +354,10 @@ export async function spawnCandidate(env, supabase, tokenRow, meta) {
         // (Phase 2). Held only in the Fly machine env (never client-side); the
         // container verifies handoff tickets + signs submissions with it.
         CYBORG_HANDOFF_SECRET: env.CYBORG_HANDOFF_SECRET,
+        // Phase 2 fully proven (2026-06-10) → disable the legacy ?token= GET
+        // sideload on new machines, closing the last URL-token redemption vector.
+        // Entry stays HTTPS POST /auth (paste form) + the HMAC handoff only.
+        CYBORG_LEGACY_TOKEN_GET: '0',
         SUBMISSION_ENDPOINT:   env.SUBMISSION_ENDPOINT,
         DEADLINE:              tokenRow.expires_at,
         PROFILE:               env.PROFILE || 'v5-recruiter_full',
