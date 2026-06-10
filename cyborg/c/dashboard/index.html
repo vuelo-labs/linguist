@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your assessments — Cyborg</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { background: var(--w-bg); color: var(--w-text); font-family: var(--sans,'Inter',sans-serif); margin: 0; }
+    .wrap { max-width: 620px; margin: 0 auto; padding: 56px 24px 80px; }
+    h1 { font-family: var(--serif,'Newsreader',serif); font-size: 2rem; font-weight: 500; letter-spacing: -0.01em; margin: 0 0 8px; }
+    .lede { font-family: var(--serif,'Newsreader',serif); color: var(--w-muted); font-size: 1.05rem; line-height: 1.55; margin: 0 0 28px; }
+    .card { background: var(--w-bg-card); border: 1px solid var(--w-border); border-radius: 12px; padding: 18px 20px; margin: 12px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .card .meta h3 { margin: 0 0 4px; font-family: var(--serif,'Newsreader',serif); font-weight: 500; font-size: 1.1rem; }
+    .card .meta p { margin: 0; font-size: 0.88rem; color: var(--w-muted); }
+    .pill { display: inline-block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 999px; }
+    .pill.active { background: #e7f0e7; color: #2f6f3a; }
+    .pill.done   { background: #eee7f0; color: #6b4f80; }
+    .pill.muted  { background: var(--w-border); color: var(--w-faint); }
+    .btn { background: var(--w-accent); color: var(--w-bg); border: none; border-radius: 9px; padding: 10px 20px; font-size: 0.95rem; font-weight: 500; font-family: inherit; text-decoration: none; cursor: pointer; white-space: nowrap; }
+    .btn.disabled { background: var(--w-border); color: var(--w-faint); pointer-events: none; }
+    .status-msg { color: var(--w-muted); font-size: 0.95rem; line-height: 1.55; }
+    .footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--w-border); font-size: 0.86rem; color: var(--w-faint); line-height: 1.55; }
+    .footer a { color: var(--w-accent); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Your assessments</h1>
+  <p class="lede" id="lede">Loading…</p>
+  <div id="list"></div>
+  <div class="footer">
+    Need help? Reply to your invitation email.
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  const supabase = createClient(
+    'https://odnzrykfmfgdfybnmcfd.supabase.co',
+    'sb_publishable_Czk4cQMbG_EcQdYgf23fZQ_Og6uDUyo',
+  );
+
+  const PILL = {
+    'not-launched': ['Not started', 'active'],
+    'in-progress':  ['In progress', 'active'],
+    'submitted':    ['Submitted', 'done'],
+    'scored':       ['Submitted', 'done'],
+    'pending':      ['Awaiting approval', 'muted'],
+    'expired':      ['Expired', 'muted'],
+    'revoked':      ['Unavailable', 'muted'],
+  };
+  const ACTION = { 'not-launched': 'Start', 'in-progress': 'Resume' };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+
+  function render(assessments) {
+    const lede = document.getElementById('lede');
+    const list = document.getElementById('list');
+    if (!assessments.length) {
+      lede.textContent = 'No assessments are linked to this account yet.';
+      list.innerHTML = '<p class="status-msg">If you were invited, open the link in your invitation email to get started.</p>';
+      return;
+    }
+    lede.textContent = assessments.length === 1
+      ? 'Here’s your assessment.'
+      : `You have ${assessments.length} assessments.`;
+    list.innerHTML = assessments.map(a => {
+      const [pillText, pillCls] = PILL[a.status] || ['—', 'muted'];
+      const action = ACTION[a.status];
+      const canLaunch = action && a.jit_token;
+      const btn = canLaunch
+        ? `<a class="btn" href="/c/${esc(a.jit_token)}">${action} →</a>`
+        : `<span class="btn disabled">${pillText}</span>`;
+      const campaign = a.campaign_name ? `${esc(a.campaign_name)}` : 'Assessment';
+      const label = a.label ? ` · ${esc(a.label)}` : '';
+      return `<div class="card">
+        <div class="meta">
+          <h3>${campaign}${label}</h3>
+          <p><span class="pill ${pillCls}">${pillText}</span></p>
+        </div>${btn}</div>`;
+    }).join('');
+  }
+
+  async function init() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      document.getElementById('lede').textContent = 'Please open the sign-in link from your invitation email.';
+      document.getElementById('list').innerHTML =
+        '<p class="status-msg">This page shows assessments tied to your signed-in account. ' +
+        'Open the link in your invitation email to confirm your address, then come back here.</p>';
+      return;
+    }
+    try {
+      const r = await fetch('/cyborg/c/my-assessments', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+      const d = await r.json();
+      if (!d.ok) {
+        document.getElementById('lede').textContent = 'Could not load your assessments.';
+        document.getElementById('list').innerHTML = '<p class="status-msg">Please try again in a moment, or reply to your invitation email.</p>';
+        return;
+      }
+      render(d.assessments || []);
+    } catch (e) {
+      document.getElementById('lede').textContent = 'Could not reach the server.';
+      document.getElementById('list').innerHTML = '<p class="status-msg">Check your connection and refresh.</p>';
+    }
+  }
+  init();
+</script>
+</body>
+</html>
