@@ -213,8 +213,8 @@
   <div class="card" id="auth-card" style="display:none;">
     <h2>One quick step: confirm it's you</h2>
     <p>
-      We'll email a one-time sign-in link to the same address your assessment invitation was sent to.
-      Open that link and you'll come straight back here to begin — your workspace boots then, not before.
+      We send a one-time sign-in link to the same address your assessment invitation was sent to.
+      Open it and you'll come straight back here to begin — your workspace boots then, not before.
       You only do this once; after that you can leave and return to this page freely.
     </p>
     <div class="enter-row">
@@ -322,6 +322,15 @@ async function init() {
     setJitPreSpawnState();
   } else {
     setAuthState();
+    // Auto-send the sign-in link on first arrival in this tab — one fewer
+    // click in the journey. JS-driven, so email scanners (which don't run JS)
+    // never trigger it. A refresh in the same tab won't resend (that would
+    // invalidate the link the candidate is about to open); the "Resend link"
+    // button covers genuine retries, and a fresh visit (new tab) sends again.
+    if (!sessionStorage.getItem('cyborg_otp_autosent')) {
+      sessionStorage.setItem('cyborg_otp_autosent', '1');
+      requestOtp();
+    }
   }
 }
 
