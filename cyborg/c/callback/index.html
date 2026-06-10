@@ -52,6 +52,19 @@
   }
 
   async function init() {
+    // Supabase puts auth errors in the URL hash (e.g. an expired/superseded
+    // magic link → #error=access_denied&error_code=otp_expired). Surface that
+    // immediately rather than waiting out the 5s session-detection timeout.
+    const hashParams = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+    if (hashParams.get('error')) {
+      const code = hashParams.get('error_code') || hashParams.get('error');
+      const msg = code === 'otp_expired'
+        ? 'That sign-in link has expired or a newer one was sent. Go back and request a fresh link — use the most recent email.'
+        : 'That sign-in link is invalid or was already used. Go back and request a fresh link.';
+      showError(msg);
+      return;
+    }
+
     let { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       session = await new Promise((resolve) => {

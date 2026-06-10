@@ -272,6 +272,7 @@ let _token = null;       // legacy ?t= path only; null in JIT/cookie mode
 let _jitMode = false;    // identity carried by HttpOnly cookies set at /c/<jit>
 let _phase = 'warming';  // 'auth' | 'begin' (JIT pre-spawn) | 'warming' | 'ready'
 let _authToken = null;   // Supabase candidate session access token (JIT path)
+let _sessionEmail = null;// email of the current session (for switch-account messaging)
 let _machineUrl = null;
 let _pollTimer = null;
 let _pollStart = 0;
@@ -315,6 +316,7 @@ async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
     _authToken = session.access_token;
+    _sessionEmail = session.user?.email || null;
     document.getElementById('enter-card').style.display = 'block';
     setJitPreSpawnState();
   } else {
@@ -322,14 +324,30 @@ async function init() {
   }
 }
 
-function setAuthState() {
+// Show the email-confirm (OTP) step. `mode === 'switch'` is used when a session
+// exists but belongs to a different address than the invitation — the OTP will
+// be sent to the INVITED inbox (resolved server-side from the jit cookie) and
+// signing in there replaces the wrong session.
+function setAuthState(mode) {
   _phase = 'auth';
   document.getElementById('auth-card').style.display = 'block';
   document.getElementById('enter-card').style.display = 'none';
-  document.getElementById('page-title').textContent = 'Confirm your email to begin.';
-  document.getElementById('page-lede').textContent =
-    'Your assessment is tied to the email it was sent to. Confirm it’s you with a one-time ' +
-    'sign-in link, then you’ll start the assessment. This takes a few seconds and you only do it once.';
+  const btn = document.getElementById('otp-btn');
+  btn.disabled = false;
+  btn.textContent = 'Email me a sign-in link';
+  document.getElementById('otp-status').textContent = '';
+  if (mode === 'switch') {
+    document.getElementById('page-title').textContent = 'Confirm the invited email.';
+    document.getElementById('page-lede').textContent =
+      `You’re signed in as ${_sessionEmail || 'another account'}, but this assessment was sent to a ` +
+      `different address. Click below and we’ll email a sign-in link to the correct inbox — opening it ` +
+      `switches you to the right account.`;
+  } else {
+    document.getElementById('page-title').textContent = 'Confirm your email to begin.';
+    document.getElementById('page-lede').textContent =
+      'Your assessment is tied to the email it was sent to. Confirm it’s you with a one-time ' +
+      'sign-in link, then you’ll start the assessment. This takes a few seconds and you only do it once.';
+  }
 }
 
 async function requestOtp() {
@@ -397,10 +415,9 @@ async function beginAssessment() {
         return;
       }
       if (d.reason === 'email_mismatch') {
-        showError(
-          'This assessment belongs to a different email.',
-          'You’re signed in with an address that doesn’t match this invitation. Reply to your invitation email and we’ll sort it.'
-        );
+        // Wrong account signed in — offer to switch to the invited inbox via OTP.
+        hideError();
+        setAuthState('switch');
         return;
       }
       surfaceLaunchError(d.reason);
