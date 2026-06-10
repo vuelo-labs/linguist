@@ -4,8 +4,8 @@
 // A token can only successfully submit once.
 
 import { createClient } from '@supabase/supabase-js';
+import { verifyHandoffSubmit } from './_lib.js';
 
-const REQUIRED_FIELDS = ['candidateToken', 'submittedAt'];
 const FLY_API_BASE = 'https://api.machines.dev/v1';
 
 // Match the cyborg-submit Edge Function's ceiling. Bounds workspace upload
@@ -25,12 +25,46 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = JSON.parse(rawText); } catch { return json({ error: 'Invalid JSON' }, 400); }
 
-  for (const field of REQUIRED_FIELDS) {
-    if (!body[field]) return json({ error: `Missing field: ${field}` }, 400);
-  }
+  if (!body.submittedAt) return json({ error: 'Missing field: submittedAt' }, 400);
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
-  const token = String(body.candidateToken).trim();
+
+  // ── Resolve + authenticate the submitter ──────────────────────────────
+  // Two paths:
+  //   1. Zero-exposure (hosted, Phase 2): the container sends NO raw token. It
+  //      authenticates with HMAC headers (X-Cyborg-Machine-Id + Ts + Nonce +
+  //      Sig). We resolve the token from cyborg_tokens by fly_machine_id, then
+  //      verify the signature against CYBORG_HANDOFF_SECRET. The token never
+  //      touches the wire.
+  //   2. Legacy / local-Docker tier: body.candidateToken carries the raw token
+  //      (different trust boundary — the candidate runs the image on their own
+  //      machine). Kept working as before + as the hosted rollback path.
+  const machineId = request.headers.get('X-Cyborg-Machine-Id') || '';
+  const sig       = request.headers.get('X-Cyborg-Sig')        || '';
+  let token = '';
+  if (machineId && sig && env.CYBORG_HANDOFF_SECRET) {
+    const { data: mrow, error: mErr } = await supabase
+      .from('cyborg_tokens')
+      .select('token')
+      .eq('fly_machine_id', machineId)
+      .maybeSingle();
+    if (mErr) {
+      console.error('submit machine lookup error:', mErr.message);
+      return json({ error: 'Failed to validate token.' }, 500);
+    }
+    if (!mrow) return json({ error: 'Unknown machine.' }, 403);
+    const ok = await verifyHandoffSubmit(env.CYBORG_HANDOFF_SECRET, mrow.token, {
+      machineId,
+      ts:    request.headers.get('X-Cyborg-Ts')    || '',
+      nonce: request.headers.get('X-Cyborg-Nonce') || '',
+      sig,
+    });
+    if (!ok) return json({ error: 'Invalid submission signature.' }, 403);
+    token = mrow.token;
+  } else {
+    token = String(body.candidateToken || '').trim();
+    if (!token) return json({ error: 'Missing field: candidateToken' }, 400);
+  }
 
   // Atomic claim: only succeeds if the token exists, isn't revoked, isn't used,
   // and hasn't expired. This is the rate-limit + replay-protection mechanism.

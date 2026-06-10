@@ -556,9 +556,47 @@ function enableEnter() {
   document.getElementById('progress').classList.add('ready');
 }
 
-function enterWorkspace() {
+async function enterWorkspace() {
   if (!_machineUrl) return;
-  window.location.href = _machineUrl;
+  // Zero-exposure handoff (Phase 2): mint a short-lived, single-use HMAC ticket
+  // now (≤60s before use), then auto-submit a form POST of it to the container's
+  // /handoff. The raw token never appears in the URL, history, referer, or logs
+  // — the ticket is an authorisation proof the container verifies against its
+  // own token. Works for both the JIT (Bearer) and legacy ?t= (token) paths.
+  const btn = document.getElementById('enter-btn');
+  btn.disabled = true;
+  setStatus('Opening your workspace…');
+  try {
+    const r = await fetch('/cyborg/handoff-ticket', {
+      method: 'POST',
+      headers: _authToken
+        ? { 'Authorization': `Bearer ${_authToken}` }
+        : { 'Content-Type': 'application/json' },
+      body: _authToken ? undefined : JSON.stringify({ token: _token }),
+    });
+    const d = await r.json();
+    if (!d.ok || !d.ticket || !d.url) {
+      btn.disabled = false;
+      surfaceLaunchError(d.reason || 'spawn_failed');
+      return;
+    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = new URL('/handoff', d.url).href;
+    const inp = document.createElement('input');
+    inp.type = 'hidden';
+    inp.name = 'ticket';
+    inp.value = d.ticket;
+    form.appendChild(inp);
+    document.body.appendChild(form);
+    form.submit();
+  } catch (e) {
+    btn.disabled = false;
+    showError(
+      'Could not open your workspace.',
+      'Check your connection and try again. Your link is still valid.'
+    );
+  }
 }
 
 function setButtonState(state) {

@@ -25,7 +25,7 @@ const NEUTRAL_DENIED = 'This assessment link is no longer available. Contact you
 
 export async function onRequestPost({ request, env }) {
   // ── Env preflight (same set as launch.js — spawnCandidate needs Fly) ───
-  const missing = ['FLY_API_TOKEN', 'FLY_ORG_SLUG', 'FLY_APP_NAME', 'FLY_IMAGE_REF', 'SUBMISSION_ENDPOINT', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY']
+  const missing = ['FLY_API_TOKEN', 'FLY_ORG_SLUG', 'FLY_APP_NAME', 'FLY_IMAGE_REF', 'SUBMISSION_ENDPOINT', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'CYBORG_HANDOFF_SECRET']
     .filter(k => !env[k]);
   if (missing.length) {
     console.error('begin not_configured: missing env', missing);

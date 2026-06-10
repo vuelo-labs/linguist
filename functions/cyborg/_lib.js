@@ -334,6 +334,51 @@ export function readJitCookie(request) {
   return m ? m[1] : null;
 }
 
+// ── Zero-exposure container handoff (Phase 2, 2026-06-10) ─────────────────
+// The raw cyb_ token must never appear client-side, in a URL, or in a log on
+// any hop. Two HMAC primitives (shared secret CYBORG_HANDOFF_SECRET, also
+// injected into the Fly machine env at spawn so the container can verify):
+//
+//   1. Handoff ticket (orientation → container). Minted at "Enter workspace"
+//      click (≤60s before use), single-use. Payload is `${exp}.${nonce}.${sig}`
+//      where sig = HMAC(secret, "handoff.<token>.<exp>.<nonce>"). The token is
+//      in the SIGNED MESSAGE but NEVER transmitted — the container recomputes
+//      the sig from its own CANDIDATE_TOKEN env. This binds the ticket to one
+//      candidate (a ticket can't be replayed against another container) and
+//      keeps the token fully server-side. The container POSTs nothing back; it
+//      sets cookie = HMAC(secret, "cookie.<token>") and 302s to a clean "/".
+//
+//   2. Submission signature (container → linguist). The container stops sending
+//      the raw token in the body; it sends fly_machine_id + a fresh HMAC over
+//      "submit.<token>.<machine_id>.<ts>.<nonce>" (re-signed on every upload
+//      attempt so retries hours later stay valid). linguist resolves the token
+//      by fly_machine_id, then verifies. See submit.js / verifyHandoffSubmit.
+
+// Mint a single-use handoff ticket for `token`. exp is a 60s ms-epoch window;
+// nonce is 12 base64url chars (72 bits) — the container tracks consumed nonces
+// within the window to block replay. Returns the wire string `exp.nonce.sig`.
+export async function signHandoffTicket(secret, token) {
+  const exp = Date.now() + 60_000;
+  const nonce = base64url(crypto.getRandomValues(new Uint8Array(9)));
+  const sig = await hmacHex(secret, `handoff.${token}.${exp}.${nonce}`);
+  return `${exp}.${nonce}.${sig}`;
+}
+
+// Verify a container-side submission signature. The container sends machine_id
+// + ts + nonce + sig; we've already resolved `token` from the row by
+// fly_machine_id. Freshness window is generous (10 min) because the container
+// re-signs at each upload attempt with the current clock, so a fresh attempt is
+// always well inside it; replay is bounded by the one-submit-per-token used_at
+// claim downstream (no nonce store needed here). Returns true/false.
+export async function verifyHandoffSubmit(secret, token, { machineId, ts, nonce, sig }) {
+  if (!secret || !token || !machineId || !ts || !nonce || !sig) return false;
+  const tsNum = Number(ts);
+  if (!Number.isFinite(tsNum)) return false;
+  if (Math.abs(Date.now() - tsNum) > 10 * 60 * 1000) return false;   // skew/freshness guard
+  const expected = await hmacHex(secret, `submit.${token}.${machineId}.${ts}.${nonce}`);
+  return timingSafeEqual(expected, sig);
+}
+
 // ── Candidate authentication (OTP / Supabase session, 2026-06-10) ─────────
 // Candidate browser access depends on an authenticated Supabase session
 // (bound to the recruiter-invited email), NOT a bare token. Supabase JS keeps

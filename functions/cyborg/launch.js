@@ -86,7 +86,7 @@ export async function onRequestPost({ request, env }) {
   // POST /v1/apps. FLY_APP_NAME still required because (a) legacy in-flight
   // rows reference it and (b) the candidate image lives at
   // registry.fly.io/${FLY_APP_NAME}:<tag>.
-  const missing = ['FLY_API_TOKEN', 'FLY_ORG_SLUG', 'FLY_APP_NAME', 'FLY_IMAGE_REF', 'SUBMISSION_ENDPOINT', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY']
+  const missing = ['FLY_API_TOKEN', 'FLY_ORG_SLUG', 'FLY_APP_NAME', 'FLY_IMAGE_REF', 'SUBMISSION_ENDPOINT', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'CYBORG_HANDOFF_SECRET']
     .filter(k => !env[k]);
   if (missing.length) {
     console.error('launch not_configured: missing env', missing);
@@ -262,7 +262,12 @@ export async function spawnCandidate(env, supabase, tokenRow, meta) {
   // attempt that failed mid-way (app created but spawn returned an error
   // before persistence), reuse that app name. Otherwise derive a fresh one.
   const appName = tokenRow.fly_app_name || deriveAppName(token);
-  const candidateUrl = `https://${appName}.fly.dev/?token=${encodeURIComponent(token)}`;
+  // Zero-exposure handoff (Phase 2): the URL carries NO token. The orientation
+  // page mints a short-lived HMAC handoff ticket at "Enter workspace" click and
+  // POSTs it to <url>/handoff (ticket in the body, never the URL). The raw token
+  // stays fully server-side. (Legacy ?token= GET on the container is kept behind
+  // a flag for manual rollback only — no flow appends it anymore.)
+  const candidateUrl = `https://${appName}.fly.dev/`;
 
   // ── Create the Fly app ───────────────────────────────────────────────
   // POST /v1/apps. 422 "app already exists" is treated as idempotent success
@@ -344,10 +349,14 @@ export async function spawnCandidate(env, supabase, tokenRow, meta) {
     config: {
       image: imageRef,
       env: {
-        CANDIDATE_TOKEN:     token,
-        SUBMISSION_ENDPOINT: env.SUBMISSION_ENDPOINT,
-        DEADLINE:            tokenRow.expires_at,
-        PROFILE:             env.PROFILE || 'v5-recruiter_full',
+        CANDIDATE_TOKEN:       token,
+        // Shared HMAC secret for the zero-exposure handoff + submission auth
+        // (Phase 2). Held only in the Fly machine env (never client-side); the
+        // container verifies handoff tickets + signs submissions with it.
+        CYBORG_HANDOFF_SECRET: env.CYBORG_HANDOFF_SECRET,
+        SUBMISSION_ENDPOINT:   env.SUBMISSION_ENDPOINT,
+        DEADLINE:              tokenRow.expires_at,
+        PROFILE:               env.PROFILE || 'v5-recruiter_full',
         ...policyEnv,
       },
       services: [{
@@ -389,12 +398,8 @@ export async function spawnCandidate(env, supabase, tokenRow, meta) {
 
   // V1.2 async-launch: do NOT await waitForMachineStarted on the cold-spawn
   // path. The orientation page polls /cyborg/launch-status and surfaces the
-  // wait as a designed experience instead of a 30-60s blank page.
-  //
-  // Append `?token=<token>` so the container's auth handler can exchange it
-  // for a session cookie on first hit (avoids the "Session expired" screen).
-  // The container's first response is a 302 that strips the token from the
-  // URL, so it doesn't end up in browser history or referer headers.
+  // wait as a designed experience instead of a 30-60s blank page. Auth happens
+  // later, at "Enter workspace", via the zero-exposure handoff (no token in URL).
 
   // ── Persist mapping ───────────────────────────────────────────────────
   // Fresh spawn: kick off the active-time clock. Reset to 0 only on the very
