@@ -167,6 +167,28 @@ export async function onRequestPost({ request, env }) {
   }
 
   if (!isResend) {
+    // Enforce the org's candidate cap (organisations.limits.candidates) on FRESH
+    // issuance only — a resend reuses an existing row and is never blocked here.
+    // NULL limits = uncapped (Vuelo Labs). Counts non-revoked tokens (matches the
+    // admin usage pill, which now also filters non-revoked).
+    const { data: orgRow } = await admin
+      .from('organisations').select('limits').eq('id', orgId).maybeSingle();
+    if (orgRow?.limits && Number.isFinite(orgRow.limits.candidates)) {
+      const { count: candCount } = await admin
+        .from('cyborg_tokens')
+        .select('token', { count: 'exact', head: true })
+        .eq('organisation_id', orgId)
+        .is('revoked_at', null);
+      if ((candCount || 0) >= orgRow.limits.candidates) {
+        await writeAuditLog(admin, {
+          actorEmail: userEmail, action: 'issue_candidate_token',
+          target: label, success: false,
+          detail: { reason: 'candidate_limit_exceeded', limit: orgRow.limits.candidates, count: candCount }, ...meta,
+        });
+        return json({ ok: false, reason: 'candidate_limit_exceeded' }, 409);
+      }
+    }
+
     const { error: insertErr } = await admin.from('cyborg_tokens').insert({
       token,
       jit_token:         jitToken,

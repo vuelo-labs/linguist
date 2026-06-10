@@ -61,10 +61,10 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, reason: 'insufficient_role' }, 403);
   }
 
-  // Get the org name for the email template.
+  // Get the org name (email template) + limits (cap enforcement).
   const { data: orgRow } = await admin
     .from('organisations')
-    .select('name, slug')
+    .select('name, slug, limits')
     .eq('id', orgId)
     .maybeSingle();
 
@@ -82,6 +82,25 @@ export async function onRequestPost({ request, env }) {
 
   if (existing) {
     return json({ ok: true, token: existing.token, message: 'invite_already_pending' });
+  }
+
+  // Enforce the org's member cap (organisations.limits.members). NULL limits =
+  // uncapped (Vuelo Labs). Re-sends of a pending invite short-circuit above, so
+  // they're never blocked. Pending invites aren't counted as members — the small
+  // concurrent-invite overshoot is acceptable at cohort scale.
+  if (orgRow.limits && Number.isFinite(orgRow.limits.members)) {
+    const { count: memberCount } = await admin
+      .from('organisation_members')
+      .select('id', { count: 'exact', head: true })
+      .eq('organisation_id', orgId);
+    if ((memberCount || 0) >= orgRow.limits.members) {
+      await writeAuditLog(admin, {
+        actorEmail: userEmail, action: 'invite_member',
+        target: email, success: false,
+        detail: { reason: 'member_limit_exceeded', limit: orgRow.limits.members, count: memberCount }, ...meta,
+      });
+      return json({ ok: false, reason: 'member_limit_exceeded' }, 409);
+    }
   }
 
   // Mint a token; insert the row.
