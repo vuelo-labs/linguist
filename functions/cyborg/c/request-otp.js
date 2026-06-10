@@ -56,8 +56,30 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, reason: 'no_email_on_record' }, 409);
   }
 
-  // Trigger the magic link via the public (anon) client. shouldCreateUser so
-  // first-time candidates get an auth identity bound to the invited address.
+  // Pre-create the candidate's auth identity (confirmed) BEFORE sending the OTP.
+  // Why: Supabase sends DIFFERENT email templates depending on whether the user
+  // exists. `signInWithOtp({shouldCreateUser:true})` on a NEW user triggers the
+  // default "Confirm signup" template (wrong subject + styling, and its subject
+  // doesn't match the orientation copy "Your Cyborg sign-in link"); only an
+  // EXISTING user gets the customized "Magic Link" template. Pre-creating the
+  // user here makes every candidate — first-timer or returning — receive the
+  // clean Magic Link email. Idempotent: a returning candidate / resend just hits
+  // "already registered", which we ignore. email_confirm:true makes the link a
+  // pure magic-link; the candidate still proves inbox control by clicking it to
+  // obtain a session (the OTP only ever goes to the invited address).
+  const { error: createErr } = await admin.auth.admin.createUser({
+    email: row.candidate_email,
+    email_confirm: true,
+  });
+  if (createErr && !/already|registered|exists/i.test(createErr.message || '')) {
+    // Non-duplicate failure — log but don't block; signInWithOtp may still work
+    // (and would fall back to shouldCreateUser if the identity truly is absent).
+    console.error('candidate pre-create failed (continuing):', createErr.message);
+  }
+
+  // Trigger the magic link via the public (anon) client. The user now exists, so
+  // Supabase sends the customized "Magic Link" template. shouldCreateUser stays
+  // true as a safety net in case the pre-create above failed.
   const origin = new URL(request.url).origin;
   const publicClient = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY);
   const { error: otpErr } = await publicClient.auth.signInWithOtp({
