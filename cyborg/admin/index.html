@@ -598,11 +598,20 @@ async function mintToken() {
 
   status.className = 'status ok';
   status.textContent = 'Minted.';
+  // Hosted candidates get the opaque /c/<jit> link (the real token never
+  // leaves the server). install_cmd is the separate local-CLI channel and
+  // necessarily embeds the token. The bare token is intentionally NOT shown
+  // — it's available in the Tokens list / Trace tab if ever needed.
+  const launchUrl = escapeHtml(d.launch_url || '');
   result.innerHTML = `
-    <div class="install-cmd">${escapeHtml(d.install_cmd)}</div>
-    <p style="font-size:0.84rem;color:var(--w-muted);margin-top:8px;">
-      Token: <code>${escapeHtml(d.token)}</code> — expires ${new Date(d.expires_at).toLocaleString('en-GB')}.
-    </p>
+    <p style="font-size:0.84rem;color:var(--w-muted);margin:0 0 4px;">Hosted launch link — share this with the candidate:</p>
+    <div class="install-cmd">${launchUrl}</div>
+    <button type="button" class="btn small" onclick="navigator.clipboard.writeText('${launchUrl}').then(()=>{this.textContent='Copied';setTimeout(()=>{this.textContent='Copy link';},1500);})">Copy link</button>
+    <details style="margin-top:12px;">
+      <summary style="cursor:pointer;font-size:0.84rem;color:var(--w-muted);">Local install (CLI) — for the self-hosted Docker tier</summary>
+      <div class="install-cmd" style="margin-top:6px;">${escapeHtml(d.install_cmd)}</div>
+    </details>
+    <p style="font-size:0.8rem;color:var(--w-muted);margin-top:10px;">Expires ${new Date(d.expires_at).toLocaleString('en-GB')}.</p>
   `;
   document.getElementById('m-label').value = '';
   document.getElementById('m-notes').value = '';
