@@ -247,6 +247,34 @@ export async function writeAuditLog(supabase, args) {
   }
 }
 
+// ── Session-event capture (Phase 3 integrity signals) ────────────────────
+// Snapshot the candidate's device / network / country at each session
+// touchpoint (launch / resume / sampled status) into cyborg_session_events.
+// The scoring worker reads these to derive SOFT credential-sharing /
+// second-session review flags (never a verdict, never part of the score).
+//
+// AWAITED insert — CF Pages Functions cancel pending promises once the handler
+// returns, so a fire-and-forget insert never lands (same constraint as the
+// rate-limit helper). Best-effort: a failed write is logged but never blocks
+// the candidate action. Keep call sites cheap (sample the high-volume ones).
+export async function writeSessionEvent(supabase, { token, kind, candidateUserId, meta }) {
+  if (!token || !kind) return;
+  const row = {
+    candidate_token:   token,
+    candidate_user_id: candidateUserId || null,
+    kind,
+    ip:         (meta && meta.ip) || null,
+    country:    (meta && meta.country) || null,
+    user_agent: meta && meta.userAgent ? String(meta.userAgent).slice(0, 500) : null,
+  };
+  try {
+    const { error } = await supabase.from('cyborg_session_events').insert(row);
+    if (error) console.error('session-event insert failed:', error.message, 'kind:', kind);
+  } catch (e) {
+    console.error('session-event exception:', e?.message || e, 'kind:', kind);
+  }
+}
+
 // Extract IP / country / user_agent from a request — same pattern used
 // across the abuse-defence helpers.
 export function requestMeta(request) {

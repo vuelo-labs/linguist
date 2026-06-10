@@ -51,7 +51,7 @@
 //     working until they finish or revoke.
 
 import { createClient } from '@supabase/supabase-js';
-import { requestMeta, writeAuditLog, checkEndpointRateLimit } from './_lib.js';
+import { requestMeta, writeAuditLog, checkEndpointRateLimit, writeSessionEvent } from './_lib.js';
 import { policyToEnvVars } from './admin/config/_knobs.js';
 
 const FLY_API_BASE = 'https://api.machines.dev/v1';
@@ -185,6 +185,9 @@ export async function spawnCandidate(env, supabase, tokenRow, meta) {
       // Re-click while already running. last_resumed_at is unchanged — the
       // active-time clock is already ticking from when the candidate first
       // launched (or resumed).
+      // Integrity capture: a re-entry is where a second device re-clicking
+      // "Enter" would surface (device/network snapshot at this moment).
+      await writeSessionEvent(supabase, { token, kind: 'launch', candidateUserId: tokenRow.candidate_user_id, meta });
       return json({
         ok: true,
         url: tokenRow.machine_url,
@@ -203,6 +206,8 @@ export async function spawnCandidate(env, supabase, tokenRow, meta) {
             .from('cyborg_tokens')
             .update({ last_resumed_at: new Date().toISOString() })
             .eq('token', token);
+          // Integrity capture: resume-after-pause device/network snapshot.
+          await writeSessionEvent(supabase, { token, kind: 'resume', candidateUserId: tokenRow.candidate_user_id, meta });
           return json({
             ok: true,
             url: tokenRow.machine_url,
@@ -443,6 +448,12 @@ export async function spawnCandidate(env, supabase, tokenRow, meta) {
     });
     return json({ ok: false, reason: 'persist_failed' }, 500);
   }
+
+  // Integrity capture: fresh-spawn device/network/country snapshot. This is the
+  // baseline the later resume/status snapshots are compared against. (Folds in
+  // the plan's "claim" touchpoint — begin → spawnCandidate is one request, so a
+  // separate claim event would be the same device/time.)
+  await writeSessionEvent(supabase, { token, kind: 'launch', candidateUserId: tokenRow.candidate_user_id, meta });
 
   return json({
     ok: true,

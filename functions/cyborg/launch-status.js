@@ -27,12 +27,16 @@
 // surface). Rate-limit hits ARE audited (attack signal).
 
 import { createClient } from '@supabase/supabase-js';
-import { requestMeta, writeAuditLog, checkEndpointRateLimit, verifyCandidateSession } from './_lib.js';
+import { requestMeta, writeAuditLog, checkEndpointRateLimit, verifyCandidateSession, writeSessionEvent } from './_lib.js';
 
 const FLY_API_BASE = 'https://api.machines.dev/v1';
 const RATE_LIMIT_WINDOW_SEC = 60;
 const RATE_LIMIT_MAX_PER_TOKEN = 60;  // orientation page polls every 2s during the warm-up window — 30/min sustained + headroom
 const HEALTHZ_TIMEOUT_MS = 1000;       // short — don't block the poll on a slow machine
+// Phase-3 integrity: fraction of status polls that snapshot device/network into
+// cyborg_session_events. Sampled because this endpoint is polled ~every 2s —
+// enough to catch a second device actively polling, without exploding the table.
+const STATUS_EVENT_SAMPLE_RATE = 0.12;
 
 // Phase E helper — keep in sync with launch.js + admin/fly/cleanup-orphans.js.
 // Per-candidate apps are named `cyborg-c-<token-suffix>` (see launch.js
@@ -114,6 +118,14 @@ export async function onRequestGet({ request, env }) {
   if (!row.approved_at)    return json({ ok: false, reason: 'pending_approval' }, 403);
   if (row.used_at)         return json({ ok: false, reason: 'used' }, 403);
   if (new Date(row.expires_at) < new Date()) return json({ ok: false, reason: 'expired' }, 403);
+
+  // ── Integrity capture (Phase 3, sampled) ─────────────────────────────
+  // A second device polling alongside the candidate surfaces here as a
+  // different ip/country within the concurrent-session window. Sampled to
+  // bound table growth + per-poll latency.
+  if (Math.random() < STATUS_EVENT_SAMPLE_RATE) {
+    await writeSessionEvent(supabase, { token, kind: 'status', meta });
+  }
 
   // ── Active-time accounting (for the orientation page badge) ──────────
   const accumulated = row.active_time_used_seconds || 0;
