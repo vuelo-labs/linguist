@@ -226,6 +226,9 @@ export async function onRequestPost({ request, env }) {
     <p style="margin:24px 0;">
       <a href="${esc(launchUrl)}" style="display:inline-block; background:#6B5540; color:#FAF8F4; text-decoration:none; padding:12px 24px; border-radius:9px; font-weight:500;">Open Cyborg</a>
     </p>
+    <p style="line-height:1.55; color:#5E5450; font-size:0.9rem; margin:0 0 16px; padding:12px 14px; background:#EFE8DD; border-radius:8px;">
+      <strong>What happens next:</strong> when you open the link, we'll email a one-time sign-in link to this same address to confirm it's you. Open that, and your workspace starts. Two quick emails, one assessment — both from us.
+    </p>
     <p style="line-height:1.55; color:#5E5450; font-size:0.88rem; margin:0 0 8px;">Or paste this link into your browser:</p>
     <p style="line-height:1.4; font-size:0.82rem; color:#5E5450; word-break:break-all; margin:0 0 18px;"><a href="${esc(launchUrl)}" style="color:#6B5540;">${esc(launchUrl)}</a></p>
     <p style="line-height:1.55; color:#8A7D77; font-size:0.82rem; margin:0 0 6px;"><strong>This link is for you only.</strong> The assessment is paired with a panel conversation about your work — sharing the link won't get someone else through.</p>

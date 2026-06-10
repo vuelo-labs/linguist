@@ -211,10 +211,11 @@
        once, before launching. Hidden for the legacy ?t= path and once a
        session exists. -->
   <div class="card" id="auth-card" style="display:none;">
-    <h2>Confirm it's you</h2>
+    <h2>One quick step: confirm it's you</h2>
     <p>
-      Before you start, we'll email a one-time sign-in link to the address your assessment was sent to.
-      This confirms it's really you — you only do this once.
+      We'll email a one-time sign-in link to the same address your assessment invitation was sent to.
+      Open that link and you'll come straight back here to begin — your workspace boots then, not before.
+      You only do this once; after that you can leave and return to this page freely.
     </p>
     <div class="enter-row">
       <button class="btn" id="otp-btn">Email me a sign-in link</button>
@@ -370,9 +371,11 @@ async function requestOtp() {
       })[d.reason] || 'Something went wrong. Try again in a moment.';
       return;
     }
-    btn.textContent = 'Link sent';
-    stat.innerHTML = `Check your inbox — we sent a sign-in link to <strong>${d.email_hint || 'your email'}</strong>. ` +
-      'Click it to continue. You can close this tab; the link opens the next step.';
+    btn.textContent = 'Resend link';
+    btn.disabled = false;
+    stat.innerHTML = `Sent — check <strong>${d.email_hint || 'your inbox'}</strong> for an email titled ` +
+      `“Your Cyborg sign-in link.” Open the <strong>most recent</strong> one to continue (resending invalidates earlier links). ` +
+      `It opens the next step automatically.`;
   } catch (e) {
     btn.disabled = false; btn.textContent = 'Email me a sign-in link';
     stat.textContent = 'Could not reach the server. Check your connection and try again.';
